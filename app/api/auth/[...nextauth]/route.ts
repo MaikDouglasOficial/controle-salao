@@ -1,11 +1,11 @@
-import NextAuth from 'next-auth/next';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const authOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -13,13 +13,13 @@ const authOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Senha', type: 'password' },
       },
-      async authorize(credentials: any): Promise<any> {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email e senha são obrigatórios');
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: credentials.email },
         });
 
         if (!user) {
@@ -27,7 +27,7 @@ const authOptions = {
         }
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
+          credentials.password,
           user.password
         );
 
@@ -44,30 +44,35 @@ const authOptions = {
       },
     }),
   ],
+
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }: any) {
+
+    async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string;
-        session.user.id = token.id as string;
+        session.user.role = token.role;
+        session.user.id = token.id;
       }
       return session;
     },
   },
+
   pages: {
     signIn: '/login',
   },
-  session: {
-    strategy: 'jwt' as const,
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-};
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST, authOptions };
+  session: {
+    strategy: 'jwt',
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
+});
+
+// 🚀 A partir daqui NÃO pode ter mais nada além disso:
+export { handler as GET, handler as POST };
