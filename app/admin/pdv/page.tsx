@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ShoppingCart, Search, Plus, Minus, Trash2, User, Package } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { ShoppingCart, Search, Plus, Minus, Trash2, User, Package, Camera, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
+import { ModalBase as Modal } from '@/components/ui/ModalBase';
+import { Button } from '@/components/ui/Button';
 
 interface Product {
   id: number;
@@ -60,6 +62,9 @@ export default function PDVPage() {
     email: '',
     phone: '',
     cpf: '',
+    birthday: '',
+    notes: '',
+    photo: '',
   });
   const [discountType, setDiscountType] = useState<'percent' | 'value'>('percent');
   const [discountValue, setDiscountValue] = useState(0);
@@ -68,6 +73,9 @@ export default function PDVPage() {
   const [tempQuantity, setTempQuantity] = useState(1);
   const [tempPrice, setTempPrice] = useState(0);
   const [editingPrices, setEditingPrices] = useState<{[key: string]: string}>({});
+  const [uploading, setUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchData();
@@ -351,6 +359,56 @@ export default function PDVPage() {
     }
   };
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tamanho (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Arquivo muito grande. Máximo 5MB');
+      return;
+    }
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione uma imagem');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        setNewCustomerData({ ...newCustomerData, photo: url });
+        setPhotoPreview(url);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Erro ao fazer upload');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer upload:', error);
+      alert('Erro ao fazer upload da foto');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setNewCustomerData({ ...newCustomerData, photo: '' });
+    setPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleRegisterNewCustomer = async () => {
     if (!newCustomerData.name || !newCustomerData.phone) {
       alert('Nome e telefone são obrigatórios!');
@@ -361,7 +419,15 @@ export default function PDVPage() {
       const response = await fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCustomerData),
+        body: JSON.stringify({
+          name: newCustomerData.name,
+          email: newCustomerData.email || null,
+          phone: newCustomerData.phone,
+          cpf: newCustomerData.cpf || null,
+          birthday: newCustomerData.birthday || null,
+          notes: newCustomerData.notes || null,
+          photo: newCustomerData.photo || null,
+        }),
       });
 
       if (response.ok) {
@@ -369,7 +435,8 @@ export default function PDVPage() {
         alert('Cliente cadastrado com sucesso!');
         setShowNewCustomerModal(false);
         setShowCustomerNotFoundModal(false);
-        setNewCustomerData({ name: '', email: '', phone: '', cpf: '' });
+        setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
+        setPhotoPreview(null);
         setCustomerSearchTerm('');
         
         // Recarrega lista de clientes
@@ -785,22 +852,44 @@ export default function PDVPage() {
 
       {/* Modal Adicionar Item ao Carrinho */}
       {showAddItemModal && itemToAdd && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
-            <div className="p-6 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-white">Adicionar ao Carrinho</h2>
-              <p className="text-sm text-gray-400 mt-1">{itemToAdd.name}</p>
-            </div>
-            
-            <div className="p-6 space-y-4">
+        <Modal
+          isOpen={showAddItemModal}
+          onClose={() => {
+            setShowAddItemModal(false);
+            setItemToAdd(null);
+          }}
+          title="Adicionar ao Carrinho"
+          subtitle={itemToAdd.name}
+          size="md"
+          footer={
+            <>
+              <Button 
+                variant="secondary"
+                onClick={() => {
+                  setShowAddItemModal(false);
+                  setItemToAdd(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={confirmAddToCart}
+              >
+                Adicionar
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Quantidade
                 </label>
                 <div className="flex items-center gap-3">
                   <button
+                    type="button"
                     onClick={() => setTempQuantity(Math.max(1, tempQuantity - 1))}
-                    className="h-10 w-10 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-lg text-white border border-gray-600"
+                    className="h-10 w-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 border border-gray-300"
                   >
                     <Minus className="h-5 w-5" />
                   </button>
@@ -812,28 +901,29 @@ export default function PDVPage() {
                       const value = parseInt(e.target.value) || 1;
                       setTempQuantity(Math.max(1, value));
                     }}
-                    className="flex-1 px-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-center text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-center text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <button
+                    type="button"
                     onClick={() => setTempQuantity(tempQuantity + 1)}
-                    className="h-10 w-10 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-lg text-white border border-gray-600"
+                    className="h-10 w-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 border border-gray-300"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
                 </div>
                 {itemToAdd.stock !== undefined && (
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-600 mt-2">
                     Estoque disponível: {itemToAdd.stock}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preço Unitário
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">R$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -848,51 +938,49 @@ export default function PDVPage() {
                       setTempPrice(numValue);
                     }}
                     placeholder="0,00"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-lg font-semibold focus:ring-2 focus:ring-primary-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
 
-              <div className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+              <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Subtotal</span>
-                  <span className="text-xl font-bold text-blue-400">
+                  <span className="text-gray-700 font-medium">Subtotal</span>
+                  <span className="text-xl font-bold text-primary-600">
                     {formatCurrency(tempPrice * tempQuantity)}
                   </span>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setShowAddItemModal(false);
-                    setItemToAdd(null);
-                  }}
-                  className="flex-1 py-3 border-2 border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors font-semibold"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={confirmAddToCart}
-                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-lg"
-                >
-                  Adicionar
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal de Finalização */}
       {showCheckoutModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">Finalizar Venda</h2>
-            </div>
-            
-            <div className="p-6 space-y-4">
+        <Modal
+          isOpen={showCheckoutModal}
+          onClose={() => setShowCheckoutModal(false)}
+          title="Finalizar Venda"
+          subtitle="Selecione o cliente e configure os detalhes da venda"
+          size="lg"
+          footer={
+            <>
+              <Button 
+                variant="secondary" 
+                onClick={() => setShowCheckoutModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={finalizeSale}
+              >
+                Confirmar Venda
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Buscar Cliente por CPF, Telefone ou Nome <span className="text-red-500">*</span>
@@ -1052,151 +1140,205 @@ export default function PDVPage() {
                 </div>
               </div>
 
-              <div className="flex space-x-4 pt-2">
-                <button
-                  onClick={finalizeSale}
-                  className="flex-1 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold"
-                >
-                  Confirmar Venda
-                </button>
-                <button
-                  onClick={() => setShowCheckoutModal(false)}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal - Cliente Não Encontrado */}
       {showCustomerNotFoundModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">Cliente Não Encontrado</h2>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-                <p className="text-yellow-800 font-medium">
-                  ATENÇÃO: O cliente não foi localizado no sistema.
-                </p>
-                <p className="text-yellow-700 text-sm mt-2">
-                  Deseja cadastrar um novo cliente?
-                </p>
-              </div>
-
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => {
-                    setShowCustomerNotFoundModal(false);
-                    setShowNewCustomerModal(true);
-                    setNewCustomerData({ ...newCustomerData, phone: customerSearchTerm });
-                  }}
-                  className="flex-1 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold"
-                >
-                  Sim, Cadastrar
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCustomerNotFoundModal(false);
-                    setCustomerSearchTerm('');
-                  }}
-                  className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
-                >
-                  Não
-                </button>
-              </div>
-            </div>
+        <Modal
+          isOpen={showCustomerNotFoundModal}
+          onClose={() => {
+            setShowCustomerNotFoundModal(false);
+            setCustomerSearchTerm('');
+          }}
+          title="Cliente Não Encontrado"
+          subtitle="O cliente não foi localizado no sistema"
+          size="md"
+          footer={
+            <>
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setShowCustomerNotFoundModal(false);
+                  setCustomerSearchTerm('');
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowCustomerNotFoundModal(false);
+                  setShowNewCustomerModal(true);
+                  setNewCustomerData({ ...newCustomerData, phone: customerSearchTerm });
+                }}
+              >
+                Cadastrar Cliente
+              </Button>
+            </>
+          }
+        >
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6">
+            <p className="text-yellow-800 font-medium text-lg mb-2">
+              ⚠️ Cliente não localizado
+            </p>
+            <p className="text-yellow-700">
+              Deseja cadastrar um novo cliente com essas informações?
+            </p>
+            {customerSearchTerm && (
+              <p className="text-yellow-600 text-sm mt-3 font-mono bg-yellow-100 px-3 py-2 rounded border border-yellow-300">
+                Busca: {customerSearchTerm}
+              </p>
+            )}
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal - Cadastro de Novo Cliente */}
       {showNewCustomerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">Cadastrar Novo Cliente</h2>
+        <Modal
+          isOpen={showNewCustomerModal}
+          onClose={() => {
+            setShowNewCustomerModal(false);
+            setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
+            setPhotoPreview(null);
+          }}
+          title="Cadastrar Novo Cliente"
+          subtitle="Preencha os dados para cadastrar um novo cliente"
+          size="md"
+          footer={
+            <>
+              <Button 
+                variant="secondary" 
+                type="button" 
+                onClick={() => {
+                  setShowNewCustomerModal(false);
+                  setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
+                  setPhotoPreview(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                form="new-customer-form"
+              >
+                Cadastrar
+              </Button>
+            </>
+          }
+        >
+          <form id="new-customer-form" onSubmit={(e) => { e.preventDefault(); handleRegisterNewCustomer(); }} className="space-y-4">
+            {/* Upload de Foto */}
+            <div className="flex flex-col items-center space-y-3 pb-4 border-b">
+              <div className="relative">
+                {photoPreview ? (
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary-100">
+                    <Image
+                      src={photoPreview}
+                      alt="Foto do cliente"
+                      fill
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemovePhoto}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      title="Remover foto"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
+                    <Camera className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload-pdv"
+              />
+              <label
+                htmlFor="photo-upload-pdv"
+                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
+                  uploading
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
+                }`}
+              >
+                {uploading ? 'Enviando...' : photoPreview ? 'Trocar Foto' : 'Adicionar Foto'}
+              </label>
+              <p className="text-xs text-gray-500">JPG, PNG ou WEBP (máx. 5MB)</p>
             </div>
-            
-            <div className="p-6 space-y-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome Completo *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
                 <input
-                  type="text"
+                  className="w-full border rounded px-3 py-2"
                   value={newCustomerData.name}
                   onChange={(e) => setNewCustomerData({ ...newCustomerData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900"
-                  placeholder="Nome do cliente"
+                  required
+                  placeholder="Ex: João Silva"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefone *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
                 <input
-                  type="text"
+                  className="w-full border rounded px-3 py-2"
                   value={newCustomerData.phone}
                   onChange={(e) => setNewCustomerData({ ...newCustomerData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900"
+                  required
                   placeholder="(00) 00000-0000"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  CPF (opcional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
                 <input
-                  type="text"
+                  className="w-full border rounded px-3 py-2"
                   value={newCustomerData.cpf}
                   onChange={(e) => setNewCustomerData({ ...newCustomerData, cpf: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900"
                   placeholder="000.000.000-00"
                   maxLength={14}
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  E-mail (opcional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
-                  type="email"
+                  className="w-full border rounded px-3 py-2"
                   value={newCustomerData.email}
                   onChange={(e) => setNewCustomerData({ ...newCustomerData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900"
+                  type="email"
                   placeholder="email@exemplo.com"
                 />
               </div>
-
-              <div className="flex space-x-4 pt-2">
-                <button
-                  onClick={handleRegisterNewCustomer}
-                  className="flex-1 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold"
-                >
-                  Cadastrar
-                </button>
-                <button
-                  onClick={() => {
-                    setShowNewCustomerModal(false);
-                    setNewCustomerData({ name: '', email: '', phone: '', cpf: '' });
-                  }}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
-                >
-                  Cancelar
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  value={newCustomerData.birthday}
+                  onChange={(e) => setNewCustomerData({ ...newCustomerData, birthday: e.target.value })}
+                  type="date"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <textarea
+                  className="w-full border rounded px-3 py-2"
+                  value={newCustomerData.notes}
+                  onChange={(e) => setNewCustomerData({ ...newCustomerData, notes: e.target.value })}
+                  rows={3}
+                  placeholder="Ex: Cliente VIP, prefere horários pela manhã..."
+                />
               </div>
             </div>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
       </div>
     </div>
