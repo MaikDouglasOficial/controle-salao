@@ -1,11 +1,11 @@
-import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { NextAuthOptions } from 'next-auth';
 
 const prisma = new PrismaClient();
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -44,17 +44,15 @@ const handler = NextAuth({
       },
     }),
   ],
-
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
       }
       return token;
     },
-
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         session.user.role = token.role;
         session.user.id = token.id;
@@ -62,17 +60,7 @@ const handler = NextAuth({
       return session;
     },
   },
-
-  pages: {
-    signIn: '/login',
-  },
-
-  session: {
-    strategy: 'jwt',
-  },
-
+  pages: { signIn: '/login' },
+  session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
-});
-
-// 🚀 A partir daqui NÃO pode ter mais nada além disso:
-export { handler as GET, handler as POST };
+};
