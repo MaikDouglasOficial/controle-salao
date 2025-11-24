@@ -472,65 +472,75 @@ export default function PDVPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
-      <div className="max-w-[1600px] mx-auto space-y-3">
-        {/* Header Compacto */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-4 py-3 shadow-lg">
-          <div className="flex items-center space-x-3">
-            <ShoppingCart className="h-7 w-7 text-white" />
-            <div>
-              <h1 className="text-2xl font-bold text-white">PDV - Ponto de Venda</h1>
-              <p className="text-xs text-blue-100">Sistema de vendas</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 p-6">
+      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+        {/* Header Aprimorado */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
+                <ShoppingCart className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-blue-700 bg-clip-text text-transparent leading-tight pb-2">
+                  PDV - Ponto de Venda
+                </h1>
+                <p className="text-xl text-gray-600 mt-2">
+                  Sistema completo de vendas
+                </p>
+              </div>
             </div>
+            <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-slideRight"></div>
           </div>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      {/* Busca */}
+      <div className="bg-white rounded-xl shadow-lg p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Pesquisar produtos e serviços..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Área de Produtos e Serviços - Ocupa 2 de 3 colunas */}
-        <div className="lg:col-span-2 space-y-3">
-            {/* Busca */}
-            <div className="bg-gray-800 rounded-lg p-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar produtos e serviços..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
+        <div className="lg:col-span-2 space-y-6">
 
             {/* Produtos e Serviços em Linha */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Produtos */}
-              <div className="bg-gray-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold text-white flex items-center">
-                  <div className="h-7 w-7 bg-blue-600 rounded flex items-center justify-center mr-2">
-                    <ShoppingCart className="h-4 w-4 text-white" />
+              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-2">
+                    <Package className="h-5 w-5 text-white" />
                   </div>
                   Produtos
                 </h2>
-                <span className="text-xs text-gray-400">{filteredProducts.length} itens</span>
+                <span className="text-sm text-gray-500 font-medium">{filteredProducts.length} itens</span>
               </div>
               
               {filteredProducts.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-12 w-12 text-gray-600 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">Nenhum produto encontrado</p>
+                <div className="text-center py-12">
+                  <Package className="h-16 w-16 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500">Nenhum produto encontrado</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 gap-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-1">
                   {filteredProducts.map((product) => (
                     <button
                       key={product.id}
                       onClick={() => openAddItemModal({ type: 'product', id: product.id, name: product.name, price: product.price, stock: product.stock })}
-                      className="group relative border-2 border-gray-700 rounded-lg p-2 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 text-left"
+                      className="group relative border-2 border-gray-200 rounded-lg p-3 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 text-left hover:shadow-md"
                     >
-                      <div className="flex items-center space-x-2">
-                        <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <div className="flex items-center space-x-3">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 border-2 border-gray-200">
                           {product.photo ? (
                             <Image
                               src={product.photo}
@@ -539,30 +549,30 @@ export default function PDVPage() {
                               className="object-cover"
                             />
                           ) : (
-                            <Package className="w-5 h-5 text-gray-500" />
+                            <Package className="w-6 h-6 text-gray-400" />
                           )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-white text-xs truncate">{product.name}</h3>
+                          <h3 className="font-semibold text-gray-900 text-sm truncate">{product.name}</h3>
                           <div className="flex items-center justify-between mt-1">
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                               product.stock > 10 
-                                ? 'bg-green-600 text-white' 
+                                ? 'bg-green-100 text-green-700 border border-green-200' 
                                 : product.stock > 0 
-                                ? 'bg-yellow-600 text-white' 
-                                : 'bg-red-600 text-white'
+                                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
+                                : 'bg-red-100 text-red-700 border border-red-200'
                             }`}>
-                              {product.stock}
+                              Estoque: {product.stock}
                             </span>
-                            <span className="text-sm font-bold text-blue-400">
+                            <span className="text-base font-bold text-blue-600">
                               {formatCurrency(product.price)}
                             </span>
                           </div>
                         </div>
 
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Plus className="h-5 w-5 text-blue-400" />
+                          <Plus className="h-5 w-5 text-blue-600" />
                         </div>
                       </div>
                     </button>
@@ -572,53 +582,53 @@ export default function PDVPage() {
             </div>
 
             {/* Serviços */}
-            <div className="bg-gray-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold text-white flex items-center">
-                  <div className="h-7 w-7 bg-purple-600 rounded flex items-center justify-center mr-2">
-                    <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-2">
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   Serviços
                 </h2>
-                <span className="text-xs text-gray-400">{filteredServices.length} itens</span>
+                <span className="text-sm text-gray-500 font-medium">{filteredServices.length} itens</span>
               </div>
               
               {filteredServices.length === 0 ? (
-                <div className="text-center py-8">
-                  <svg className="h-12 w-12 text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="text-center py-12">
+                  <svg className="h-16 w-16 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-gray-400 text-sm">Nenhum serviço encontrado</p>
+                  <p className="text-gray-500">Nenhum serviço encontrado</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 gap-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-1">
                   {filteredServices.map((service) => (
                     <button
                       key={service.id}
                       onClick={() => openAddItemModal({ type: 'service', id: service.id, name: service.name, price: service.price })}
-                      className="group relative border-2 border-gray-700 rounded-lg p-2 hover:border-purple-500 hover:bg-gray-700 transition-all duration-200 text-left"
+                      className="group relative border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 text-left hover:shadow-md"
                     >
-                      <div className="flex items-center space-x-2">
-                        <div className="h-10 w-10 bg-purple-600/20 rounded flex items-center justify-center flex-shrink-0">
-                          <svg className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-12 w-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-purple-200">
+                          <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-white text-xs truncate">{service.name}</h3>
+                          <h3 className="font-semibold text-gray-900 text-sm truncate">{service.name}</h3>
                           <div className="flex items-center justify-between mt-1">
-                            <span className="text-xs text-gray-400">Serviço</span>
-                            <span className="text-sm font-bold text-purple-400">
+                            <span className="text-xs text-gray-500">Serviço</span>
+                            <span className="text-base font-bold text-purple-600">
                               {formatCurrency(service.price)}
                             </span>
                           </div>
                         </div>
 
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Plus className="h-5 w-5 text-purple-400" />
+                          <Plus className="h-5 w-5 text-purple-600" />
                         </div>
                       </div>
                     </button>
@@ -631,17 +641,17 @@ export default function PDVPage() {
 
           {/* Carrinho - Estilo Tabela - Ocupa 1 de 3 colunas */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-800 rounded-lg shadow-lg sticky top-4 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg sticky top-4 overflow-hidden">
               {/* Header do Carrinho */}
-              <div className="bg-blue-600 px-3 py-2 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <ShoppingCart className="h-5 w-5 text-white" />
-                  <h2 className="text-sm font-bold text-white">Carrinho ({cart.length})</h2>
+                  <ShoppingCart className="h-6 w-6 text-white" />
+                  <h2 className="text-lg font-bold text-white">Carrinho ({cart.length})</h2>
                 </div>
                 {cart.length > 0 && (
                   <button
                     onClick={clearCart}
-                    className="text-xs text-white hover:text-blue-100 underline"
+                    className="text-sm text-white hover:text-blue-100 underline font-medium"
                   >
                     Limpar
                   </button>
@@ -649,48 +659,48 @@ export default function PDVPage() {
               </div>
 
               {/* Tabela de Itens */}
-              <div className="p-3">
+              <div className="p-4">
                 {cart.length === 0 ? (
                   <div className="text-center py-12">
-                    <ShoppingCart className="h-16 w-16 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400 text-sm">Carrinho vazio</p>
+                    <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">Carrinho vazio</p>
                   </div>
                 ) : (
                   <>
-                    <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+                    <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
                       <table className="w-full text-xs">
-                        <thead className="sticky top-0 bg-gray-700">
-                          <tr className="border-b border-gray-600">
-                            <th className="px-2 py-2 text-left text-gray-300 font-semibold">Produto</th>
-                            <th className="px-1 py-2 text-center text-gray-300 font-semibold w-16">Qtd</th>
-                            <th className="px-1 py-2 text-right text-gray-300 font-semibold w-20">Unit.</th>
-                            <th className="px-1 py-2 text-right text-gray-300 font-semibold w-20">Total</th>
-                            <th className="px-1 py-2 text-center text-gray-300 font-semibold w-10"></th>
+                        <thead className="sticky top-0 bg-gray-50">
+                          <tr className="border-b-2 border-gray-200">
+                            <th className="px-3 py-2 text-left text-gray-700 font-semibold">Produto</th>
+                            <th className="px-2 py-2 text-center text-gray-700 font-semibold w-20">Qtd</th>
+                            <th className="px-2 py-2 text-right text-gray-700 font-semibold w-24">Unit.</th>
+                            <th className="px-2 py-2 text-right text-gray-700 font-semibold w-24">Total</th>
+                            <th className="px-2 py-2 text-center text-gray-700 font-semibold w-12"></th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-700">
+                        <tbody className="divide-y divide-gray-100">
                           {cart.map((item, index) => (
-                            <tr key={`${item.type}-${item.id}-${index}`} className="hover:bg-gray-700/50">
-                              <td className="px-2 py-3">
+                            <tr key={`${item.type}-${item.id}-${index}`} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-3 py-3">
                                 <div>
-                                  <p className="text-white font-medium line-clamp-2">{item.name}</p>
-                                  <p className="text-gray-400 text-xs mt-0.5">
-                                    {item.type === 'product' ? 'Produto' : 'Serviço'}
+                                  <p className="text-gray-900 font-medium line-clamp-2">{item.name}</p>
+                                  <p className="text-gray-500 text-xs mt-0.5">
+                                    {item.type === 'product' ? '📦 Produto' : '✨ Serviço'}
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-1 py-3">
+                              <td className="px-2 py-3">
                                 <div className="flex items-center justify-center space-x-1">
                                   <button
                                     onClick={() => updateQuantity(item.type, item.id, -1)}
-                                    className="h-5 w-5 flex items-center justify-center bg-gray-600 hover:bg-gray-500 rounded text-white"
+                                    className="h-6 w-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded border border-gray-300 text-gray-700"
                                   >
                                     <Minus className="h-3 w-3" />
                                   </button>
-                                  <span className="text-white font-semibold min-w-[20px] text-center">{item.quantity}</span>
+                                  <span className="text-gray-900 font-semibold min-w-[24px] text-center">{item.quantity}</span>
                                   <button
                                     onClick={() => updateQuantity(item.type, item.id, 1)}
-                                    className="h-5 w-5 flex items-center justify-center bg-gray-600 hover:bg-gray-500 rounded text-white"
+                                    className="h-6 w-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded border border-gray-300 text-gray-700"
                                   >
                                     <Plus className="h-3 w-3" />
                                   </button>
@@ -753,20 +763,20 @@ export default function PDVPage() {
                                       e.currentTarget.blur();
                                     }
                                   }}
-                                  className="w-full px-1 py-1 bg-gray-700 border border-gray-600 rounded text-white text-xs text-right focus:ring-1 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  className="w-full px-2 py-1 bg-white border border-gray-300 rounded text-gray-900 text-xs text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                               </td>
-                              <td className="px-1 py-3 text-right">
-                                <span className="text-blue-400 font-bold">
+                              <td className="px-2 py-3 text-right">
+                                <span className="text-blue-600 font-bold">
                                   {formatCurrency(item.price * item.quantity)}
                                 </span>
                               </td>
-                              <td className="px-1 py-3 text-center">
+                              <td className="px-2 py-3 text-center">
                                 <button
                                   onClick={() => removeFromCart(item.type, item.id)}
-                                  className="text-red-400 hover:text-red-300"
+                                  className="p-1.5 hover:bg-red-50 rounded transition-colors"
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4 text-red-500 hover:text-red-600" />
                                 </button>
                               </td>
                             </tr>
@@ -776,16 +786,16 @@ export default function PDVPage() {
                     </div>
 
                     {/* Total e Botão */}
-                    <div className="mt-4 pt-4 border-t border-gray-700 space-y-3">
-                      <div className="bg-gray-700 rounded-lg p-3 space-y-3">
+                    <div className="mt-4 pt-4 border-t-2 border-gray-200 space-y-4">
+                      <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 space-y-3 border border-gray-200">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-300 text-sm">Subtotal</span>
-                          <span className="text-white font-semibold">{formatCurrency(subtotal)}</span>
+                          <span className="text-gray-700 text-sm font-medium">Subtotal</span>
+                          <span className="text-gray-900 font-semibold">{formatCurrency(subtotal)}</span>
                         </div>
                         
                         {/* Campo de Desconto */}
                         <div className="space-y-2">
-                          <label className="text-gray-300 text-sm font-medium">Desconto</label>
+                          <label className="text-gray-700 text-sm font-medium">Desconto</label>
                           <div className="flex gap-2">
                             <div className="flex-1 flex gap-1">
                               <input
@@ -797,24 +807,24 @@ export default function PDVPage() {
                                   setDiscountValue(parseFloat(value) || 0);
                                 }}
                                 placeholder="0"
-                                className="flex-1 px-2 py-1.5 bg-gray-600 border border-gray-500 rounded text-white text-xs text-right focus:ring-1 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                className="flex-1 px-2 py-2 bg-white border border-gray-300 rounded text-gray-900 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                               />
                               <button
                                 onClick={() => setDiscountType('percent')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded transition-all ${
+                                className={`px-3 py-2 text-sm font-bold rounded transition-all ${
                                   discountType === 'percent'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                                 }`}
                               >
                                 %
                               </button>
                               <button
                                 onClick={() => setDiscountType('value')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded transition-all ${
+                                className={`px-3 py-2 text-sm font-bold rounded transition-all ${
                                   discountType === 'value'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                                 }`}
                               >
                                 R$
@@ -822,15 +832,15 @@ export default function PDVPage() {
                             </div>
                           </div>
                           {discountAmount > 0 && (
-                            <div className="text-right text-xs text-red-400">
+                            <div className="text-right text-sm text-red-600 font-medium">
                               - {formatCurrency(discountAmount)}
                             </div>
                           )}
                         </div>
 
-                        <div className="flex justify-between items-center pt-2 border-t border-gray-600">
-                          <span className="text-lg font-bold text-white">TOTAL</span>
-                          <span className="text-2xl font-bold text-blue-400">
+                        <div className="flex justify-between items-center pt-3 border-t-2 border-gray-200">
+                          <span className="text-xl font-bold text-gray-900">TOTAL</span>
+                          <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             {formatCurrency(total)}
                           </span>
                         </div>
@@ -838,9 +848,9 @@ export default function PDVPage() {
 
                       <button
                         onClick={() => setShowCheckoutModal(true)}
-                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg font-bold text-sm"
+                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-bold text-base"
                       >
-                        FINALIZAR VENDA
+                        🛒 FINALIZAR VENDA
                       </button>
                     </div>
                   </>
