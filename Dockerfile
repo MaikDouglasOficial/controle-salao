@@ -1,5 +1,5 @@
 # 1. Imagem base
-FROM node:18-alpine AS base
+FROM node:21-alpine AS base
 
 # 2. Imagem para dependências
 FROM base AS deps
