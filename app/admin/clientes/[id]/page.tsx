@@ -296,10 +296,10 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <Link
             href="/admin/clientes"
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -307,16 +307,16 @@ export default function ClienteDetalhesPage() {
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Detalhes do Cliente</h1>
-            <p className="text-sm text-gray-500 mt-1">Histórico completo e informações</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalhes do Cliente</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Histórico completo e informações</p>
           </div>
         </div>
 
       {/* Informações do Cliente */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
               {customer.photo ? (
                 <Image
                   src={customer.photo}
@@ -328,45 +328,45 @@ export default function ClienteDetalhesPage() {
                 <User className="h-8 w-8 text-gray-400" />
               )}
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{customer.name}</h2>
-              <p className="text-gray-600">Cliente desde {new Date(customer.createdAt).toLocaleDateString('pt-BR')}</p>
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{customer.name}</h2>
+              <p className="text-xs sm:text-sm text-gray-600">Cliente desde {new Date(customer.createdAt).toLocaleDateString('pt-BR')}</p>
             </div>
           </div>
           <button
             onClick={handleEdit}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors w-full sm:w-auto text-sm"
           >
             <Pencil className="h-4 w-4" />
             <span>Editar</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {customer.email && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Mail className="h-5 w-5 text-gray-400" />
-              <div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg min-w-0">
+              <Mail className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm font-medium text-gray-900">{customer.email}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{customer.email}</p>
               </div>
             </div>
           )}
           
           {customer.phone && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Phone className="h-5 w-5 text-gray-400" />
-              <div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg min-w-0">
+              <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-gray-500">Telefone</p>
-                <p className="text-sm font-medium text-gray-900">{customer.phone}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{customer.phone}</p>
               </div>
             </div>
           )}
           
           {customer.birthday && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Calendar className="h-5 w-5 text-gray-400" />
-              <div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg min-w-0">
+              <Calendar className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-gray-500">Aniversário</p>
                 <p className="text-sm font-medium text-gray-900">
                   {new Date(customer.birthday).toLocaleDateString('pt-BR')}
@@ -385,70 +385,70 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Gasto</p>
-              <p className="text-2xl font-bold text-green-600">
-                R$ {totalGasto.toFixed(2)}
-              </p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm text-gray-600">Total Gasto</p>
+              <div className="h-8 w-8 sm:h-10 sm:w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
-            </div>
+            <p className="text-lg sm:text-2xl font-bold text-green-600 truncate">
+              R$ {totalGasto.toFixed(2)}
+            </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Agendamentos</p>
-              <p className="text-2xl font-bold text-blue-600">{totalAgendamentos}</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm text-gray-600">Agendamentos</p>
+              <div className="h-8 w-8 sm:h-10 sm:w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-blue-600" />
-            </div>
+            <p className="text-lg sm:text-2xl font-bold text-blue-600">{totalAgendamentos}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Concluídos</p>
-              <p className="text-2xl font-bold text-purple-600">{agendamentosConcluidos}</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm text-gray-600">Concluídos</p>
+              <div className="h-8 w-8 sm:h-10 sm:w-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Award className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Award className="h-6 w-6 text-purple-600" />
-            </div>
+            <p className="text-lg sm:text-2xl font-bold text-purple-600">{agendamentosConcluidos}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Última Visita</p>
-              <p className="text-lg font-bold text-orange-600">
-                {ultimaVisita ? ultimaVisita.toLocaleDateString('pt-BR') : 'Nunca'}
-              </p>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm text-gray-600">Última Visita</p>
+              <div className="h-8 w-8 sm:h-10 sm:w-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Clock className="h-6 w-6 text-orange-600" />
-            </div>
+            <p className="text-base sm:text-lg font-bold text-orange-600 truncate">
+              {ultimaVisita ? ultimaVisita.toLocaleDateString('pt-BR') : 'Nunca'}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Filter className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filtros</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Buscar
             </label>
             <input
@@ -456,18 +456,18 @@ export default function ClienteDetalhesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Tipo
             </label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="all">Todos</option>
               <option value="appointments">Agendamentos</option>
@@ -476,13 +476,13 @@ export default function ClienteDetalhesPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Status
             </label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="all">Todos</option>
               <option value="agendado">Agendado</option>
@@ -493,13 +493,13 @@ export default function ClienteDetalhesPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Período
             </label>
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value as any)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="all">Todo período</option>
               <option value="7days">Últimos 7 dias</option>
@@ -526,8 +526,8 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Histórico */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
           Histórico ({combinedHistory.length})
         </h3>
 
@@ -536,40 +536,40 @@ export default function ClienteDetalhesPage() {
             <p className="text-gray-600">Nenhum registro encontrado</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {combinedHistory.map((item, index) => (
               <div
                 key={`${item.type}-${index}`}
-                className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors"
+                className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-primary-300 transition-colors"
               >
                 {item.type === 'appointment' ? (
                   // Agendamento
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Scissors className="h-6 w-6 text-blue-600" />
+                  <div className="flex flex-col sm:flex-row items-start justify-between space-y-3 sm:space-y-0">
+                    <div className="flex items-start space-x-3 flex-1 w-full">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Scissors className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                          <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                             {(item.data as Appointment).service.name}
                           </h4>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor((item.data as Appointment).status)}`}>
+                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor((item.data as Appointment).status)} w-fit`}>
                             {formatStatus((item.data as Appointment).status)}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600">
                           <span className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{new Date((item.data as Appointment).date).toLocaleDateString('pt-BR')}</span>
                           </span>
                           <span className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{(item.data as Appointment).time}</span>
                           </span>
                           <span className="flex items-center space-x-1">
-                            <DollarSign className="h-4 w-4" />
-                            <span>R$ {(item.data as Appointment).service.price.toFixed(2)}</span>
+                            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="whitespace-nowrap">R$ {(item.data as Appointment).service.price.toFixed(2)}</span>
                           </span>
                         </div>
                         {(item.data as Appointment).notes && (
@@ -582,21 +582,21 @@ export default function ClienteDetalhesPage() {
                   </div>
                 ) : (
                   // Venda
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <ShoppingBag className="h-6 w-6 text-green-600" />
+                  <div className="flex flex-col sm:flex-row items-start justify-between space-y-3 sm:space-y-0">
+                    <div className="flex items-start space-x-3 flex-1 w-full">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-gray-900">Venda</h4>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getPaymentMethodColor((item.data as Sale).paymentMethod)}`}>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                          <h4 className="font-semibold text-sm sm:text-base text-gray-900">Venda</h4>
+                          <span className={`px-2 py-1 text-xs rounded-full ${getPaymentMethodColor((item.data as Sale).paymentMethod)} w-fit`}>
                             {formatPaymentMethod((item.data as Sale).paymentMethod)}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600">
                           <span className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{new Date((item.data as Sale).date).toLocaleDateString('pt-BR')}</span>
                           </span>
                           <span className="flex items-center space-x-1 text-green-600 font-semibold">
@@ -625,10 +625,10 @@ export default function ClienteDetalhesPage() {
 
       {/* Modal de Edição */}
       {showEditModal && editingCustomer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Editar Cliente</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Editar Cliente</h2>
               <button
                 onClick={() => {
                   setShowEditModal(false);
@@ -636,14 +636,14 @@ export default function ClienteDetalhesPage() {
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <X className="h-6 w-6 text-gray-600" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
               </button>
             </div>
             
-            <form onSubmit={handleUpdateCustomer} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+            <form onSubmit={handleUpdateCustomer} className="p-4 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Nome Completo *
                   </label>
                   <input
@@ -651,13 +651,13 @@ export default function ClienteDetalhesPage() {
                     required
                     value={editingCustomer.name}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="Ex: João Silva"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Telefone *
                   </label>
                   <input
@@ -665,64 +665,64 @@ export default function ClienteDetalhesPage() {
                     required
                     value={editingCustomer.phone}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="(00) 00000-0000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     value={editingCustomer.email || ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="joao@email.com"
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Data de Nascimento
                   </label>
                   <input
                     type="date"
                     value={editingCustomer.birthday ? editingCustomer.birthday.split('T')[0] : ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, birthday: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Observações
                   </label>
                   <textarea
-                    rows={4}
+                    rows={3}
                     value={editingCustomer.notes || ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, notes: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="Ex: Cliente VIP, prefere horários pela manhã..."
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false);
                     setEditingCustomer(null);
                   }}
-                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg font-medium"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
                 >
                   Salvar Alterações
                 </button>
