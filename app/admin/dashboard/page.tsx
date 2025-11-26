@@ -212,55 +212,40 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Aprimorado */}
-        <div className="text-center pb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl mb-6 shadow-lg animate-bounce-in">
-            <TrendingUp className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary-700 to-primary-600 bg-clip-text text-transparent leading-tight pb-2">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Minimalista */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
             Dashboard
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-            Visão completa e em tempo real do seu negócio
+          <p className="text-sm text-gray-500 mt-1">
+            Visão geral do negócio
           </p>
-          <div className="h-1 w-32 bg-gradient-to-r from-primary-500 to-primary-600 mx-auto rounded-full animate-slideDown"></div>
         </div>
 
-        {/* Cards de Estatísticas Aprimorados */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        {/* Cards de Estatísticas Minimalistas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
               <Card 
                 key={index} 
-                hover 
-                className={`group animate-stagger-${(index % 4) + 1} transform hover:scale-105 transition-all duration-500 hover:shadow-xl border-0 shadow-md bg-white/80 backdrop-blur-sm overflow-hidden`}
+                className="bg-white border border-gray-200 hover:border-gray-300 transition-colors"
               >
-                <CardBody className="p-6">
+                <CardBody className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 truncate">
+                      <p className="text-xs text-gray-500 mb-1 truncate">
                         {card.title}
                       </p>
-                      <p className={`text-3xl font-bold ${card.textColor} transition-colors duration-300 truncate`}>
+                      <p className="text-2xl font-semibold text-gray-900 truncate">
                         {card.value}
                       </p>
                     </div>
-                    <div
-                      className={`h-16 w-16 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg flex-shrink-0`}
-                    >
-                      <Icon className="h-8 w-8 text-white" />
+                    <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon className="h-5 w-5 text-gray-600" />
                     </div>
-                  </div>
-                  
-                  {/* Barra de progresso decorativa */}
-                  <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full bg-gradient-to-r ${card.color} rounded-full animate-slideRight`}
-                      style={{ width: '75%' }}
-                    ></div>
                   </div>
                 </CardBody>
               </Card>
@@ -268,130 +253,121 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* Alertas Aprimorados */}
+        {/* Alertas Minimalistas */}
         {stats && stats.produtosEstoqueBaixo > 0 && (
-          <div className="animate-slideDown">
-            <Alert 
-              variant="warning" 
-              title="Estoque Baixo"
-              className="border-0 shadow-lg bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-l-amber-500"
-            >
-              <div className="flex items-center space-x-2">
-                <Package className="h-5 w-5 text-amber-600" />
-                <span>
-                  <span className="font-bold text-amber-700">{stats.produtosEstoqueBaixo}</span>{' '}
-                  produto(s) com estoque baixo. 
-                  <button 
-                    onClick={() => router.push('/admin/produtos')}
-                    className="ml-2 text-amber-700 underline hover:text-amber-800 font-medium"
-                  >
-                    Verificar produtos →
-                  </button>
-                </span>
-              </div>
-            </Alert>
-          </div>
+          <Alert 
+            variant="warning" 
+            title="Estoque Baixo"
+            className="bg-amber-50 border-amber-200"
+          >
+            <div className="flex items-center space-x-2 text-sm">
+              <Package className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800">
+                {stats.produtosEstoqueBaixo} produto(s) com estoque baixo. 
+                <button 
+                  onClick={() => router.push('/admin/produtos')}
+                  className="ml-2 text-amber-700 underline hover:text-amber-900"
+                >
+                  Verificar produtos
+                </button>
+              </span>
+            </div>
+          </Alert>
         )}
 
-        {/* Gráficos Aprimorados */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+        {/* Gráficos Minimalistas */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
           {/* Gráfico de Receita vs Despesa */}
-          <Card className="animate-slideLeft hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200">
             <CardHeader 
               title="Receita vs Despesa" 
               subtitle="Últimos 6 meses"
               className="pb-4"
             />
             <CardBody className="pt-0">
-              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-4">
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis 
-                      dataKey="mes" 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      axisLine={{ stroke: '#cbd5e1' }}
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      axisLine={{ stroke: '#cbd5e1' }}
-                    />
-                    <Tooltip 
-                      formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: 'none',
-                        borderRadius: '12px',
-                        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
-                      }}
-                    />
-                    <Bar dataKey="receita" fill="#10b981" name="Receita" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="despesa" fill="#ef4444" name="Despesa" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis 
+                    dataKey="mes" 
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    axisLine={{ stroke: '#d1d5db' }}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
+                    axisLine={{ stroke: '#d1d5db' }}
+                    tickLine={false}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                  />
+                  <Bar dataKey="receita" fill="#10b981" name="Receita" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="despesa" fill="#ef4444" name="Despesa" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardBody>
           </Card>
 
-          {/* Resumo Financeiro Aprimorado */}
-          <Card className="animate-slideRight hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+          {/* Resumo Financeiro Minimalista */}
+          <Card className="bg-white border border-gray-200">
             <CardHeader 
               title="Resumo Financeiro" 
               subtitle="Visão consolidada"
               className="pb-4"
             />
             <CardBody className="pt-0">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center">
-                      <TrendingUp className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-gray-700 font-medium">Receita Total (Mês)</span>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">Receita Total (Mês)</span>
                   </div>
-                  <span className="font-bold text-emerald-600 text-xl">
+                  <span className="text-sm font-semibold text-gray-900">
                     {formatCurrency(stats?.lucroMes || 0)}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center p-5 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-100 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-red-500 rounded-full flex items-center justify-center">
-                      <AlertCircle className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-gray-700 font-medium">Despesas (Mês)</span>
+                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <AlertCircle className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">Despesas (Mês)</span>
                   </div>
-                  <span className="font-bold text-red-600 text-xl">
+                  <span className="text-sm font-semibold text-gray-900">
                     {formatCurrency(stats?.despesasMes || 0)}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border-2 border-primary-200 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
-                      <DollarSign className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-gray-800 font-bold text-lg">Lucro Líquido</span>
+                <div className="flex justify-between items-center py-3 px-4 bg-gray-100 rounded-lg border border-gray-300">
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm font-semibold text-gray-900">Lucro Líquido</span>
                   </div>
-                  <span className="font-bold text-primary-700 text-2xl">
+                  <span className="text-base font-semibold text-gray-900">
                     {formatCurrency(stats?.lucroLiquido || 0)}
                   </span>
                 </div>
 
-                <div className="pt-4 space-y-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="h-5 w-5 text-primary-500" />
-                      <span className="text-gray-700 font-medium">Agendamentos hoje</span>
+                <div className="pt-3 space-y-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">Agendamentos hoje</span>
                     </div>
-                    <span className="font-bold text-primary-600 text-lg">{stats?.agendamentosHoje || 0}</span>
+                    <span className="text-sm font-medium text-gray-900">{stats?.agendamentosHoje || 0}</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <div className="flex items-center space-x-3">
-                      <Users className="h-5 w-5 text-orange-500" />
-                      <span className="text-gray-700 font-medium">Total de clientes</span>
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">Total de clientes</span>
                     </div>
-                    <span className="font-bold text-orange-600 text-lg">{stats?.clientesTotal || 0}</span>
+                    <span className="text-sm font-medium text-gray-900">{stats?.clientesTotal || 0}</span>
                   </div>
                 </div>
               </div>
@@ -399,19 +375,18 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Próximos Agendamentos Aprimorados */}
-        <Card className="animate-fade-in hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+        {/* Próximos Agendamentos */}
+        <Card className="bg-white border border-gray-200">
           <CardHeader 
             title="Próximos Agendamentos"
-            subtitle={`${proximosAgendamentos.length} agendamento${proximosAgendamentos.length !== 1 ? 's' : ''} próximo${proximosAgendamentos.length !== 1 ? 's' : ''}`}
-            className="border-b border-gray-100"
+            subtitle={`${proximosAgendamentos.length} agendamento${proximosAgendamentos.length !== 1 ? 's' : ''}`}
+            className="border-b border-gray-200"
           >
             <Button
               variant="secondary"
               size="sm"
               icon={ArrowRight}
               onClick={() => router.push('/admin/agendamentos')}
-              className="hover:scale-105 transition-transform duration-200"
             >
               Ver todos
             </Button>
@@ -433,17 +408,17 @@ export default function DashboardPage() {
               }
             />
           ) : (
-            <div className="space-y-4">
-              {proximosAgendamentos.map((agendamento, index) => (
+            <div className="space-y-3">
+              {proximosAgendamentos.map((agendamento) => (
                 <div
                   key={agendamento.id}
                   onClick={() => router.push('/admin/agendamentos')}
-                  className={`p-6 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 cursor-pointer group animate-stagger-${(index % 4) + 1}`}
+                  className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <div className="h-14 w-14 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 overflow-hidden relative bg-gradient-to-br from-primary-500 to-primary-600">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-gray-200">
                           {agendamento.customer.photo ? (
                             <Image
                               src={agendamento.customer.photo}
@@ -452,71 +427,44 @@ export default function DashboardPage() {
                               className="object-cover"
                             />
                           ) : (
-                            <User className="h-7 w-7 text-white" />
+                            <User className="h-5 w-5 text-gray-500" />
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">
+                          <h3 className="text-sm font-semibold text-gray-900">
                             {agendamento.customer.name}
                           </h3>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
-                            <Phone className="h-4 w-4" />
+                          <div className="flex items-center space-x-2 text-xs text-gray-500 mt-0.5">
+                            <Phone className="h-3 w-3" />
                             <span>{agendamento.customer.phone}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 ml-18">
-                        <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100">
-                          <div className="h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Scissors className="h-4 w-4 text-purple-600" />
-                          </div>
-                          <div>
-                            <span className="text-gray-800 font-semibold text-sm">{agendamento.service.name}</span>
-                            <div className="text-xs text-gray-500">
-                              {agendamento.service.duration}min • {formatCurrency(agendamento.service.price)}
-                            </div>
-                          </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 text-xs">
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <Scissors className="h-3 w-3" />
+                          <span>{agendamento.service.name} • {agendamento.service.duration}min</span>
                         </div>
-
-                        <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100">
-                          <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Clock className="h-4 w-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <span className="text-gray-800 font-semibold text-sm">
-                              {new Date(agendamento.date).toLocaleDateString('pt-BR', { 
-                                day: '2-digit', 
-                                month: '2-digit',
-                                year: 'numeric'
-                              })}
-                            </span>
-                            <div className="text-xs text-gray-500">{agendamento.time}</div>
-                          </div>
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            {new Date(agendamento.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} • {agendamento.time}
+                          </span>
                         </div>
-
                         {agendamento.professional && (
-                          <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100">
-                            <div className="h-8 w-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                              <Users className="h-4 w-4 text-orange-600" />
-                            </div>
-                            <div>
-                              <span className="text-gray-800 font-semibold text-sm">{agendamento.professional}</span>
-                              <div className="text-xs text-gray-500">Profissional</div>
-                            </div>
+                          <div className="flex items-center space-x-2 text-gray-600">
+                            <Users className="h-3 w-3" />
+                            <span>{agendamento.professional}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="ml-6 flex flex-col items-end space-y-2">
-                      <Badge 
-                        variant={getStatusBadgeVariant(agendamento.status)}
-                        className="transform hover:scale-105 transition-transform duration-200"
-                      >
+                    <div className="ml-4 flex items-center space-x-2">
+                      <Badge variant={getStatusBadgeVariant(agendamento.status)}>
                         {formatStatusText(agendamento.status)}
                       </Badge>
-                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                   </div>
                 </div>
@@ -526,12 +474,12 @@ export default function DashboardPage() {
         </CardBody>
       </Card>
 
-        {/* Aniversariantes do Mês Aprimorados */}
-        <Card className="animate-slideUp hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+        {/* Aniversariantes do Mês */}
+        <Card className="bg-white border border-gray-200">
           <CardHeader 
             title="Aniversariantes do Mês"
-            subtitle={`${aniversariantes.length} cliente${aniversariantes.length !== 1 ? 's' : ''} fazendo aniversário`}
-            className="border-b border-gray-100"
+            subtitle={`${aniversariantes.length} cliente${aniversariantes.length !== 1 ? 's' : ''}`}
+            className="border-b border-gray-200"
           />
         
         <CardBody>
@@ -542,8 +490,8 @@ export default function DashboardPage() {
               description="Não há clientes fazendo aniversário este mês"
             />
           ) : (
-            <div className="space-y-4">
-              {aniversariantes.map((aniversariante, index) => {
+            <div className="space-y-3">
+              {aniversariantes.map((aniversariante) => {
                 const birthday = new Date(aniversariante.birthday);
                 const today = new Date();
                 const isToday = birthday.getDate() === today.getDate() && 
@@ -552,15 +500,13 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={aniversariante.id}
-                    className={`p-6 rounded-xl border transition-all duration-300 cursor-pointer group animate-stagger-${(index % 4) + 1} hover:shadow-lg ${
-                      isToday 
-                        ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-200 hover:border-orange-300' 
-                        : 'bg-gradient-to-r from-white to-gray-50 border-gray-100 hover:border-primary-200'
+                    className={`p-4 rounded-lg border transition-colors ${
+                      isToday ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ring-4 ring-white shadow-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0">
                           {aniversariante.photo ? (
                             <Image
                               src={aniversariante.photo}
@@ -569,59 +515,43 @@ export default function DashboardPage() {
                               className="object-cover"
                             />
                           ) : (
-                            <User className="h-8 w-8 text-gray-400" />
+                            <User className="h-5 w-5 text-gray-500" />
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className={`text-lg font-bold group-hover:text-primary-600 transition-colors duration-200 ${
-                            isToday ? 'text-orange-700' : 'text-gray-900'
-                          }`}>
+                          <h3 className="text-sm font-semibold text-gray-900">
                             {aniversariante.name}
-                            {isToday && <span className="ml-2 text-sm font-semibold text-orange-600">(Hoje)</span>}
+                            {isToday && <span className="ml-2 text-xs text-amber-600">(Hoje)</span>}
                           </h3>
-                          <div className="flex items-center space-x-6 mt-2">
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
-                              <Phone className="h-4 w-4" />
-                              <span className="font-medium">{aniversariante.phone}</span>
+                          <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
+                            <div className="flex items-center space-x-1">
+                              <Phone className="h-3 w-3" />
+                              <span>{aniversariante.phone}</span>
                             </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
-                              <Calendar className="h-4 w-4" />
-                              <span className="font-medium">
-                                {birthday.toLocaleDateString('pt-BR', { 
-                                  day: '2-digit', 
-                                  month: '2-digit'
-                                })}
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>
+                                {birthday.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-3">
-                        {isToday && (
-                          <Badge 
-                            variant="success"
-                            className="animate-pulse bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0"
-                          >
-                            Aniversário Hoje
-                          </Badge>
-                        )}
-                        <Button
-                          variant={isToday ? "primary" : "secondary"}
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const message = isToday 
-                              ? `Parabéns pelo seu aniversário! Que tal comemorar com um cuidado especial no nosso salão? Temos uma surpresa para você!`
-                              : `Olá ${aniversariante.name}! Seu aniversário está chegando. Que tal agendar um cuidado especial conosco?`;
-                            const whatsappUrl = `https://wa.me/${aniversariante.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-                            window.open(whatsappUrl, '_blank');
-                          }}
-                          className="hover:scale-105 transition-transform duration-200"
-                        >
-                          {isToday ? 'Parabenizar' : 'Lembrar'}
-                        </Button>
-                      </div>
+                      <Button
+                        variant={isToday ? "primary" : "secondary"}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const message = isToday 
+                            ? `Parabéns pelo seu aniversário! Que tal comemorar com um cuidado especial no nosso salão? Temos uma surpresa para você!`
+                            : `Olá ${aniversariante.name}! Seu aniversário está chegando. Que tal agendar um cuidado especial conosco?`;
+                          const whatsappUrl = `https://wa.me/${aniversariante.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, '_blank');
+                        }}
+                      >
+                        {isToday ? 'Parabenizar' : 'Lembrar'}
+                      </Button>
                     </div>
                   </div>
                 );
@@ -632,18 +562,17 @@ export default function DashboardPage() {
         </Card>
 
         {/* Vendas Recentes */}
-        <Card className="animate-slideUp hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+        <Card className="bg-white border border-gray-200">
           <CardHeader 
             title="Vendas Recentes"
-            subtitle={`${vendasRecentes.length} venda${vendasRecentes.length !== 1 ? 's' : ''} realizada${vendasRecentes.length !== 1 ? 's' : ''}`}
-            className="border-b border-gray-100"
+            subtitle={`${vendasRecentes.length} venda${vendasRecentes.length !== 1 ? 's' : ''}`}
+            className="border-b border-gray-200"
           >
             <Button
               variant="secondary"
               size="sm"
               icon={ArrowRight}
               onClick={() => router.push('/admin/vendas')}
-              className="hover:scale-105 transition-transform duration-200"
             >
               Ver todas
             </Button>
@@ -665,9 +594,8 @@ export default function DashboardPage() {
               }
             />
           ) : (
-            <div className="space-y-4">
-              {vendasRecentes.map((venda, index) => {
-                const vendaDate = new Date(venda.date);
+            <div className="space-y-3">
+              {vendasRecentes.map((venda) => {
                 const paymentMethodLabels: { [key: string]: string } = {
                   'DINHEIRO': 'Dinheiro',
                   'CARTAO_CREDITO': 'Cartão de Crédito',
@@ -679,12 +607,12 @@ export default function DashboardPage() {
                   <div
                     key={venda.id}
                     onClick={() => router.push('/admin/vendas')}
-                    className={`p-6 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 cursor-pointer group animate-stagger-${(index % 4) + 1}`}
+                    className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="h-14 w-14 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 overflow-hidden relative bg-gradient-to-br from-green-500 to-emerald-600">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-gray-200">
                             {venda.customer?.photo ? (
                               <Image
                                 src={venda.customer.photo}
@@ -693,85 +621,50 @@ export default function DashboardPage() {
                                 className="object-cover"
                               />
                             ) : (
-                              <ShoppingBag className="h-7 w-7 text-white" />
+                              <ShoppingBag className="h-5 w-5 text-gray-500" />
                             )}
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">
+                            <h3 className="text-sm font-semibold text-gray-900">
                               {venda.customer ? venda.customer.name : 'Cliente não informado'}
                             </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                            <div className="flex items-center space-x-3 text-xs text-gray-500 mt-0.5">
                               {venda.customer && (
                                 <>
                                   <div className="flex items-center space-x-1">
-                                    <Phone className="h-4 w-4" />
+                                    <Phone className="h-3 w-3" />
                                     <span>{venda.customer.phone}</span>
                                   </div>
-                                  <span className="text-gray-300">•</span>
+                                  <span>•</span>
                                 </>
                               )}
                               <div className="flex items-center space-x-1">
-                                <Clock className="h-4 w-4" />
+                                <Clock className="h-3 w-3" />
                                 <span>{formatDateTime(venda.date)}</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 ml-18">
-                          <div className="bg-white/50 rounded-lg p-3 border border-gray-100">
-                            <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                              <DollarSign className="h-4 w-4" />
-                              <span className="text-xs font-medium text-gray-500">Total</span>
-                            </div>
-                            <p className="text-lg font-bold text-gray-900">{formatCurrency(venda.total)}</p>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="flex items-center space-x-1 text-gray-600">
+                            <DollarSign className="h-3 w-3" />
+                            <span className="font-semibold">{formatCurrency(venda.total)}</span>
                           </div>
-
-                          <div className="bg-white/50 rounded-lg p-3 border border-gray-100">
-                            <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                              <CreditCard className="h-4 w-4" />
-                              <span className="text-xs font-medium text-gray-500">Pagamento</span>
-                            </div>
-                            <p className="text-sm font-semibold text-gray-900">{paymentMethodLabels[venda.paymentMethod] || venda.paymentMethod}</p>
+                          <div className="flex items-center space-x-1 text-gray-600">
+                            <CreditCard className="h-3 w-3" />
+                            <span>{paymentMethodLabels[venda.paymentMethod] || venda.paymentMethod}</span>
                           </div>
-
-                          <div className="bg-white/50 rounded-lg p-3 border border-gray-100">
-                            <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                              <Package className="h-4 w-4" />
-                              <span className="text-xs font-medium text-gray-500">Itens</span>
-                            </div>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {venda.items.length} item{venda.items.length !== 1 ? 's' : ''}
-                            </p>
+                          <div className="flex items-center space-x-1 text-gray-600">
+                            <Package className="h-3 w-3" />
+                            <span>{venda.items.length} item{venda.items.length !== 1 ? 's' : ''}</span>
                           </div>
                         </div>
 
                         {venda.professional && (
-                          <div className="mt-4 flex items-center space-x-2 text-sm text-gray-600">
-                            <Scissors className="h-4 w-4" />
-                            <span className="font-medium">Profissional: {venda.professional}</span>
-                          </div>
-                        )}
-
-                        {venda.items.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-gray-100">
-                            <p className="text-xs font-medium text-gray-500 mb-2">Itens da venda:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {venda.items.slice(0, 3).map((item, idx) => (
-                                <Badge 
-                                  key={idx}
-                                  variant="info"
-                                  className="text-xs"
-                                >
-                                  {item.product?.name || item.service?.name || 'Item'} ({item.quantity}x)
-                                </Badge>
-                              ))}
-                              {venda.items.length > 3 && (
-                                <Badge variant="gray" className="text-xs">
-                                  +{venda.items.length - 3} mais
-                                </Badge>
-                              )}
-                            </div>
+                          <div className="mt-2 flex items-center space-x-1 text-xs text-gray-600">
+                            <Scissors className="h-3 w-3" />
+                            <span>Profissional: {venda.professional}</span>
                           </div>
                         )}
                       </div>

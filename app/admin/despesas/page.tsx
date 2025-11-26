@@ -182,116 +182,93 @@ export default function DespesasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/30 to-pink-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Aprimorado */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
-                <TrendingDown className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-red-700 bg-clip-text text-transparent leading-tight pb-2">
-                  Despesas
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Controle completo dos seus gastos
-                </p>
-              </div>
-            </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-red-500 to-pink-600 rounded-full animate-slideRight"></div>
+            <h1 className="text-2xl font-semibold text-gray-900">Despesas</h1>
+            <p className="text-sm text-gray-500 mt-1">Controle seus gastos</p>
           </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          icon={Plus}
-          size="lg"
-        >
-          Nova Despesa
-        </Button>
-      </div>
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            icon={Plus}
+            size="lg"
+          >
+            Nova Despesa
+          </Button>
+        </div>
 
-      {/* Filtros Modernos */}
-      <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-xl p-6 border border-slate-200">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Filter className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">Filtros Avançados</h3>
-              <p className="text-sm text-gray-500">Refine sua busca por período e categoria</p>
-            </div>
+      {/* Filtros */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-medium text-gray-700">Filtros</h3>
           </div>
           {(selectedMonth || selectedYear || selectedCategory) && (
             <button
               onClick={clearFilters}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium shadow-sm"
+              className="flex items-center space-x-1 px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded-md transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3" />
               <span>Limpar</span>
             </button>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              <span>Data Inicial</span>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 uppercase">
+              Data Inicial
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => {
                 setStartDate(e.target.value);
-                // Limpar mês/ano se usar intervalo
                 if (e.target.value) {
                   setSelectedMonth('');
                   setSelectedYear('');
                 }
               }}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-300"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              <span>Data Final</span>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 uppercase">
+              Data Final
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => {
                 setEndDate(e.target.value);
-                // Limpar mês/ano se usar intervalo
                 if (e.target.value) {
                   setSelectedMonth('');
                   setSelectedYear('');
                 }
               }}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-300"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              <span>Mês</span>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 uppercase">
+              Mês
             </label>
             <select
               value={selectedMonth}
               onChange={(e) => {
                 setSelectedMonth(e.target.value);
-                // Limpar intervalo se usar mês/ano
                 if (e.target.value) {
                   setStartDate('');
                   setEndDate('');
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os meses</option>
               <option value="1">Janeiro</option>
@@ -309,23 +286,21 @@ export default function DespesasPage() {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              <span>Ano</span>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 uppercase">
+              Ano
             </label>
             <select
               value={selectedYear}
               onChange={(e) => {
                 setSelectedYear(e.target.value);
-                // Limpar intervalo se usar mês/ano
                 if (e.target.value) {
                   setStartDate('');
                   setEndDate('');
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os anos</option>
               {years.map(year => (
@@ -334,15 +309,14 @@ export default function DespesasPage() {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <DollarSign className="h-4 w-4 text-blue-600" />
-              <span>Categoria</span>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 uppercase">
+              Categoria
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-300"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               <option value="">Todas as categorias</option>
               <option value="PRODUTOS">Produtos</option>
@@ -355,77 +329,68 @@ export default function DespesasPage() {
         </div>
         
         {(selectedMonth || selectedYear || selectedCategory || startDate || endDate) && (
-          <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">{filteredExpenses.length}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-blue-900">
-                    Mostrando {filteredExpenses.length} de {expenses.length} despesas
-                  </p>
-                  <p className="text-xs text-blue-600">
-                    {startDate && `De: ${new Date(startDate).toLocaleDateString('pt-BR')}`}
-                    {startDate && endDate && ' • '}
-                    {endDate && `Até: ${new Date(endDate).toLocaleDateString('pt-BR')}`}
-                    {(startDate || endDate) && selectedCategory && ' • '}
-                    {!startDate && !endDate && selectedMonth && `Mês: ${['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][parseInt(selectedMonth) - 1]}`}
-                    {!startDate && !endDate && selectedMonth && selectedYear && ' • '}
-                    {!startDate && !endDate && selectedYear && `Ano: ${selectedYear}`}
-                    {(!startDate && !endDate && (selectedMonth || selectedYear)) && selectedCategory && ' • '}
-                    {selectedCategory && `Categoria: ${selectedCategory}`}
-                  </p>
-                </div>
-              </div>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="text-sm font-medium text-blue-900">
+              Mostrando {filteredExpenses.length} de {expenses.length} despesas
+            </div>
+            <div className="text-xs text-blue-600 mt-1">
+              {startDate && `De: ${new Date(startDate).toLocaleDateString('pt-BR')}`}
+              {startDate && endDate && ' • '}
+              {endDate && `Até: ${new Date(endDate).toLocaleDateString('pt-BR')}`}
+              {(startDate || endDate) && selectedCategory && ' • '}
+              {!startDate && !endDate && selectedMonth && `Mês: ${['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][parseInt(selectedMonth) - 1]}`}
+              {!startDate && !endDate && selectedMonth && selectedYear && ' • '}
+              {!startDate && !endDate && selectedYear && `Ano: ${selectedYear}`}
+              {(!startDate && !endDate && (selectedMonth || selectedYear)) && selectedCategory && ' • '}
+              {selectedCategory && `Categoria: ${selectedCategory}`}
             </div>
           </div>
         )}
       </div>
 
-      {/* Total de Despesas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-red-500 to-red-700 rounded-xl shadow-xl p-6 text-white">
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100 text-sm mb-1">Total de Despesas</p>
-              <p className="text-3xl font-bold">{formatCurrency(totalExpenses)}</p>
+              <p className="text-xs text-gray-500 uppercase mb-1">Total de Despesas</p>
+              <p className="text-2xl font-semibold text-gray-900">{formatCurrency(totalExpenses)}</p>
             </div>
-            <div className="h-12 w-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <TrendingDown className="h-6 w-6" />
+            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <TrendingDown className="h-5 w-5 text-gray-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm mb-1">Total de Registros</p>
-              <p className="text-3xl font-bold text-gray-900">{filteredExpenses.length}</p>
+              <p className="text-xs text-gray-500 uppercase mb-1">Total de Registros</p>
+              <p className="text-2xl font-semibold text-gray-900">{filteredExpenses.length}</p>
             </div>
-            <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
               <DollarSign className="h-6 w-6 text-red-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm mb-1">Média por Despesa</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-xs text-gray-500 uppercase mb-1">Média por Despesa</p>
+              <p className="text-2xl font-semibold text-gray-900">
                 {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
               </p>
             </div>
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-blue-600" />
+            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Calendar className="h-5 w-5 text-gray-600" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Lista de Despesas */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {filteredExpenses.length === 0 ? (
           <div className="text-center py-12">
             <DollarSign className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -440,19 +405,19 @@ export default function DespesasPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Data
                   </th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Descrição
                   </th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Categoria
                   </th>
-                  <th className="text-right py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Valor
                   </th>
-                  <th className="text-right py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Ações
                   </th>
                 </tr>
@@ -463,14 +428,11 @@ export default function DespesasPage() {
                     key={expense.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-4 px-6 text-gray-600">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                        {formatDate(expense.date)}
-                      </div>
+                    <td className="py-3 px-4 text-sm text-gray-600">
+                      {formatDate(expense.date)}
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="font-medium text-gray-900">
+                    <td className="py-3 px-4">
+                      <div className="text-sm font-medium text-gray-900">
                         {expense.description}
                       </div>
                       {expense.notes && (
@@ -479,22 +441,22 @@ export default function DespesasPage() {
                         </div>
                       )}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(
+                        className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
                           expense.category
                         )}`}
                       >
                         {expense.category}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <span className="font-semibold text-red-600">
+                    <td className="py-3 px-4 text-right">
+                      <span className="text-sm font-semibold text-red-600">
                         {formatCurrency(expense.amount)}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end space-x-1">
                         <Button
                           onClick={() => handleEdit(expense)}
                           variant="ghost"

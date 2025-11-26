@@ -98,25 +98,17 @@ export default function ServicosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Aprimorado */}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="h-16 w-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
-                <Scissors className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-purple-700 bg-clip-text text-transparent leading-tight pb-2">
-                  Serviços
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Gerencie todos os serviços oferecidos
-                </p>
-              </div>
-            </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full animate-slideRight"></div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Serviços
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gerencie seus serviços
+            </p>
           </div>
           <Button
             type="button"
@@ -129,16 +121,16 @@ export default function ServicosPage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <p className="text-sm font-medium text-gray-600">Total de Serviços</p>
-            <p className="text-3xl font-bold text-purple-600 mt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500 uppercase font-medium">Total de Serviços</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">
               {services.length}
             </p>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <p className="text-sm font-medium text-gray-600">Preço Médio</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500 uppercase font-medium">Preço Médio</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">
               {services.length > 0
                 ? formatCurrency(
                     services.reduce((acc, s) => acc + s.price, 0) / services.length
@@ -146,9 +138,9 @@ export default function ServicosPage() {
                 : 'R$ 0,00'}
             </p>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <p className="text-sm font-medium text-gray-600">Duração Média</p>
-            <p className="text-3xl font-bold text-blue-600 mt-2">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500 uppercase font-medium">Duração Média</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">
               {services.length > 0
                 ? Math.round(
                     services.reduce((acc, s) => acc + s.duration, 0) / services.length
@@ -161,26 +153,26 @@ export default function ServicosPage() {
 
         {/* Lista de Serviços */}
         {services.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-            <Scissors className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Nenhum serviço encontrado</p>
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <Scissors className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-sm text-gray-500">Nenhum serviço encontrado</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-purple-500 to-pink-600">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Serviço
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Duração
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Preço
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                       Ações
                     </th>
                   </tr>
@@ -189,34 +181,34 @@ export default function ServicosPage() {
                   {services.map((service) => (
                     <tr
                       key={service.id}
-                      className="hover:bg-purple-50/50 transition-colors"
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
-                          <div className="h-10 w-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Scissors className="h-5 w-5 text-white" />
+                          <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Scissors className="h-4 w-4 text-gray-600" />
                           </div>
                           <div>
-                            <div className="font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900">
                               {service.name}
                             </div>
                             {service.description && (
-                              <div className="text-sm text-gray-500 mt-1">
+                              <div className="text-xs text-gray-500 mt-0.5">
                                 {service.description}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
                           {service.duration} min
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                         {formatCurrency(service.price)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center space-x-2">
                           <Button
                             onClick={() => handleEdit(service.id)}

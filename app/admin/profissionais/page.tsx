@@ -110,25 +110,17 @@ export default function ProfessionalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-blue-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Aprimorado */}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="h-16 w-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
-                <UserCheck className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-indigo-700 bg-clip-text text-transparent leading-tight pb-2">
-                  Profissionais
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Gerencie toda a equipe do salão
-                </p>
-              </div>
-            </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full animate-slideRight"></div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Profissionais
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gerencie sua equipe
+            </p>
           </div>
           <Button
             onClick={() => { setEditingProfessional(null); setShowModal(true); }}

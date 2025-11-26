@@ -279,24 +279,16 @@ export default function AgendamentosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-blue-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="h-16 w-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-purple-700 bg-clip-text text-transparent leading-tight pb-2">
-                  Agendamentos
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Gerencie e organize todos os seus agendamentos
-                </p>
-              </div>
-            </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full animate-slideRight"></div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Agendamentos
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gerencie seus agendamentos
+            </p>
           </div>
           <Button
             onClick={() => setShowModal(true)}
@@ -308,7 +300,7 @@ export default function AgendamentosPage() {
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => setFilterStatus('all')}
             variant={filterStatus === 'all' ? 'primary' : 'outline'}
@@ -353,27 +345,27 @@ export default function AgendamentosPage() {
             <p className="text-gray-500">Nenhum agendamento encontrado</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-purple-500 to-blue-600">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Data/Hora</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Cliente</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Serviço</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Profissional</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serviço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-purple-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={appointment.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-purple-600" />
+                          <Clock className="h-3 w-3 text-gray-400" />
                           <div>
-                            <div className="text-sm font-semibold text-gray-900">
+                            <div className="text-sm font-medium text-gray-900">
                               {new Date(appointment.date).toLocaleDateString('pt-BR')}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -382,9 +374,9 @@ export default function AgendamentosPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
                             {appointment.customer.photo ? (
                               <Image
                                 src={appointment.customer.photo}
@@ -393,7 +385,7 @@ export default function AgendamentosPage() {
                                 className="object-cover"
                               />
                             ) : (
-                              <User className="h-5 w-5 text-gray-400" />
+                              <User className="h-4 w-4 text-gray-400" />
                             )}
                           </div>
                           <div>
@@ -402,22 +394,22 @@ export default function AgendamentosPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          <Scissors className="h-4 w-4 text-purple-600" />
+                          <Scissors className="h-3 w-3 text-gray-400" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">{appointment.service.name}</div>
                             <div className="text-xs text-gray-500">{appointment.service.duration} min</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                         {appointment.professional || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {getStatusBadge(appointment.status)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center space-x-1">
                           {/* SEQUÊNCIA OBRIGATÓRIA: agendado → confirmado → concluido → PDV */}
                           

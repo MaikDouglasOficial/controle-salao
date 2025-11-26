@@ -190,25 +190,17 @@ export default function ClientesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Aprimorado */}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="h-16 w-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-in">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-purple-700 bg-clip-text text-transparent leading-tight pb-2">
-                  Clientes
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Gerencie seus clientes e relacionamentos
-                </p>
-              </div>
-            </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full animate-slideRight"></div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Clientes
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gerencie seus clientes
+            </p>
           </div>
           <Button
             onClick={() => {
@@ -224,43 +216,43 @@ export default function ClientesPage() {
         </div>
 
         {/* Busca */}
-        <div className="bg-white rounded-xl shadow-lg p-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
             placeholder="Buscar por nome ou telefone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Lista de Clientes */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {filteredCustomers.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">Nenhum cliente encontrado</p>
+            <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Nome
                   </th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Telefone
                   </th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Email
                   </th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Aniversário
                   </th>
-                  <th className="text-right py-4 px-6 font-semibold text-gray-700">
+                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
                     Ações
                   </th>
                 </tr>
@@ -271,12 +263,12 @@ export default function ClientesPage() {
                     key={customer.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-4">
                       <Link 
                         href={`/admin/clientes/${customer.id}`}
-                        className="flex items-center space-x-3 hover:text-primary-600 transition-colors"
+                        className="flex items-center space-x-3 hover:text-gray-900 transition-colors"
                       >
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex-shrink-0">
+                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                           {customer.photo ? (
                             <Image
                               src={customer.photo}
@@ -286,32 +278,32 @@ export default function ClientesPage() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <Users className="h-5 w-5" />
+                              <Users className="h-4 w-4" />
                             </div>
                           )}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900">
                             {customer.name}
                           </div>
                           {customer.notes && (
-                            <div className="text-sm text-gray-500 mt-1">
+                            <div className="text-xs text-gray-500 mt-0.5">
                               {customer.notes}
                             </div>
                           )}
                         </div>
                       </Link>
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="py-3 px-4 text-sm text-gray-600">
                       {formatPhone(customer.phone)}
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="py-3 px-4 text-sm text-gray-600">
                       {customer.email || '-'}
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="py-3 px-4 text-sm text-gray-600">
                       {customer.birthday ? formatDate(customer.birthday) : '-'}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-4">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           href={`/admin/clientes/${customer.id}`}
@@ -345,18 +337,18 @@ export default function ClientesPage() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <p className="text-sm font-medium text-gray-600">Total de Clientes</p>
-          <p className="text-3xl font-bold text-primary-600 mt-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-xs text-gray-500 uppercase font-medium">Total de Clientes</p>
+          <p className="text-2xl font-semibold text-gray-900 mt-1">
             {customers.length}
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <p className="text-sm font-medium text-gray-600">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-xs text-gray-500 uppercase font-medium">
             Aniversariantes do Mês
           </p>
-          <p className="text-3xl font-bold text-blue-600 mt-2">
+          <p className="text-2xl font-semibold text-gray-900 mt-1">
             {
               customers.filter((c) => {
                 if (!c.birthday) return false;
@@ -367,9 +359,9 @@ export default function ClientesPage() {
             }
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <p className="text-sm font-medium text-gray-600">Com Email</p>
-          <p className="text-3xl font-bold text-green-600 mt-2">
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-xs text-gray-500 uppercase font-medium">Com Email</p>
+          <p className="text-2xl font-semibold text-gray-900 mt-1">
             {customers.filter((c) => c.email).length}
           </p>
         </div>
