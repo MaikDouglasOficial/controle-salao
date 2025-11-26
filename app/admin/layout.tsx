@@ -11,7 +11,7 @@ export default function AdminPanelLayout({
       <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar />
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6 lg:p-8">{children}</div>
+          <div className="pt-16 lg:pt-6 px-3 pb-3 sm:p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </AdminLayout>
