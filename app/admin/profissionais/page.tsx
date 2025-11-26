@@ -295,6 +295,23 @@ export default function ProfessionalsPage() {
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
+                        <button
+                          onClick={() => handleDeleteClick(professional)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Deletar"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Modal de criar/editar profissional */}
       {showModal && (
         <ProfissionalEditarModal
@@ -329,24 +346,6 @@ export default function ProfessionalsPage() {
           onClose={() => { setShowModal(false); setEditingProfessional(null); }}
         />
       )}
-                        <button
-                          onClick={() => handleDeleteClick(professional)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Deletar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-
 
       {/* Modal Confirmar Exclusão */}
       {showDeleteModal && deletingProfessional && (
