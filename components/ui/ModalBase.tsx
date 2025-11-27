@@ -77,7 +77,7 @@ export const ModalBase: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="modal-body flex-1 overflow-y-auto px-6 sm:px-8 py-6 sm:py-8 bg-white">
+        <div className="modal-body flex-1 overflow-y-auto px-6 sm:px-8 py-6 sm:py-8 pb-20 sm:pb-8 bg-white">
           <div className="max-w-full">
             {children}
           </div>
