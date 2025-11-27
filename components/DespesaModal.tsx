@@ -56,13 +56,13 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
       subtitle={despesa ? 'Atualize os dados da despesa abaixo' : 'Preencha os dados para cadastrar uma nova despesa'}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Descrição *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Descrição *</label>
             <input
               type="text"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={description}
               onChange={e => setDescription(e.target.value)}
               required
@@ -72,12 +72,12 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Valor (R$) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Valor (R$) *</label>
             <input
               type="number"
               step="0.01"
               min="0.01"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={amount}
               onChange={e => setAmount(Number(e.target.value))}
               required
@@ -86,9 +86,9 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Categoria *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Categoria *</label>
             <select
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={category}
               onChange={e => setCategory(e.target.value)}
               required
@@ -102,10 +102,10 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Data *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Data *</label>
             <input
               type="date"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={date}
               onChange={e => setDate(e.target.value)}
               required
@@ -113,10 +113,10 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Observações</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Observações</label>
             <textarea
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="Observações adicionais..."
@@ -124,9 +124,9 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </ModalBase>

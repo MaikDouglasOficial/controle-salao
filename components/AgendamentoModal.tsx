@@ -120,15 +120,15 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       subtitle={agendamento ? 'Atualize os dados do agendamento abaixo' : 'Preencha os dados para criar um novo agendamento'}
       size="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative" ref={customerSearchRef}>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Cliente *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Cliente *</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-9 pr-9 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Buscar por nome, CPF ou telefone..."
                 value={customerSearchTerm}
                 onChange={(e) => {
@@ -225,9 +225,9 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
             )}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Serviço *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Serviço *</label>
             <select
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={serviceId}
               onChange={e => setServiceId(Number(e.target.value))}
               required
@@ -239,9 +239,9 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Profissional</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Profissional</label>
             <select
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={professional}
               onChange={e => setProfessional(e.target.value)}
             >
@@ -252,30 +252,31 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Data e Hora *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Data e Hora *</label>
             <input
               type="datetime-local"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={date}
               onChange={e => setDate(e.target.value)}
               required
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Observações</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Observações</label>
             <textarea
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              rows={3}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="Observações do agendamento"
             />
           </div>
         </div>
-        <div className="flex justify-end gap-4 mt-8">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
             Cancelar
           </Button>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" className="w-full sm:w-auto">
             {agendamento ? 'Salvar Alterações' : 'Criar Agendamento'}
           </Button>
         </div>

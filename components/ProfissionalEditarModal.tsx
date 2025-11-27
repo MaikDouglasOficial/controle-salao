@@ -90,7 +90,7 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       subtitle={profissional ? 'Atualize os dados do profissional abaixo' : 'Preencha os dados para cadastrar um novo profissional'}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Upload de Foto */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">Foto do Profissional</label>
@@ -140,11 +140,11 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nome Completo *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome Completo *</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={name}
               onChange={e => setName(e.target.value)}
               required
@@ -152,27 +152,27 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Especialidade</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Especialidade</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={specialty}
               onChange={e => setSpecialty(e.target.value)}
               placeholder="Ex: Cabeleireiro, Manicure, Barbeiro..."
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Telefone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={phone}
               onChange={e => setPhone(e.target.value)}
               placeholder="(00) 00000-0000"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
@@ -193,9 +193,9 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
             </div>
           </div>
         </div>
-  <div className="flex justify-end space-x-4 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
+  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </Modal>

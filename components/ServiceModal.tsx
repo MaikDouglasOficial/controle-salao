@@ -33,12 +33,12 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       subtitle={service ? 'Atualize os dados do serviço abaixo' : 'Preencha os dados para cadastrar um novo serviço'}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nome do Serviço *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome do Serviço *</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={name}
               onChange={e => setName(e.target.value)}
               required
@@ -46,12 +46,12 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Preço (R$) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Preço (R$) *</label>
             <input
               type="number"
               step="0.01"
               min="0"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={price}
               onChange={e => setPrice(Number(e.target.value))}
               required
@@ -59,11 +59,11 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Duração (min) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Duração (min) *</label>
             <input
               type="number"
               min="0"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={duration}
               onChange={e => setDuration(Number(e.target.value))}
               required
@@ -71,19 +71,19 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Descrição</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Descrição</label>
             <textarea
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              rows={3}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Descrição detalhada do serviço..."
             />
           </div>
         </div>
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </ModalBase>

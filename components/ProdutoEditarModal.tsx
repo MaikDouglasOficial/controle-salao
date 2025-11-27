@@ -90,7 +90,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
       subtitle={produto ? 'Atualize os dados do produto abaixo' : 'Preencha os dados para cadastrar um novo produto'}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Upload de Foto */}
         <div className="flex flex-col items-center space-y-3 pb-4 border-b">
           <div className="relative">
@@ -138,11 +138,11 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
           <p className="text-xs text-gray-500">JPG, PNG ou WEBP (máx. 5MB)</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nome do Produto *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome do Produto *</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={nome}
               onChange={e => setNome(e.target.value)}
               required
@@ -150,21 +150,21 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">SKU</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">SKU</label>
             <input
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={sku}
               onChange={e => setSku(e.target.value)}
               placeholder="Ex: 12345"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Preço (R$) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Preço (R$) *</label>
             <input
               type="number"
               step="0.01"
               min="0"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={preco}
               onChange={e => setPreco(Number(e.target.value))}
               required
@@ -172,11 +172,11 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Estoque *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Estoque *</label>
             <input
               type="number"
               min="0"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={estoque}
               onChange={e => setEstoque(Number(e.target.value))}
               required
@@ -184,19 +184,19 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Descrição</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Descrição</label>
             <textarea
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              rows={3}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={descricao}
               onChange={e => setDescricao(e.target.value)}
               placeholder="Descrição detalhada do produto..."
             />
           </div>
         </div>
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit">Salvar</Button>
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </Modal>
