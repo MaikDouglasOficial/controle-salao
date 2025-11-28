@@ -412,61 +412,61 @@ export default function DespesasPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Data
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Descrição
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Categoria
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Valor
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {filteredExpenses.map((expense) => (
                   <tr
                     key={expense.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-3 px-4 text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {formatDate(expense.date)}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="px-4 py-3">
                       <div className="text-sm font-medium text-gray-900">
                         {expense.description}
                       </div>
                       {expense.notes && (
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 mt-1">
                           {expense.notes}
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(
                           expense.category
                         )}`}
                       >
                         {expense.category}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
                       <span className="text-sm font-semibold text-red-600">
                         {formatCurrency(expense.amount)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-1">
+                    <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium">
+                      <div className="flex items-center justify-center space-x-1">
                         <Button
                           onClick={() => handleEdit(expense)}
                           variant="ghost"

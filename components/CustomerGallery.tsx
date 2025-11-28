@@ -137,6 +137,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            capture="environment"
             onChange={handlePhotoSelect}
             className="hidden"
             id="gallery-upload"

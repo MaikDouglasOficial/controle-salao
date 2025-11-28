@@ -212,44 +212,32 @@ export default function ProfessionalsPage() {
       </div>
 
       {/* Lista de Profissionais */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                  Nome
-                </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                  Especialidade
-                </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                  Telefone
-                </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                  Email
-                </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                  Status
-                </th>
-                <th className="text-right py-4 px-6 font-semibold text-gray-700">
-                  Ações
-                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especialidade</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredProfessionals.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
-                    <p className="text-gray-500">Nenhum profissional encontrado</p>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                    Nenhum profissional encontrado
                   </td>
                 </tr>
               ) : (
                 filteredProfessionals.map((professional) => (
                   <tr key={professional.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-6">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex-shrink-0">
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                           {professional.photo ? (
                             <Image
                               src={professional.photo}
@@ -266,44 +254,42 @@ export default function ProfessionalsPage() {
                         <div className="font-medium text-gray-900">{professional.name}</div>
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {professional.specialty || '-'}
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {professional.phone || '-'}
                     </td>
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {professional.email || '-'}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {professional.active ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                          <UserCheck size={14} />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          <UserCheck size={12} />
                           Ativo
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
-                          <UserX size={14} />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                          <UserX size={12} />
                           Inativo
                         </span>
                       )}
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center space-x-1">
+                        <Button
                           onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
-                          className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
+                          variant="ghost"
+                          size="sm"
+                          icon={Edit2}
+                        />
+                        <Button
                           onClick={() => handleDeleteClick(professional)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Deletar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                          variant="ghost"
+                          size="sm"
+                          icon={Trash2}
+                        />
                       </div>
                     </td>
                   </tr>

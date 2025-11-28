@@ -240,38 +240,38 @@ export default function ClientesPage() {
       {/* Lista de Clientes */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {filteredCustomers.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="px-4 py-8 text-center">
             <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nome
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Telefone
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Aniversário
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-3 px-4">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <Link 
                         href={`/admin/clientes/${customer.id}`}
                         className="flex items-center space-x-3 hover:text-gray-900 transition-colors"
@@ -302,17 +302,17 @@ export default function ClientesPage() {
                         </div>
                       </Link>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {formatPhone(customer.phone)}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {customer.email || '-'}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {customer.birthday ? formatDate(customer.birthday) : '-'}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium">
+                      <div className="flex items-center justify-center space-x-2">
                         <Link
                           href={`/admin/clientes/${customer.id}`}
                           className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
