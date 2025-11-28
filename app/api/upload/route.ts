@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { put } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,10 +14,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar tipo de arquivo
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Tipo de arquivo inválido. Use JPEG, PNG ou WEBP' },
+        { error: 'Tipo de arquivo inválido. Use JPEG, PNG, WEBP ou GIF' },
         { status: 400 }
       );
     }
@@ -31,23 +30,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     // Gerar nome único
     const timestamp = Date.now();
     const originalName = file.name.replace(/\s+/g, '-').toLowerCase();
     const filename = `${timestamp}-${originalName}`;
-    
-    // Caminho para salvar
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    const filepath = join(uploadDir, filename);
 
-    // Salvar arquivo
-    await writeFile(filepath, buffer);
+    // Upload para Vercel Blob
+    const blob = await put(filename, file, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
 
     // Retornar URL pública
-    const url = `/uploads/${filename}`;
+    const url = blob.url;
 
     return NextResponse.json({ url }, { status: 200 });
   } catch (error) {

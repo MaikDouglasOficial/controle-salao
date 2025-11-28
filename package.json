@@ -24,6 +24,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^5.18.0",
     "@swc/helpers": "^0.5.17",
+    "@vercel/blob": "^2.0.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
