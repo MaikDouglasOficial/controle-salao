@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CustomerGallery from '@/components/CustomerGallery';
+import { useToast } from '@/hooks/useToast';
 
 interface Customer {
   id: number;
@@ -63,6 +65,7 @@ interface Sale {
 }
 
 export default function ClienteDetalhesPage() {
+  const { success, error } = useToast();
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
@@ -73,6 +76,7 @@ export default function ClienteDetalhesPage() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
 
   // Filtros
   const [filterType, setFilterType] = useState<'all' | 'appointments' | 'sales'>('all');
@@ -87,10 +91,11 @@ export default function ClienteDetalhesPage() {
   const fetchCustomerData = async () => {
     setLoading(true);
     try {
-      const [customerRes, appointmentsRes, salesRes] = await Promise.all([
+      const [customerRes, appointmentsRes, salesRes, galleryRes] = await Promise.all([
         fetch(`/api/customers/${customerId}`),
         fetch(`/api/appointments?customerId=${customerId}`),
         fetch(`/api/sales?customerId=${customerId}`),
+        fetch(`/api/customers/${customerId}/gallery`),
       ]);
 
       if (customerRes.ok) {
@@ -107,8 +112,13 @@ export default function ClienteDetalhesPage() {
         const salesData = await salesRes.json();
         setSales(salesData);
       }
+
+      if (galleryRes.ok) {
+        const galleryData = await galleryRes.json();
+        setGalleryPhotos(galleryData);
+      }
     } catch (error) {
-      console.error('Erro ao buscar dados do cliente:', error);
+      console.error('Erro ao buscar dados:', error);
     } finally {
       setLoading(false);
     }
@@ -138,14 +148,14 @@ export default function ClienteDetalhesPage() {
         await fetchCustomerData();
         setShowEditModal(false);
         setEditingCustomer(null);
-        alert('Cliente atualizado com sucesso!');
+        success('Cliente atualizado com sucesso!');
       } else {
-        const error = await response.json();
-        alert(error.error || 'Erro ao atualizar cliente');
+        const err = await response.json();
+        error(err.error || 'Erro ao atualizar cliente');
       }
-    } catch (error) {
-      console.error('Erro ao atualizar cliente:', error);
-      alert('Erro ao atualizar cliente');
+    } catch (err) {
+      console.error('Erro ao atualizar cliente:', err);
+      error('Erro ao atualizar cliente');
     }
   };
 
@@ -437,6 +447,15 @@ export default function ClienteDetalhesPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Galeria de Fotos */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <CustomerGallery
+          customerId={parseInt(customerId)}
+          photos={galleryPhotos}
+          onPhotosUpdate={fetchCustomerData}
+        />
       </div>
 
       {/* Filtros */}

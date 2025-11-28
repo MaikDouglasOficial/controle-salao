@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 
 interface Professional {
   id: number;
@@ -15,6 +16,7 @@ interface Professional {
 }
 
 export default function EditarProfissionalPage() {
+  const { success, error } = useToast();
   const router = useRouter();
   const params = useParams();
   const [loading, setLoading] = useState(false);
@@ -51,9 +53,9 @@ export default function EditarProfissionalPage() {
         specialty: data.specialty || '',
         active: data.active,
       });
-    } catch (error) {
-      console.error('Erro ao buscar profissional:', error);
-      alert('Erro ao carregar dados do profissional');
+    } catch (err) {
+      console.error('Erro ao buscar profissional:', err);
+      error('Erro ao carregar dados do profissional');
       router.push('/admin/profissionais');
     } finally {
       setFetchLoading(false);
@@ -64,7 +66,7 @@ export default function EditarProfissionalPage() {
     e.preventDefault();
     
     if (!formData.name.trim()) {
-      alert('Nome é obrigatório');
+      error('Nome é obrigatório');
       return;
     }
 
@@ -81,15 +83,15 @@ export default function EditarProfissionalPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao atualizar profissional');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao atualizar profissional');
       }
 
-      alert('Profissional atualizado com sucesso!');
+      success('Profissional atualizado com sucesso!');
       router.push('/admin/profissionais');
-    } catch (error: any) {
-      console.error('Erro ao atualizar profissional:', error);
-      alert(error.message || 'Erro ao atualizar profissional');
+    } catch (err: any) {
+      console.error('Erro ao atualizar profissional:', err);
+      error(err.message || 'Erro ao atualizar profissional');
     } finally {
       setLoading(false);
     }

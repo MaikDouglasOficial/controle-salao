@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { TrendingUp, Download, Calendar } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 
 export default function RelatoriosPage() {
+  const { info } = useToast();
   const [reportType, setReportType] = useState('vendas');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
   const generateReport = () => {
-    alert('Funcionalidade de geração de relatórios em desenvolvimento');
+    info('Funcionalidade de geração de relatórios em desenvolvimento');
   };
 
   return (

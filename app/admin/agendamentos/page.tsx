@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { Button } from "@/components/ui/Button";
 import { Plus, Calendar, CheckCircle, XCircle, Trash2, ShoppingCart, Clock, User, Scissors, Edit } from "lucide-react";
@@ -30,6 +31,7 @@ interface Appointment {
 }
 
 export default function AgendamentosPage() {
+  const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -88,15 +90,15 @@ export default function AgendamentosPage() {
       if (response.ok) {
         setShowModal(false);
         setEditingAppointment(null);
-        alert(isEditing ? 'Agendamento atualizado com sucesso!' : 'Agendamento criado com sucesso!');
+        toast.success(isEditing ? 'Agendamento atualizado com sucesso!' : 'Agendamento criado com sucesso!');
         fetchData(); // Recarregar lista
       } else {
         console.error('Erro da API:', data);
-        alert(data.error || `Erro ao ${isEditing ? 'atualizar' : 'criar'} agendamento`);
+        toast.error(data.error || `Erro ao ${isEditing ? 'atualizar' : 'criar'} agendamento`);
       }
     } catch (error) {
       console.error('Erro ao salvar agendamento:', error);
-      alert('Erro ao salvar agendamento. Verifique o console para mais detalhes.');
+      toast.error('Erro ao salvar agendamento. Verifique o console para mais detalhes.');
     }
   }
 
@@ -106,7 +108,12 @@ export default function AgendamentosPage() {
   }
 
   async function handleConfirmar(id: number) {
-    if (!confirm('Confirmar este agendamento?\n\nApós confirmar, você poderá finalizar o serviço quando for realizado.')) return;
+    const confirmed = await toast.confirm({
+      title: 'Confirmar agendamento',
+      message: 'Confirmar este agendamento?\n\nApós confirmar, você poderá finalizar o serviço quando for realizado.',
+      type: 'info'
+    });
+    if (!confirmed) return;
     
     try {
       const appointment = appointments.find(a => a.id === id);
@@ -114,7 +121,7 @@ export default function AgendamentosPage() {
 
       // Validar que está agendado
       if (appointment.status !== 'agendado') {
-        alert('ATENÇÃO: Este agendamento já foi processado!');
+        toast.error('ATENÇÃO: Este agendamento já foi processado!');
         return;
       }
 
@@ -128,19 +135,24 @@ export default function AgendamentosPage() {
       });
 
       if (response.ok) {
-        alert('Agendamento confirmado!\n\nQuando o serviço for realizado, clique em "Finalizar Serviço".');
+        toast.success('Agendamento confirmado!\n\nQuando o serviço for realizado, clique em "Finalizar Serviço".');
         fetchData();
       } else {
-        alert('ERRO: Não foi possível confirmar agendamento');
+        toast.error('ERRO: Não foi possível confirmar agendamento');
       }
     } catch (error) {
       console.error('Erro:', error);
-      alert('ERRO: Não foi possível confirmar agendamento');
+      toast.error('ERRO: Não foi possível confirmar agendamento');
     }
   }
 
   async function handleConcluir(id: number) {
-    if (!confirm('Confirmar que o serviço foi finalizado?\n\nApós confirmar, você poderá ir para o PDV para faturamento.')) return;
+    const confirmed = await toast.confirm({
+      title: 'Finalizar serviço',
+      message: 'Confirmar que o serviço foi finalizado?\n\nApós confirmar, você poderá ir para o PDV para faturamento.',
+      type: 'info'
+    });
+    if (!confirmed) return;
     
     try {
       const appointment = appointments.find(a => a.id === id);
@@ -148,7 +160,7 @@ export default function AgendamentosPage() {
 
       // Validar que está confirmado
       if (appointment.status !== 'confirmado') {
-        alert('ATENÇÃO: Este agendamento precisa estar confirmado primeiro!');
+        toast.error('ATENÇÃO: Este agendamento precisa estar confirmado primeiro!');
         return;
       }
 
@@ -162,19 +174,24 @@ export default function AgendamentosPage() {
       });
 
       if (response.ok) {
-        alert('Serviço finalizado com sucesso!\n\nAgora você pode ir para o PDV para faturamento.');
+        toast.success('Serviço finalizado com sucesso!\n\nAgora você pode ir para o PDV para faturamento.');
         fetchData();
       } else {
-        alert('ERRO: Não foi possível finalizar serviço');
+        toast.error('ERRO: Não foi possível finalizar serviço');
       }
     } catch (error) {
       console.error('Erro:', error);
-      alert('ERRO: Não foi possível finalizar serviço');
+      toast.error('ERRO: Não foi possível finalizar serviço');
     }
   }
 
   async function handleCancelar(id: number) {
-    if (!confirm('Deseja cancelar este agendamento?')) return;
+    const confirmed = await toast.confirm({
+      title: 'Cancelar agendamento',
+      message: 'Deseja cancelar este agendamento?',
+      type: 'warning'
+    });
+    if (!confirmed) return;
     
     try {
       const appointment = appointments.find(a => a.id === id);
@@ -190,19 +207,24 @@ export default function AgendamentosPage() {
       });
 
       if (response.ok) {
-        alert('Agendamento cancelado!');
+        toast.success('Agendamento cancelado!');
         fetchData();
       } else {
-        alert('Erro ao cancelar agendamento');
+        toast.error('Erro ao cancelar agendamento');
       }
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao cancelar agendamento');
+      toast.error('Erro ao cancelar agendamento');
     }
   }
 
   async function handleExcluir(id: number) {
-    if (!confirm('Deseja realmente excluir este agendamento? Esta ação não pode ser desfeita.')) return;
+    const confirmed = await toast.confirm({
+      title: 'Excluir agendamento',
+      message: 'Deseja realmente excluir este agendamento? Esta ação não pode ser desfeita.',
+      type: 'danger'
+    });
+    if (!confirmed) return;
     
     try {
       const response = await fetch(`/api/appointments?id=${id}`, {
@@ -210,21 +232,21 @@ export default function AgendamentosPage() {
       });
 
       if (response.ok) {
-        alert('Agendamento excluído!');
+        toast.success('Agendamento excluído!');
         fetchData();
       } else {
-        alert('Erro ao excluir agendamento');
+        toast.error('Erro ao excluir agendamento');
       }
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao excluir agendamento');
+      toast.error('Erro ao excluir agendamento');
     }
   }
 
   function handleIrParaPDV(appointment: Appointment) {
     // Verificar se o serviço foi concluído
     if (appointment.status !== 'concluido') {
-      alert('O serviço precisa ser finalizado antes de ir para o PDV!');
+      toast.error('O serviço precisa ser finalizado antes de ir para o PDV!');
       return;
     }
 

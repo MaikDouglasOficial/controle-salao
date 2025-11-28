@@ -6,6 +6,7 @@ import { Plus, Search, Pencil, Trash2, Package, Camera, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface Product {
   id: number;
@@ -18,6 +19,7 @@ interface Product {
 }
 
 export default function ProdutosPage() {
+  const { success, error, confirm } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,7 +52,12 @@ export default function ProdutosPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Deseja realmente excluir este produto?')) return;
+    const confirmed = await confirm({
+      title: 'Excluir Produto',
+      message: 'Deseja realmente excluir este produto?',
+      type: 'danger'
+    });
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/products?id=${id}`, {
@@ -58,13 +65,14 @@ export default function ProdutosPage() {
       });
 
       if (response.ok) {
+        success('Produto excluído com sucesso');
         fetchProducts();
       } else {
-        alert('Erro ao deletar produto');
+        error('Erro ao deletar produto');
       }
-    } catch (error) {
-      console.error('Erro ao deletar produto:', error);
-      alert('Erro ao deletar produto');
+    } catch (err) {
+      console.error('Erro ao deletar produto:', err);
+      error('Erro ao deletar produto');
     }
   };
 
@@ -206,14 +214,15 @@ export default function ProdutosPage() {
                 })
               });
               if (response.ok) {
+                success('Produto atualizado com sucesso');
                 setShowEditModal(false);
                 setEditingProduct(null);
                 fetchProducts();
               } else {
-                alert('Erro ao atualizar produto');
+                error('Erro ao atualizar produto');
               }
-            } catch (error) {
-              alert('Erro ao atualizar produto');
+            } catch (err) {
+              error('Erro ao atualizar produto');
             }
           }}
           onClose={() => {
@@ -240,13 +249,14 @@ export default function ProdutosPage() {
                 })
               });
               if (response.ok) {
+                success('Produto criado com sucesso');
                 setShowNewModal(false);
                 fetchProducts();
               } else {
-                alert('Erro ao criar produto');
+                error('Erro ao criar produto');
               }
-            } catch (error) {
-              alert('Erro ao criar produto');
+            } catch (err) {
+              error('Erro ao criar produto');
             }
           }}
           onClose={() => setShowNewModal(false)}

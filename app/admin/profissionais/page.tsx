@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Users } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface Professional {
   id: number;
@@ -18,6 +19,7 @@ interface Professional {
 }
 
 export default function ProfessionalsPage() {
+  const { success, error } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,10 +78,10 @@ export default function ProfessionalsPage() {
       await fetchProfessionals();
       setShowDeleteModal(false);
       setDeletingProfessional(null);
-      alert('Profissional removido com sucesso!');
+      success('Profissional removido com sucesso!');
     } catch (error: any) {
       console.error('Erro ao deletar profissional:', error);
-      alert(error.message || 'Erro ao deletar profissional');
+      error(error.message || 'Erro ao deletar profissional');
     }
   };
 
@@ -338,9 +340,9 @@ export default function ProfessionalsPage() {
               await fetchProfessionals();
               setShowModal(false);
               setEditingProfessional(null);
-              alert(editingProfessional ? 'Profissional atualizado com sucesso!' : 'Profissional cadastrado com sucesso!');
+              success(editingProfessional ? 'Profissional atualizado com sucesso!' : 'Profissional cadastrado com sucesso!');
             } catch (error: any) {
-              alert(error.message || 'Erro ao salvar profissional.');
+              error(error.message || 'Erro ao salvar profissional.');
             }
           }}
           onClose={() => { setShowModal(false); setEditingProfessional(null); }}

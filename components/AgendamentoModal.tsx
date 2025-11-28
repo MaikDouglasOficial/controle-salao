@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { useState, useEffect, useRef } from 'react';
 import { Search, X, User } from 'lucide-react';
 import Image from 'next/image';
+import { useToast } from '@/hooks/useToast';
 
 interface Customer {
   id: number;
@@ -30,6 +31,7 @@ interface AgendamentoModalProps {
 }
 
 export default function AgendamentoModal({ agendamento, customers, services, professionals, onSave, onClose }: AgendamentoModalProps) {
+  const { warning } = useToast();
   const [customerId, setCustomerId] = useState<number | ''>(agendamento?.customerId || '');
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
@@ -97,7 +99,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
     
     // Validação
     if (!customerId || !serviceId || !date) {
-      alert('Por favor, preencha todos os campos obrigatórios');
+      warning('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
@@ -121,7 +123,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div className="relative" ref={customerSearchRef}>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Cliente *</label>
             <div className="relative">
@@ -224,55 +226,103 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
               </div>
             )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Serviço *</label>
-            <select
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              value={serviceId}
-              onChange={e => setServiceId(Number(e.target.value))}
-              required
-            >
-              <option value="">Selecione o serviço</option>
-              {services.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Serviço *</label>
+              <select
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={serviceId}
+                onChange={e => setServiceId(Number(e.target.value))}
+                required
+              >
+                <option value="">Selecione o serviço</option>
+                {services.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Profissional</label>
+              <select
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={professional}
+                onChange={e => setProfessional(e.target.value)}
+              >
+                <option value="">Selecione o profissional</option>
+                {professionals.map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Profissional</label>
-            <select
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              value={professional}
-              onChange={e => setProfessional(e.target.value)}
-            >
-              <option value="">Selecione o profissional</option>
-              {professionals.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Data *</label>
+              <input
+                type="date"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={date.split('T')[0] || ''}
+                onChange={e => {
+                  const time = date.split('T')[1] || '09:00';
+                  setDate(`${e.target.value}T${time}`);
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Horário *</label>
+              <select
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={date.split('T')[1] || '09:00'}
+                onChange={e => {
+                  const dateOnly = date.split('T')[0] || new Date().toISOString().split('T')[0];
+                  setDate(`${dateOnly}T${e.target.value}`);
+                }}
+                required
+              >
+                <option value="08:00">08:00</option>
+                <option value="08:30">08:30</option>
+                <option value="09:00">09:00</option>
+                <option value="09:30">09:30</option>
+                <option value="10:00">10:00</option>
+                <option value="10:30">10:30</option>
+                <option value="11:00">11:00</option>
+                <option value="11:30">11:30</option>
+                <option value="12:00">12:00</option>
+                <option value="12:30">12:30</option>
+                <option value="13:00">13:00</option>
+                <option value="13:30">13:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+                <option value="15:30">15:30</option>
+                <option value="16:00">16:00</option>
+                <option value="16:30">16:30</option>
+                <option value="17:00">17:00</option>
+                <option value="17:30">17:30</option>
+                <option value="18:00">18:00</option>
+                <option value="18:30">18:30</option>
+                <option value="19:00">19:00</option>
+                <option value="19:30">19:30</option>
+                <option value="20:00">20:00</option>
+              </select>
+            </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Data e Hora *</label>
-            <input
-              type="datetime-local"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Observações</label>
             <textarea
               rows={3}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="Observações do agendamento"
             />
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
             Cancelar
           </Button>

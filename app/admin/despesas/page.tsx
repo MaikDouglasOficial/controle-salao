@@ -5,6 +5,7 @@ import { Plus, TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X } f
 import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface Expense {
   id: number;
@@ -16,6 +17,7 @@ interface Expense {
 }
 
 export default function DespesasPage() {
+  const { success, error, confirm } = useToast();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,13 @@ export default function DespesasPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Tem certeza que deseja excluir esta despesa?')) {
+    const confirmed = await confirm({
+      title: 'Excluir Despesa',
+      message: 'Tem certeza que deseja excluir esta despesa?',
+      type: 'danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -115,13 +123,14 @@ export default function DespesasPage() {
       });
 
       if (response.ok) {
+        success('Despesa excluída com sucesso!');
         fetchExpenses();
       } else {
-        alert('Erro ao deletar despesa');
+        error('Erro ao deletar despesa');
       }
-    } catch (error) {
-      console.error('Erro ao deletar despesa:', error);
-      alert('Erro ao deletar despesa');
+    } catch (err) {
+      console.error('Erro ao deletar despesa:', err);
+      error('Erro ao deletar despesa');
     }
   };
 
@@ -142,17 +151,18 @@ export default function DespesasPage() {
       });
 
       if (response.ok) {
+        success(`Despesa ${isEdit ? 'atualizada' : 'criada'} com sucesso!`);
         setShowEditModal(false);
         setShowCreateModal(false);
         setEditingExpense(null);
         fetchExpenses();
       } else {
-        const error = await response.json();
-        alert(error.error || `Erro ao ${isEdit ? 'atualizar' : 'criar'} despesa`);
+        const err = await response.json();
+        error(err.error || `Erro ao ${isEdit ? 'atualizar' : 'criar'} despesa`);
       }
-    } catch (error) {
-      console.error('Erro ao salvar despesa:', error);
-      alert('Erro ao salvar despesa');
+    } catch (err) {
+      console.error('Erro ao salvar despesa:', err);
+      error('Erro ao salvar despesa');
     }
   };
 

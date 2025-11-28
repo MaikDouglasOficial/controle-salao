@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/hooks/useToast';
 
 interface Customer {
   id: number;
@@ -63,6 +64,7 @@ interface Sale {
 }
 
 export default function ClienteDetalhesPage() {
+  const { success, error } = useToast();
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
@@ -138,14 +140,14 @@ export default function ClienteDetalhesPage() {
         await fetchCustomerData();
         setShowEditModal(false);
         setEditingCustomer(null);
-        alert('Cliente atualizado com sucesso!');
+        success('Cliente atualizado com sucesso!');
       } else {
-        const error = await response.json();
-        alert(error.error || 'Erro ao atualizar cliente');
+        const err = await response.json();
+        error(err.error || 'Erro ao atualizar cliente');
       }
-    } catch (error) {
-      console.error('Erro ao atualizar cliente:', error);
-      alert('Erro ao atualizar cliente');
+    } catch (err) {
+      console.error('Erro ao atualizar cliente:', err);
+      error('Erro ao atualizar cliente');
     }
   };
 

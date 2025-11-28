@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, Calendar, DollarSign, User, Trash2, Filter } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 interface Sale {
   id: number;
@@ -34,6 +35,7 @@ interface Sale {
 }
 
 export default function VendasPage() {
+  const { success, error, confirm } = useToast();
   const [sales, setSales] = useState<Sale[]>([]);
   const [filteredSales, setFilteredSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,7 +136,13 @@ export default function VendasPage() {
   }, [sales, selectedPayment, startDate, endDate, selectedMonth, selectedYear]);
 
   const handleDeleteSale = async (id: number) => {
-    if (!confirm('Tem certeza que deseja excluir esta venda?')) {
+    const confirmed = await confirm({
+      title: 'Excluir venda',
+      message: 'Tem certeza que deseja excluir esta venda?',
+      type: 'danger'
+    });
+    
+    if (!confirmed) {
       return;
     }
 
@@ -146,13 +154,14 @@ export default function VendasPage() {
       });
 
       if (response.ok) {
+        success('Venda excluída com sucesso!');
         fetchSales();
       } else {
-        alert('Erro ao deletar venda');
+        error('Erro ao deletar venda');
       }
-    } catch (error) {
-      console.error('Erro ao deletar venda:', error);
-      alert('Erro ao deletar venda');
+    } catch (err) {
+      console.error('Erro ao deletar venda:', err);
+      error('Erro ao deletar venda');
     }
   };
 

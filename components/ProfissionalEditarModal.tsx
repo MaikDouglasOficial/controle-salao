@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 
 interface ProfissionalEditarModalProps {
   profissional?: {
@@ -19,6 +20,7 @@ interface ProfissionalEditarModalProps {
 }
 
 export default function ProfissionalEditarModal({ profissional, onSave, onClose }: ProfissionalEditarModalProps) {
+  const { error } = useToast();
   const [name, setName] = useState<string>(profissional?.name || '');
   const [specialty, setSpecialty] = useState<string>(profissional?.specialty || '');
   const [phone, setPhone] = useState<string>(profissional?.phone || '');
@@ -34,12 +36,12 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem deve ter no máximo 5MB');
+      error('A imagem deve ter no máximo 5MB');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem válida');
+      error('Por favor, selecione uma imagem válida');
       return;
     }
 
@@ -61,9 +63,9 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       const data = await response.json();
       setPhoto(data.url);
       setPhotoPreview(data.url);
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload da imagem. Tente novamente.');
+    } catch (err) {
+      console.error('Erro ao fazer upload:', err);
+      error('Erro ao fazer upload da imagem. Tente novamente.');
     } finally {
       setUploading(false);
     }

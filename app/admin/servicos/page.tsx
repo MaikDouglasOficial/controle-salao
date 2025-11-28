@@ -6,6 +6,7 @@ import { Plus, Search, Scissors, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ServiceModal from '@/components/ServiceModal';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface Service {
   id: number;
@@ -16,6 +17,7 @@ interface Service {
 }
 
 export default function ServicosPage() {
+  const { success, error, confirm } = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -62,16 +64,21 @@ export default function ServicosPage() {
         setEditingService(null);
         fetchServices();
       } else {
-        alert('Erro ao atualizar serviço');
+        error('Erro ao atualizar serviço');
       }
-    } catch (error) {
-      console.error('Erro ao atualizar serviço:', error);
-      alert('Erro ao atualizar serviço');
+    } catch (err) {
+      console.error('Erro ao atualizar serviço:', err);
+      error('Erro ao atualizar serviço');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Deseja realmente excluir este serviço?')) return;
+    const confirmed = await confirm({
+      title: 'Confirmar exclusão',
+      message: 'Deseja realmente excluir este serviço?',
+      type: 'danger'
+    });
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/services?id=${id}`, {
@@ -79,13 +86,14 @@ export default function ServicosPage() {
       });
 
       if (response.ok) {
+        success('Serviço excluído com sucesso');
         fetchServices();
       } else {
-        alert('Erro ao deletar serviço');
+        error('Erro ao deletar serviço');
       }
-    } catch (error) {
-      console.error('Erro ao deletar serviço:', error);
-      alert('Erro ao deletar serviço');
+    } catch (err) {
+      console.error('Erro ao deletar serviço:', err);
+      error('Erro ao deletar serviço');
     }
   };
 
@@ -254,14 +262,15 @@ export default function ServicosPage() {
                 })
               });
               if (response.ok) {
+                success('Serviço atualizado com sucesso');
                 setShowEditModal(false);
                 setEditingService(null);
                 fetchServices();
               } else {
-                alert('Erro ao atualizar serviço');
+                error('Erro ao atualizar serviço');
               }
-            } catch (error) {
-              alert('Erro ao atualizar serviço');
+            } catch (err) {
+              error('Erro ao atualizar serviço');
             }
           }}
           onClose={() => {
@@ -288,13 +297,14 @@ export default function ServicosPage() {
                 })
               });
               if (response.ok) {
+                success('Serviço criado com sucesso');
                 setShowNewModal(false);
                 fetchServices();
               } else {
-                alert('Erro ao criar serviço');
+                error('Erro ao criar serviço');
               }
-            } catch (error) {
-              alert('Erro ao criar serviço');
+            } catch (err) {
+              error('Erro ao criar serviço');
             }
           }}
           onClose={() => setShowNewModal(false)}

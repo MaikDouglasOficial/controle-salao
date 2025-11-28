@@ -34,6 +34,18 @@ model Customer {
   updatedAt     DateTime      @updatedAt
   appointments  Appointment[]
   sales         Sale[]
+  gallery       CustomerGallery[]
+}
+
+// Modelo de Galeria de Fotos do Cliente
+model CustomerGallery {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  photoUrl    String
+  description String?
+  serviceDate DateTime? // Data do serviço realizado
+  createdAt   DateTime @default(now())
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 // Modelo de Profissional

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/hooks/useToast';
 
 import { Plus, Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
@@ -20,6 +21,7 @@ interface Customer {
 }
 
 export default function ClientesPage() {
+  const toast = useToast();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,13 +77,13 @@ export default function ClientesPage() {
 
     // Validar tamanho (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Arquivo muito grande. Máximo 5MB');
+      toast.error('Arquivo muito grande. Máximo 5MB');
       return;
     }
 
     // Validar tipo
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem');
+      toast.error('Por favor, selecione uma imagem');
       return;
     }
 
@@ -101,11 +103,11 @@ export default function ClientesPage() {
         setPhotoPreview(url);
       } else {
         const error = await response.json();
-        alert(error.error || 'Erro ao fazer upload');
+        toast.error(error.error || 'Erro ao fazer upload');
       }
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload da foto');
+      toast.error('Erro ao fazer upload da foto');
     } finally {
       setUploading(false);
     }
@@ -143,18 +145,24 @@ export default function ClientesPage() {
         setEditingCustomer(null);
         setForm(null);
         setPhotoPreview(null);
-        alert(editingCustomer ? 'Cliente atualizado com sucesso!' : 'Cliente criado com sucesso!');
+        toast.success(editingCustomer ? 'Cliente atualizado com sucesso!' : 'Cliente criado com sucesso!');
       } else {
         const error = await response.json();
-        alert(error.error || 'Erro ao salvar cliente');
+        toast.error(error.error || 'Erro ao salvar cliente');
       }
     } catch (error) {
-      alert('Erro ao salvar cliente');
+      toast.error('Erro ao salvar cliente');
     }
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`ATENÇÃO: Tem certeza que deseja excluir o cliente "${name}"?\n\nEsta ação não pode ser desfeita e irá remover:\n• Todos os agendamentos\n• Histórico de vendas\n• Todas as informações do cliente`)) {
+    const confirmed = await toast.confirm({
+      title: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir o cliente "${name}"?\n\nEsta ação não pode ser desfeita e irá remover:\n• Todos os agendamentos\n• Histórico de vendas\n• Todas as informações do cliente`,
+      type: 'warning'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -164,15 +172,15 @@ export default function ClientesPage() {
       });
 
       if (response.ok) {
-        alert('Cliente excluído com sucesso!');
+        toast.success('Cliente excluído com sucesso!');
         await fetchCustomers();
       } else {
         const error = await response.json();
-        alert(`ERRO: ${error.error || 'Erro desconhecido'}`);
+        toast.error(error.error || 'Erro desconhecido');
       }
     } catch (error) {
       console.error('Erro ao excluir cliente:', error);
-      alert('ERRO: Não foi possível excluir cliente. Tente novamente.');
+      toast.error('Não foi possível excluir cliente. Tente novamente.');
     }
   };
 
@@ -380,123 +388,124 @@ export default function ClientesPage() {
           subtitle={editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente'}
           size="md"
           footer={
-            <>
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
               <Button variant="secondary" type="button" onClick={() => {
                 setShowModal(false);
                 setEditingCustomer(null);
                 setForm(null);
-              }}>
+              }} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button type="submit" form="cliente-form">
+              <Button type="submit" form="cliente-form" className="w-full sm:w-auto">
                 {editingCustomer ? 'Salvar' : 'Cadastrar'}
               </Button>
-            </>
+            </div>
           }
         >
           <form id="cliente-form" onSubmit={handleSaveCustomer} className="space-y-4">
             {/* Upload de Foto */}
-            <div className="flex flex-col items-center space-y-3 pb-4 border-b">
-              <div className="relative">
-                {photoPreview ? (
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary-100">
-                    <Image
-                      src={photoPreview}
-                      alt="Foto do cliente"
-                      fill
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemovePhoto}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                      title="Remover foto"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-gray-400" />
-                  </div>
-                )}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Cliente</label>
+              <div className="flex items-center gap-4">
+                <div className="relative flex-shrink-0">
+                  {photoPreview ? (
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                      <Image
+                        src={photoPreview}
+                        alt="Foto do cliente"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                      <Camera className="h-8 w-8 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    id="photo-upload"
+                  />
+                  <label
+                    htmlFor="photo-upload"
+                    className={`inline-block cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      uploading
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {uploading ? 'Enviando...' : 'Adicionar Foto'}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
+                </div>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="photo-upload"
-              />
-              <label
-                htmlFor="photo-upload"
-                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploading
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-                }`}
-              >
-                {uploading ? 'Enviando...' : photoPreview ? 'Trocar Foto' : 'Adicionar Foto'}
-              </label>
-              <p className="text-xs text-gray-500">JPG, PNG ou WEBP (máx. 5MB)</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome Completo *</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={form?.nome || ''}
                   onChange={e => setForm((f: any) => ({ ...f, nome: e.target.value }))}
                   required
-                  placeholder="Ex: João Silva"
+                  placeholder="Ex: Maria Silva"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  value={form?.telefone || ''}
-                  onChange={e => setForm((f: any) => ({ ...f, telefone: e.target.value }))}
-                  required
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">CPF</label>
                   <input
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={form?.cpf || ''}
                     onChange={e => setForm((f: any) => ({ ...f, cpf: e.target.value }))}
-                    required
                     placeholder="000.000.000-00"
                     maxLength={14}
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone</label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={form?.telefone || ''}
+                    onChange={e => setForm((f: any) => ({ ...f, telefone: e.target.value }))}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={form?.email || ''}
                   onChange={e => setForm((f: any) => ({ ...f, email: e.target.value }))}
                   type="email"
                   placeholder="email@exemplo.com"
                 />
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Data de Nascimento</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={form?.aniversario || ''}
                   onChange={e => setForm((f: any) => ({ ...f, aniversario: e.target.value }))}
                   type="date"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Observações</label>
                 <textarea
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={form?.observacoes || ''}
                   onChange={e => setForm((f: any) => ({ ...f, observacoes: e.target.value }))}
                   rows={3}

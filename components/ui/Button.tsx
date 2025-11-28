@@ -38,13 +38,13 @@ export function Button({
     ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400 border border-transparent',
   };
   
-  // Tamanhos com espaçamentos e tipografia consistentes
+  // Tamanhos com espaçamentos e tipografia consistentes (responsivos)
   const sizeClasses = {
-    xs: 'px-3 py-1.5 text-xs gap-1.5',
-    sm: 'px-4 py-2 text-sm gap-2',
-    md: 'px-5 py-2.5 text-base gap-2',
-    lg: 'px-6 py-3 text-base gap-2.5',
-    xl: 'px-8 py-4 text-lg gap-3',
+    xs: 'px-2 xs:px-3 py-1 xs:py-1.5 text-xs gap-1 xs:gap-1.5',
+    sm: 'px-3 xs:px-4 py-1.5 xs:py-2 text-xs xs:text-sm gap-1.5 xs:gap-2',
+    md: 'px-4 xs:px-5 py-2 xs:py-2.5 text-sm xs:text-base gap-1.5 xs:gap-2',
+    lg: 'px-5 xs:px-6 py-2.5 xs:py-3 text-sm xs:text-base gap-2 xs:gap-2.5',
+    xl: 'px-6 xs:px-8 py-3 xs:py-4 text-base xs:text-lg gap-2 xs:gap-3',
   };
 
   // Tamanho do ícone proporcional ao tamanho do botão

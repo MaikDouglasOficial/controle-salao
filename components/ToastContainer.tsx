@@ -1,12 +1,9 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
-import { ReactNode } from 'react';
-import { ToastProvider } from '@/hooks/useToast';
-import { Toast, ConfirmDialog } from '@/components/ui/Toast';
-import { useToast } from '@/hooks/useToast';
+import { Toast, ConfirmDialog } from './ui/Toast';
+import { useToast, ToastProvider } from '@/hooks/useToast';
 
-function ToastRenderer() {
+function ToastContainerInner() {
   const { toasts, removeToast, confirmDialog, closeConfirm } = useToast();
 
   return (
@@ -37,13 +34,10 @@ function ToastRenderer() {
   );
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function ToastContainer() {
   return (
-    <SessionProvider>
-      <ToastProvider>
-        {children}
-        <ToastRenderer />
-      </ToastProvider>
-    </SessionProvider>
+    <ToastProvider>
+      <ToastContainerInner />
+    </ToastProvider>
   );
 }

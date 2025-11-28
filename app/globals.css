@@ -19,10 +19,56 @@
   /* Reset e configurações básicas */
   html {
     scroll-behavior: smooth;
+    /* Prevenir overflow horizontal em dispositivos móveis */
+    overflow-x: hidden;
+    /* Altura 100% para mobile */
+    height: 100%;
+    /* Corrigir problemas de scroll em iOS */
+    -webkit-overflow-scrolling: touch;
   }
   
   body {
     @apply text-gray-900 bg-gray-50;
+    /* Prevenir overflow horizontal em dispositivos móveis */
+    overflow-x: hidden;
+    /* Garantir largura máxima da viewport */
+    max-width: 100vw;
+    /* Altura mínima 100% para evitar travamento de scroll */
+    min-height: 100%;
+    /* Corrigir problemas de scroll em iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Garantir que o body possa rolar */
+    position: relative;
+  }
+  
+  /* Corrigir problema de altura em mobile para evitar travamento */
+  #__next {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Prevenir elementos de ultrapassarem a viewport */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Garantir que imagens sejam responsivas */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Quebra de palavras longas em dispositivos móveis */
+  p, span, div, td, th, li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Prevenir que textos longos causem overflow horizontal */
+  pre, code {
+    overflow-x: auto;
+    max-width: 100%;
   }
 
   /* Remover setinhas dos inputs number */
@@ -260,6 +306,32 @@
   .responsive-padding {
     @apply px-4 sm:px-6 lg:px-8;
   }
+  
+  /* Wrapper responsivo para tabelas em dispositivos móveis */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Garantir que tabelas não ultrapassem a viewport */
+  .table-responsive table {
+    min-width: 100%;
+  }
+  
+  /* Em telas pequenas, permitir scroll horizontal */
+  @media (max-width: 640px) {
+    .table-responsive {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-responsive table {
+      min-width: 600px;
+    }
+  }
 }
 
 @layer utilities {
@@ -353,6 +425,27 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgb(148 163 184);
+  }
+  
+  /* Utilitários para textos responsivos */
+  .text-truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  @media (min-width: 640px) {
+    .text-truncate-mobile {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+    }
+  }
+  
+  /* Garantir que flex items não causem overflow */
+  .flex-safe {
+    min-width: 0;
+    min-height: 0;
   }
 }
 

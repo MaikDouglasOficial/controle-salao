@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/hooks/useToast';
 
 interface Product {
   id: number;
@@ -36,6 +37,7 @@ interface Professional {
 }
 
 export default function PDVPage() {
+  const { success, error, info, confirm } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -128,11 +130,11 @@ export default function PDVPage() {
         
         // Mostra mensagem de sucesso
         setTimeout(() => {
-          alert(`Agendamento carregado!\n\nCliente: ${appointmentData.customerName}\nServiço: ${appointmentData.serviceName}\nValor: R$ ${appointmentData.servicePrice.toFixed(2)}\n\nAdicione produtos extras se necessário e finalize a venda.`);
+          info(`Agendamento carregado!\n\nCliente: ${appointmentData.customerName}\nServiço: ${appointmentData.serviceName}\nValor: R$ ${appointmentData.servicePrice.toFixed(2)}\n\nAdicione produtos extras se necessário e finalize a venda.`);
         }, 500);
-      } catch (error) {
-        console.error('ERRO: Erro ao carregar dados do agendamento:', error);
-        alert('Erro ao carregar dados do agendamento. Tente novamente.');
+      } catch (err) {
+        console.error('ERRO: Erro ao carregar dados do agendamento:', err);
+        error('Erro ao carregar dados do agendamento. Tente novamente.');
       }
     }
   };
@@ -244,17 +246,17 @@ export default function PDVPage() {
 
   const finalizeSale = async () => {
     if (cart.length === 0) {
-      alert('Carrinho vazio!');
+      error('Carrinho vazio!');
       return;
     }
 
     if (!checkoutData.paymentMethod) {
-      alert('Por favor, selecione a forma de pagamento!');
+      error('Por favor, selecione a forma de pagamento!');
       return;
     }
 
     if (!checkoutData.professional || checkoutData.professional.trim() === '') {
-      alert('Por favor, informe o profissional que realizou o atendimento!');
+      error('Por favor, informe o profissional que realizou o atendimento!');
       return;
     }
 
@@ -286,23 +288,28 @@ export default function PDVPage() {
       });
 
       if (response.ok) {
-        alert('Venda finalizada com sucesso!');
+        success('Venda finalizada com sucesso!');
         setCart([]);
         setShowCheckoutModal(false);
         setCheckoutData({ customerId: '', professional: '', paymentMethod: 'DINHEIRO', installments: 1, installmentValue: 0 });
         fetchData();
       } else {
-        const error = await response.json();
-        alert(error.error || 'Erro ao finalizar venda');
+        const errorData = await response.json();
+        error(errorData.error || 'Erro ao finalizar venda');
       }
-    } catch (error) {
-      console.error('Erro ao finalizar venda:', error);
-      alert('Erro ao finalizar venda');
+    } catch (err) {
+      console.error('Erro ao finalizar venda:', err);
+      error('Erro ao finalizar venda');
     }
   };
 
-  const clearCart = () => {
-    if (confirm('Limpar carrinho?')) {
+  const clearCart = async () => {
+    const confirmed = await confirm({
+      title: 'Limpar carrinho',
+      message: 'Tem certeza que deseja limpar o carrinho?',
+      type: 'warning'
+    });
+    if (confirmed) {
       setCart([]);
     }
   };
@@ -310,7 +317,7 @@ export default function PDVPage() {
   const searchCustomer = () => {
     const term = customerSearchTerm.trim();
     if (!term) {
-      alert('Digite o CPF, telefone ou nome do cliente para buscar');
+      error('Digite o CPF, telefone ou nome do cliente para buscar');
       return;
     }
 
@@ -365,13 +372,13 @@ export default function PDVPage() {
 
     // Validar tamanho (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Arquivo muito grande. Máximo 5MB');
+      error('Arquivo muito grande. Máximo 5MB');
       return;
     }
 
     // Validar tipo
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem');
+      error('Por favor, selecione uma imagem');
       return;
     }
 
@@ -390,12 +397,12 @@ export default function PDVPage() {
         setNewCustomerData({ ...newCustomerData, photo: url });
         setPhotoPreview(url);
       } else {
-        const error = await response.json();
-        alert(error.error || 'Erro ao fazer upload');
+        const errorData = await response.json();
+        error(errorData.error || 'Erro ao fazer upload');
       }
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload da foto');
+    } catch (err) {
+      console.error('Erro ao fazer upload:', err);
+      error('Erro ao fazer upload da foto');
     } finally {
       setUploading(false);
     }
@@ -411,7 +418,7 @@ export default function PDVPage() {
 
   const handleRegisterNewCustomer = async () => {
     if (!newCustomerData.name || !newCustomerData.phone) {
-      alert('Nome e telefone são obrigatórios!');
+      error('Nome e telefone são obrigatórios!');
       return;
     }
 
@@ -432,7 +439,7 @@ export default function PDVPage() {
 
       if (response.ok) {
         const customer = await response.json();
-        alert('Cliente cadastrado com sucesso!');
+        success('Cliente cadastrado com sucesso!');
         setShowNewCustomerModal(false);
         setShowCustomerNotFoundModal(false);
         setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
@@ -446,12 +453,12 @@ export default function PDVPage() {
         setSelectedCustomer(customer);
         setCheckoutData({ ...checkoutData, customerId: customer.id.toString() });
       } else {
-        const error = await response.json();
-        alert(error.error || 'Erro ao cadastrar cliente');
+        const errorData = await response.json();
+        error(errorData.error || 'Erro ao cadastrar cliente');
       }
-    } catch (error) {
-      console.error('Erro ao cadastrar cliente:', error);
-      alert('Erro ao cadastrar cliente');
+    } catch (err) {
+      console.error('Erro ao cadastrar cliente:', err);
+      error('Erro ao cadastrar cliente');
     }
   };
 

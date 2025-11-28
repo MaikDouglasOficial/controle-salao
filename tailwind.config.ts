@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Breakpoints customizados para melhor responsividade
+      screens: {
+        'xs': '475px',  // Extra small devices (celulares muito pequenos)
+      },
       // Sistema de Cores Padronizado Global
       colors: {
         // Cores Primárias (Azul)
