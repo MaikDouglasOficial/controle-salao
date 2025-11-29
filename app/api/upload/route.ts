@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configurar Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { put } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,26 +30,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Converter file para buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // Gerar nome único
+    const timestamp = Date.now();
+    const originalName = file.name.replace(/\s+/g, '-').toLowerCase();
+    const filename = `controle-salao/${timestamp}-${originalName}`;
 
-    // Upload para Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: 'controle-salao',
-          resource_type: 'image',
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+    // Upload para Vercel Blob
+    const blob = await put(filename, file, {
+      access: 'public',
     });
 
     // Retornar URL pública
-    const url = (result as any).secure_url;
+    const url = blob.url;
 
     return NextResponse.json({ url }, { status: 200 });
   } catch (error) {
