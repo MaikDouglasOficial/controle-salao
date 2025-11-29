@@ -38,14 +38,14 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto py-4"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div
-        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] xs:max-h-[92vh] flex flex-col rounded-lg xs:rounded-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200`}
+        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} my-auto flex flex-col rounded-lg xs:rounded-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
