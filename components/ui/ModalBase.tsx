@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -24,6 +26,18 @@ export const ModalBase: React.FC<ModalProps> = ({
   size = 'lg',
   footer,
 }) => {
+  // Bloquear scroll do body quando modal abrir
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const sizeClasses: Record<string, string> = {
@@ -38,27 +52,27 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto pt-20 pb-20"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div
-        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} max-h-[calc(100vh-6rem)] flex flex-col rounded-lg xs:rounded-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200`}
+        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col rounded-2xl overflow-hidden border border-gray-100`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || typeof onClose !== 'undefined') && (
-          <div className="flex-shrink-0 flex items-center justify-between gap-3 xs:gap-4 px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
-            <div className="flex flex-col items-start flex-1">
+          <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+            <div className="flex flex-col items-start flex-1 pr-2">
               {title && (
-                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight break-words tracking-tight">
+                <h2 className="text-xl font-bold text-gray-900 leading-tight break-words">
                   {title}
                 </h2>
               )}
               {subtitle && (
-                <p className="text-xs xs:text-sm sm:text-base text-gray-600 mt-0.5 xs:mt-1 font-normal break-words">
+                <p className="text-sm text-gray-600 mt-1 break-words">
                   {subtitle}
                 </p>
               )}
@@ -66,26 +80,24 @@ export const ModalBase: React.FC<ModalProps> = ({
             {onClose && (
               <button
                 onClick={onClose}
-                className="ml-2 xs:ml-3 sm:ml-4 md:ml-6 p-1.5 xs:p-2 sm:p-2.5 hover:bg-gray-200/80 active:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg xs:rounded-xl text-gray-600 hover:text-gray-900 flex-shrink-0"
+                className="p-2 hover:bg-gray-200/80 transition-colors rounded-lg text-gray-600 hover:text-gray-900 flex-shrink-0"
                 aria-label="Fechar modal"
                 type="button"
               >
-                <X className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
+                <X className="h-5 w-5" />
               </button>
             )}
           </div>
         )}
 
         {/* Body */}
-        <div className="modal-body flex-1 overflow-y-auto px-3 xs:px-4 sm:px-6 md:px-8 py-4 xs:py-5 sm:py-6 md:py-8 bg-white">
-          <div className="max-w-full">
-            {children}
-          </div>
+        <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
+          {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="modal-footer px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gray-50/80 border-t border-gray-200 flex flex-wrap gap-2 xs:gap-3 justify-end items-center">
+          <div className="flex-shrink-0 px-6 py-4 bg-gray-50/80 border-t border-gray-200 flex flex-wrap gap-3 justify-end items-center">
             {footer}
           </div>
         )}
