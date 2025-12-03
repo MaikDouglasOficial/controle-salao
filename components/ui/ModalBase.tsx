@@ -38,19 +38,19 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto py-4"
+      className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto pt-4 pb-20"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div
-        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} my-auto flex flex-col rounded-lg xs:rounded-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200`}
+        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} max-h-[calc(100vh-6rem)] flex flex-col rounded-lg xs:rounded-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || typeof onClose !== 'undefined') && (
-          <div className="flex items-center justify-between px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+          <div className="flex-shrink-0 flex items-center justify-between px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
             <div className="flex flex-col items-start min-w-0 flex-1">
               {title && (
                 <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight truncate tracking-tight">
@@ -77,7 +77,7 @@ export const ModalBase: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="modal-body flex-1 overflow-y-auto px-3 xs:px-4 sm:px-6 md:px-8 py-4 xs:py-5 sm:py-6 md:py-8 pb-20 sm:pb-8 bg-white">
+        <div className="modal-body flex-1 overflow-y-auto px-3 xs:px-4 sm:px-6 md:px-8 py-4 xs:py-5 sm:py-6 md:py-8 bg-white">
           <div className="max-w-full">
             {children}
           </div>

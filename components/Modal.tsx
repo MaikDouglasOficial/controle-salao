@@ -24,16 +24,16 @@ export default function Modal({ isOpen, onClose, title, children, size = 'lg' }:
 
   return (
     <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10000] p-4 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-[10000] p-2 sm:p-4 animate-fade-in overflow-y-auto pt-4 pb-20"
       onClick={onClose}
     >
       <div 
-        className={`bg-white rounded-2xl shadow-2xl ${sizeClasses[size]} w-full my-auto overflow-hidden transform transition-all animate-slide-up`}
+        className={`bg-white rounded-xl sm:rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[calc(100vh-6rem)] flex flex-col overflow-hidden transform transition-all animate-slide-up`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-white flex-shrink-0">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -44,7 +44,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'lg' }:
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)] bg-white">
+        <div className="overflow-y-auto flex-1 bg-white">
           {children}
         </div>
       </div>
