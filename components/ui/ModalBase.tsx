@@ -38,7 +38,7 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto pt-4 pb-20"
+      className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto pt-20 pb-20"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"
@@ -50,15 +50,15 @@ export const ModalBase: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || typeof onClose !== 'undefined') && (
-          <div className="flex-shrink-0 flex items-center justify-between px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
-            <div className="flex flex-col items-start min-w-0 flex-1">
+          <div className="flex-shrink-0 flex items-center justify-between gap-3 xs:gap-4 px-3 xs:px-4 sm:px-6 md:px-8 py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+            <div className="flex flex-col items-start flex-1">
               {title && (
-                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight truncate tracking-tight">
+                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight break-words tracking-tight">
                   {title}
                 </h2>
               )}
               {subtitle && (
-                <p className="text-xs xs:text-sm sm:text-base text-gray-600 mt-0.5 xs:mt-1 font-normal line-clamp-2">
+                <p className="text-xs xs:text-sm sm:text-base text-gray-600 mt-0.5 xs:mt-1 font-normal break-words">
                   {subtitle}
                 </p>
               )}
