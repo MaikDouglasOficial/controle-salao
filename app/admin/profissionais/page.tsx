@@ -337,7 +337,7 @@ export default function ProfessionalsPage() {
 
       {/* Modal Confirmar Exclusão */}
       {showDeleteModal && deletingProfessional && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Confirmar Exclusão</h2>
             <p className="text-gray-600 mb-6">

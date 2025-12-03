@@ -197,7 +197,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       {/* Modal de Visualização */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 z-[10000] flex items-center justify-center p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh] w-full h-full">
@@ -221,7 +221,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
 
       {/* Modal de Adicionar Descrição */}
       {showModal && photoToUpload && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Adicionar Detalhes</h3>
             

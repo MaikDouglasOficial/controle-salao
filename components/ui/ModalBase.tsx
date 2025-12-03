@@ -38,7 +38,7 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto py-4"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-2 xs:px-3 sm:px-4 md:px-6 overflow-y-auto py-4"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"

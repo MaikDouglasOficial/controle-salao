@@ -78,7 +78,7 @@ export function ConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center p-4">
       <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <p className="text-sm text-gray-600 whitespace-pre-line">{message}</p>
