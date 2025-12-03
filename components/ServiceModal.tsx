@@ -17,12 +17,18 @@ interface ServiceModalProps {
 export default function ServiceModal({ service, onSave, onClose }: ServiceModalProps) {
   const [name, setName] = useState<string>(service?.name || '');
   const [description, setDescription] = useState<string>(service?.description || '');
-  const [duration, setDuration] = useState<number>(service?.duration || 0);
-  const [price, setPrice] = useState<number>(service?.price || 0);
+  const [duration, setDuration] = useState<string>(service?.duration?.toString() || '');
+  const [price, setPrice] = useState<string>(service?.price?.toString() || '');
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSave({ ...service, name, description, duration, price });
+    onSave({ 
+      ...service, 
+      name, 
+      description, 
+      duration: parseInt(duration) || 0, 
+      price: parseFloat(price) || 0 
+    });
   }
 
   return (
@@ -48,12 +54,14 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Preço (R$) *</label>
             <input
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={price}
-              onChange={e => setPrice(Number(e.target.value))}
+              onChange={e => {
+                const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                setPrice(value);
+              }}
               required
               placeholder="0.00"
             />
@@ -61,11 +69,14 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Duração (min) *</label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               value={duration}
-              onChange={e => setDuration(Number(e.target.value))}
+              onChange={e => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setDuration(value);
+              }}
               required
               placeholder="30"
             />

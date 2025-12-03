@@ -19,7 +19,7 @@ interface DespesaModalProps {
 export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalProps) {
   const { warning } = useToast();
   const [description, setDescription] = useState<string>(despesa?.description || '');
-  const [amount, setAmount] = useState<number>(despesa?.amount || 0);
+  const [amount, setAmount] = useState<string>(despesa?.amount?.toString() || '');
   const [category, setCategory] = useState<string>(despesa?.category || 'OUTROS');
   const [date, setDate] = useState<string>(
     despesa?.date ? despesa.date.split('T')[0] : new Date().toISOString().split('T')[0]
@@ -35,7 +35,8 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
       return;
     }
     
-    if (!amount || amount <= 0) {
+    const amountValue = parseFloat(amount);
+    if (!amountValue || amountValue <= 0) {
       warning('Por favor, preencha um valor válido maior que zero');
       return;
     }
@@ -43,7 +44,7 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
     onSave({
       ...despesa,
       description: description.trim(),
-      amount,
+      amount: amountValue,
       category,
       date,
       notes: notes.trim() || null,
@@ -92,12 +93,14 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Valor (R$) *</label>
             <input
-              type="number"
-              step="0.01"
-              min="0.01"
+              type="text"
+              inputMode="decimal"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={amount}
-              onChange={e => setAmount(Number(e.target.value))}
+              onChange={e => {
+                const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                setAmount(value);
+              }}
               required
               placeholder="0.00"
             />
