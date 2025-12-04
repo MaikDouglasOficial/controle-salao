@@ -1,14 +1,15 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Eye, Pencil, Trash2, Package } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SkeletonTable } from '@/components/ui/Loading';
-import { NoResults } from '@/components/ui/EmptyState';
+import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { formatCurrency } from '@/lib/utils';
+import { OptimizedImage } from '@/components/OptimizedImage';
+import { useProducts, useDeleteProduct } from '@/hooks/useApi';
 
 interface Product {
   id: number;
@@ -22,30 +23,12 @@ interface Product {
 }
 
 export default function ProdutosPage() {
-  const { success, error, confirm } = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { confirm } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/products');
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar produtos:', err);
-      error('Erro ao carregar produtos');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks
+  const { data: products = [], isLoading, isError, error: queryError } = useProducts();
+  const deleteMutation = useDeleteProduct();
 
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
@@ -56,28 +39,19 @@ export default function ProdutosPage() {
 
     if (!confirmed) return;
 
-    try {
-      const response = await fetch(`/api/products?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        success('Produto excluído com sucesso');
-        fetchProducts();
-      } else {
-        error('Erro ao excluir produto');
-      }
-    } catch (err) {
-      console.error('Erro ao excluir produto:', err);
-      error('Erro ao excluir produto');
-    }
+    await deleteMutation.mutateAsync(id.toString());
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Memoizar filtro
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    
+    return products.filter((product: Product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [products, searchTerm]);
 
   return (
     <div className="container-app">
@@ -113,18 +87,21 @@ export default function ProdutosPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {isError && <ErrorState message={queryError?.message || 'Erro ao carregar produtos'} />}
+
       {/* Loading State */}
-      {loading && <SkeletonTable columns={5} rows={5} />}
+      {isLoading && <SkeletonTable />}
 
       {/* Empty State */}
-      {!loading && filteredProducts.length === 0 && searchTerm && (
+      {!isLoading && !isError && filteredProducts.length === 0 && searchTerm && (
         <NoResults
           searchTerm={searchTerm}
-          onClear={() => setSearchTerm('')}
+          onClearSearch={() => setSearchTerm('')}
         />
       )}
 
-      {!loading && products.length === 0 && !searchTerm && (
+      {!isLoading && !isError && products.length === 0 && !searchTerm && (
         <div className="text-center py-12">
           <Package className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -143,7 +120,7 @@ export default function ProdutosPage() {
       )}
 
       {/* Desktop Table */}
-      {!loading && filteredProducts.length > 0 && (
+      {!isLoading && !isError && filteredProducts.length > 0 && (
         <>
           <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
@@ -168,27 +145,21 @@ export default function ProdutosPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product: Product) => (
                     <tr
                       key={product.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
-                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                            {product.photo ? (
-                              <Image
-                                src={product.photo}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                                <Package className="w-6 h-6" />
-                              </div>
-                            )}
-                          </div>
+                          <OptimizedImage
+                            src={product.photo}
+                            alt={product.name}
+                            width={48}
+                            height={48}
+                            className="rounded-lg object-cover"
+                            fallbackIcon={<Package className="w-6 h-6" />}
+                          />
                           <div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {product.name}
@@ -262,26 +233,20 @@ export default function ProdutosPage() {
 
           {/* Mobile Cards */}
           <div className="md:hidden space-y-4">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product: Product) => (
               <div
                 key={product.id}
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
               >
                 <div className="flex items-start space-x-4 mb-4">
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                    {product.photo ? (
-                      <Image
-                        src={product.photo}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                        <Package className="w-8 h-8" />
-                      </div>
-                    )}
-                  </div>
+                  <OptimizedImage
+                    src={product.photo}
+                    alt={product.name}
+                    width={64}
+                    height={64}
+                    className="rounded-lg object-cover"
+                    fallbackIcon={<Package className="w-8 h-8" />}
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
                       {product.name}

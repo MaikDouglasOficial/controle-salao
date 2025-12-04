@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { ToastProvider } from '@/hooks/useToast';
 import { Toast, ConfirmDialog } from '@/components/ui/Toast';
 import { useToast } from '@/hooks/useToast';
+import { ReactQueryProvider } from '@/lib/react-query-provider';
 
 function ToastRenderer() {
   const { toasts, removeToast, confirmDialog, closeConfirm } = useToast();
@@ -40,10 +41,12 @@ function ToastRenderer() {
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <ToastProvider>
-        {children}
-        <ToastRenderer />
-      </ToastProvider>
+      <ReactQueryProvider>
+        <ToastProvider>
+          {children}
+          <ToastRenderer />
+        </ToastProvider>
+      </ReactQueryProvider>
     </SessionProvider>
   );
 }

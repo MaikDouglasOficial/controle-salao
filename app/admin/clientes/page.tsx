@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Plus, Search, Pencil, Trash2, Eye, Users, Camera } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, Eye, Users } from 'lucide-react'
 import { formatPhone, formatDate } from '@/lib/utils'
-import { LoadingSpinner, SkeletonTable, NoResults, ErrorState } from '@/components/ui'
-import { useToast } from '@/hooks/useToast'
+import { SkeletonTable, NoResults, ErrorState } from '@/components/ui'
 import { ConfirmDialog } from '@/components/ui/Toast'
+import { OptimizedAvatar } from '@/components/OptimizedImage'
+import { useCustomers, useDeleteCustomer } from '@/hooks/useApi'
 
 interface Customer {
   id: number
@@ -21,57 +21,29 @@ interface Customer {
 }
 
 export default function ClientesPage() {
-  const toast = useToast()
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
-  useEffect(() => {
-    fetchCustomers()
-  }, [])
-
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/customers')
-      if (!response.ok) throw new Error('Erro ao carregar clientes')
-      const data = await response.json()
-      setCustomers(data)
-    } catch (error) {
-      console.error('Erro ao buscar clientes:', error)
-      toast.error('Erro ao carregar clientes')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // React Query hooks - substituindo fetch manual
+  const { data: customers = [], isLoading, isError, error } = useCustomers()
+  const deleteMutation = useDeleteCustomer()
 
   const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`/api/customers/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        toast.success('Cliente excluído com sucesso')
-        fetchCustomers()
-      } else {
-        toast.error('Erro ao excluir cliente')
-      }
-    } catch (error) {
-      console.error('Erro ao excluir cliente:', error)
-      toast.error('Erro ao excluir cliente')
-    } finally {
-      setDeleteId(null)
-    }
+    await deleteMutation.mutateAsync(id.toString())
+    setDeleteId(null)
   }
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.cpf?.includes(searchTerm)
-  )
+  // Memoizar filtro para evitar recalcular em cada render
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return []
+    
+    return customers.filter((customer: Customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone.includes(searchTerm) ||
+      customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.cpf?.includes(searchTerm)
+    )
+  }, [customers, searchTerm])
 
   return (
     <div className="container-app py-6">
@@ -111,7 +83,9 @@ export default function ClientesPage() {
       </div>
 
       {/* Content */}
-      {loading ? (
+      {isError ? (
+        <ErrorState message={error?.message || 'Erro ao carregar clientes'} />
+      ) : isLoading ? (
         <SkeletonTable />
       ) : filteredCustomers.length === 0 ? (
         <NoResults
@@ -140,28 +114,18 @@ export default function ClientesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredCustomers.map((customer) => (
+                {filteredCustomers.map((customer: Customer) => (
                   <tr
                     key={customer.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          {customer.photo ? (
-                            <Image
-                              src={customer.photo}
-                              alt={customer.name}
-                              width={40}
-                              height={40}
-                              className="h-10 w-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                              <Users className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                            </div>
-                          )}
-                        </div>
+                        <OptimizedAvatar
+                          src={customer.photo}
+                          alt={customer.name}
+                          size="md"
+                        />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             {customer.name}
@@ -220,24 +184,14 @@ export default function ClientesPage() {
 
           {/* Mobile Cards */}
           <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredCustomers.map((customer) => (
+            {filteredCustomers.map((customer: Customer) => (
               <div key={customer.id} className="p-4">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    {customer.photo ? (
-                      <Image
-                        src={customer.photo}
-                        alt={customer.name}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                        <Users className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-                      </div>
-                    )}
-                  </div>
+                  <OptimizedAvatar
+                    src={customer.photo}
+                    alt={customer.name}
+                    size="lg"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                       {customer.name}

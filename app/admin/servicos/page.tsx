@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Scissors, Pencil, Trash2, Eye, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { SkeletonTable } from '@/components/ui/Loading';
-import { NoResults } from '@/components/ui/EmptyState';
+import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
+import { useServices, useDeleteService } from '@/hooks/useApi';
 
 interface Service {
   id: number;
@@ -19,30 +20,12 @@ interface Service {
 }
 
 export default function ServicosPage() {
-  const { success, error, confirm } = useToast();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { confirm } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/services');
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar serviços:', err);
-      error('Erro ao carregar serviços');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks
+  const { data: services = [], isLoading, isError, error: queryError } = useServices();
+  const deleteMutation = useDeleteService();
 
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
@@ -53,27 +36,18 @@ export default function ServicosPage() {
 
     if (!confirmed) return;
 
-    try {
-      const response = await fetch(`/api/services?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        success('Serviço excluído com sucesso');
-        fetchServices();
-      } else {
-        error('Erro ao excluir serviço');
-      }
-    } catch (err) {
-      console.error('Erro ao excluir serviço:', err);
-      error('Erro ao excluir serviço');
-    }
+    await deleteMutation.mutateAsync(id.toString());
   };
 
-  const filteredServices = services.filter((service) =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Memoizar filtro
+  const filteredServices = useMemo(() => {
+    if (!services) return [];
+    
+    return services.filter((service: Service) =>
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [services, searchTerm]);
 
   return (
     <div className="container-app">
@@ -109,18 +83,21 @@ export default function ServicosPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {isError && <ErrorState message={queryError?.message || 'Erro ao carregar serviços'} />}
+
       {/* Loading State */}
-      {loading && <SkeletonTable />}
+      {isLoading && <SkeletonTable />}
 
       {/* Empty State */}
-      {!loading && filteredServices.length === 0 && searchTerm && (
+      {!isLoading && !isError && filteredServices.length === 0 && searchTerm && (
         <NoResults
           searchTerm={searchTerm}
           onClearSearch={() => setSearchTerm('')}
         />
       )}
 
-      {!loading && services.length === 0 && !searchTerm && (
+      {!isLoading && !isError && services.length === 0 && !searchTerm && (
         <div className="text-center py-12">
           <Scissors className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -139,7 +116,7 @@ export default function ServicosPage() {
       )}
 
       {/* Desktop Table */}
-      {!loading && filteredServices.length > 0 && (
+      {!isLoading && !isError && filteredServices.length > 0 && (
         <>
           <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
@@ -161,7 +138,7 @@ export default function ServicosPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredServices.map((service) => (
+                  {filteredServices.map((service: Service) => (
                     <tr
                       key={service.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
@@ -234,7 +211,7 @@ export default function ServicosPage() {
 
           {/* Mobile Cards */}
           <div className="md:hidden space-y-4">
-            {filteredServices.map((service) => (
+            {filteredServices.map((service: Service) => (
               <div
                 key={service.id}
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"

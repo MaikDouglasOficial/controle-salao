@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Plus, Search, Eye, Edit2, Trash2, Users, UserCheck, UserX, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SkeletonTable } from '@/components/ui/Loading';
-import { NoResults } from '@/components/ui/EmptyState';
+import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
+import { OptimizedAvatar } from '@/components/OptimizedImage';
+import { useProfessionals, useDeleteProfessional } from '@/hooks/useApi';
 
 interface Professional {
   id: number;
@@ -22,77 +23,44 @@ interface Professional {
 
 export default function ProfissionaisPage() {
   const router = useRouter();
-  const { success, error } = useToast();
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { confirm } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletingProfessional, setDeletingProfessional] = useState<Professional | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchProfessionals();
-  }, []);
+  // React Query hooks
+  const { data: professionals = [], isLoading, isError, error: queryError } = useProfessionals();
+  const deleteMutation = useDeleteProfessional();
 
-  const fetchProfessionals = async () => {
-    try {
-      const response = await fetch('/api/professionals');
-      if (response.ok) {
-        const data = await response.json();
-        setProfessionals(Array.isArray(data) ? data : []);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar profissionais:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleDelete = async (professional: Professional) => {
+    const confirmed = await confirm({
+      title: 'Excluir Profissional',
+      message: `Tem certeza que deseja excluir ${professional.name}? Esta ação não pode ser desfeita.`,
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    await deleteMutation.mutateAsync(professional.id.toString());
   };
 
-  const handleDeleteClick = (professional: Professional) => {
-    setDeletingProfessional(professional);
-    setShowDeleteDialog(true);
-  };
+  // Memoizar filtro
+  const filteredProfessionals = useMemo(() => {
+    if (!professionals) return [];
+    
+    return professionals.filter((prof: Professional) => {
+      const matchesSearch =
+        prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prof.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prof.phone?.includes(searchTerm);
 
-  const handleDelete = async () => {
-    if (!deletingProfessional) return;
+      const matchesActive =
+        filterActive === 'all' ||
+        (filterActive === 'active' && prof.active) ||
+        (filterActive === 'inactive' && !prof.active);
 
-    setDeleting(true);
-    try {
-      const response = await fetch(`/api/professionals?id=${deletingProfessional.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        success('Profissional excluído com sucesso');
-        fetchProfessionals();
-        setShowDeleteDialog(false);
-        setDeletingProfessional(null);
-      } else {
-        const errorData = await response.json();
-        error(errorData.error || 'Erro ao excluir profissional');
-      }
-    } catch (err) {
-      console.error('Erro ao excluir profissional:', err);
-      error('Erro ao excluir profissional');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const filteredProfessionals = professionals.filter((prof) => {
-    const matchesSearch =
-      prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prof.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prof.phone?.includes(searchTerm);
-
-    const matchesActive =
-      filterActive === 'all' ||
-      (filterActive === 'active' && prof.active) ||
-      (filterActive === 'inactive' && !prof.active);
-
-    return matchesSearch && matchesActive;
-  });
+      return matchesSearch && matchesActive;
+    });
+  }, [professionals, searchTerm, filterActive]);
 
   return (
     <div className="container-app">
@@ -168,12 +136,15 @@ export default function ProfissionaisPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {isError && <ErrorState message={queryError?.message || 'Erro ao carregar profissionais'} />}
+
       {/* Desktop Table */}
-      {loading ? (
+      {isLoading ? (
         <div className="hidden lg:block">
           <SkeletonTable />
         </div>
-      ) : filteredProfessionals.length === 0 ? (
+      ) : !isError && filteredProfessionals.length === 0 ? (
         searchTerm ? (
           <NoResults
             searchTerm={searchTerm}
@@ -219,24 +190,15 @@ export default function ProfissionaisPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredProfessionals.map((professional) => (
+                  {filteredProfessionals.map((professional: Professional) => (
                     <tr key={professional.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                            {professional.photo ? (
-                              <Image
-                                src={professional.photo}
-                                alt={professional.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                                <Users className="w-5 h-5" />
-                              </div>
-                            )}
-                          </div>
+                          <OptimizedAvatar
+                            src={professional.photo}
+                            alt={professional.name}
+                            size="md"
+                          />
                           <div className="font-medium text-gray-900 dark:text-white">
                             {professional.name}
                           </div>
@@ -285,7 +247,7 @@ export default function ProfissionaisPage() {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteClick(professional)}
+                            onClick={() => handleDelete(professional)}
                             className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
                             aria-label="Excluir"
                           >
@@ -302,26 +264,17 @@ export default function ProfissionaisPage() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden grid gap-4">
-            {filteredProfessionals.map((professional) => (
+            {filteredProfessionals.map((professional: Professional) => (
               <div
                 key={professional.id}
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                    {professional.photo ? (
-                      <Image
-                        src={professional.photo}
-                        alt={professional.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                        <Users className="w-8 h-8" />
-                      </div>
-                    )}
-                  </div>
+                  <OptimizedAvatar
+                    src={professional.photo}
+                    alt={professional.name}
+                    size="lg"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
                       {professional.name}
@@ -370,7 +323,7 @@ export default function ProfissionaisPage() {
                     Editar
                   </Button>
                   <button
-                    onClick={() => handleDeleteClick(professional)}
+                    onClick={() => handleDelete(professional)}
                     className="px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
                     aria-label="Excluir"
                   >
@@ -381,57 +334,6 @@ export default function ProfissionaisPage() {
             ))}
           </div>
         </>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && deletingProfessional && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Confirmar Exclusão
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Tem certeza que deseja excluir o profissional <strong>{deletingProfessional.name}</strong>? Esta ação não pode ser desfeita.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeletingProfessional(null);
-                }}
-                disabled={deleting}
-                className="touch-target"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="touch-target bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
-              >
-                {deleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Excluindo...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Excluir
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Eye, Edit2, Trash2, Receipt, TrendingUp, TrendingDown, AlertTriangle, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SkeletonTable } from '@/components/ui/Loading';
-import { NoResults } from '@/components/ui/EmptyState';
+import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
+import { useExpenses, useDeleteExpense } from '@/hooks/useApi';
 
 interface Expense {
   id: number;
@@ -20,76 +21,45 @@ interface Expense {
 
 export default function DespesasPage() {
   const router = useRouter();
-  const { success, error } = useToast();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { confirm } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'FIXA' | 'VARIAVEL'>('all');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
+  // React Query hooks
+  const { data: expenses = [], isLoading, isError, error: queryError } = useExpenses();
+  const deleteMutation = useDeleteExpense();
 
-  const fetchExpenses = async () => {
-    try {
-      const response = await fetch('/api/expenses');
-      if (response.ok) {
-        const data = await response.json();
-        setExpenses(Array.isArray(data) ? data : []);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar despesas:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleDelete = async (expense: Expense) => {
+    const confirmed = await confirm({
+      title: 'Excluir Despesa',
+      message: `Tem certeza que deseja excluir a despesa "${expense.name}"? Esta ação não pode ser desfeita.`,
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    await deleteMutation.mutateAsync(expense.id.toString());
   };
 
-  const handleDeleteClick = (expense: Expense) => {
-    setDeletingExpense(expense);
-    setShowDeleteDialog(true);
-  };
+  // Memoizar filtros
+  const filteredExpenses = useMemo(() => {
+    if (!expenses) return [];
+    
+    return expenses.filter((expense: Expense) => {
+      const matchesSearch =
+        expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        expense.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const handleDelete = async () => {
-    if (!deletingExpense) return;
+      const matchesType =
+        filterType === 'all' || expense.type === filterType;
 
-    setDeleting(true);
-    try {
-      const response = await fetch(`/api/expenses?id=${deletingExpense.id}`, {
-        method: 'DELETE',
-      });
+      return matchesSearch && matchesType;
+    });
+  }, [expenses, searchTerm, filterType]);
 
-      if (response.ok) {
-        success('Despesa excluída com sucesso');
-        fetchExpenses();
-        setShowDeleteDialog(false);
-        setDeletingExpense(null);
-      } else {
-        const errorData = await response.json();
-        error(errorData.error || 'Erro ao excluir despesa');
-      }
-    } catch (err) {
-      console.error('Erro ao excluir despesa:', err);
-      error('Erro ao excluir despesa');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const filteredExpenses = expenses.filter((expense) => {
-    const matchesSearch =
-      expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expense.category.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesType =
-      filterType === 'all' || expense.type === filterType;
-
-    return matchesSearch && matchesType;
-  });
-
-  const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.value, 0);
+  const totalExpenses = useMemo(() => {
+    return filteredExpenses.reduce((sum: number, exp: Expense) => sum + exp.value, 0);
+  }, [filteredExpenses]);
 
   return (
     <div className="container-app">
@@ -180,8 +150,11 @@ export default function DespesasPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {isError && <ErrorState message={queryError?.message || 'Erro ao carregar despesas'} />}
+
       {/* Desktop Table */}
-      {loading ? (
+      {isLoading ? (
         <div className="hidden lg:block">
           <SkeletonTable />
         </div>
@@ -234,7 +207,7 @@ export default function DespesasPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredExpenses.map((expense) => (
+                  {filteredExpenses.map((expense: Expense) => (
                     <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -288,7 +261,7 @@ export default function DespesasPage() {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteClick(expense)}
+                            onClick={() => handleDelete(expense)}
                             className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
                             aria-label="Excluir"
                           >
@@ -305,7 +278,7 @@ export default function DespesasPage() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden grid gap-4">
-            {filteredExpenses.map((expense) => (
+            {filteredExpenses.map((expense: Expense) => (
               <div
                 key={expense.id}
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
@@ -371,7 +344,7 @@ export default function DespesasPage() {
                     Editar
                   </Button>
                   <button
-                    onClick={() => handleDeleteClick(expense)}
+                    onClick={() => handleDelete(expense)}
                     className="px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
                     aria-label="Excluir"
                   >
@@ -382,57 +355,6 @@ export default function DespesasPage() {
             ))}
           </div>
         </>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && deletingExpense && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Confirmar Exclusão
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Tem certeza que deseja excluir a despesa <strong>{deletingExpense.name}</strong>? Esta ação não pode ser desfeita.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeletingExpense(null);
-                }}
-                disabled={deleting}
-                className="touch-target"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="touch-target bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
-              >
-                {deleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Excluindo...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Excluir
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
