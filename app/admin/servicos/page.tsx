@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Scissors, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Scissors, Pencil, Trash2, Eye, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import ServiceModal from '@/components/ServiceModal';
 import { Button } from '@/components/ui/Button';
+import { SkeletonTable } from '@/components/ui/Loading';
+import { NoResults } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 
 interface Service {
@@ -14,15 +15,14 @@ interface Service {
   description: string | null;
   duration: number;
   price: number;
+  createdAt: string;
 }
 
 export default function ServicosPage() {
   const { success, error, confirm } = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showNewModal, setShowNewModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchServices();
@@ -30,54 +30,27 @@ export default function ServicosPage() {
 
   const fetchServices = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/services');
-      const data = await response.json();
-      setServices(data);
-    } catch (error) {
-      console.error('Erro ao buscar serviços:', error);
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar serviços:', err);
+      error('Erro ao carregar serviços');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (id: number) => {
-    const service = services.find(s => s.id === id);
-    if (service) {
-      setEditingService(service);
-      setShowEditModal(true);
-    }
-  };
-
-  const handleUpdateService = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingService) return;
-
-    try {
-      const response = await fetch('/api/services', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingService),
-      });
-
-      if (response.ok) {
-        setShowEditModal(false);
-        setEditingService(null);
-        fetchServices();
-      } else {
-        error('Erro ao atualizar serviço');
-      }
-    } catch (err) {
-      console.error('Erro ao atualizar serviço:', err);
-      error('Erro ao atualizar serviço');
-    }
-  };
-
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
-      title: 'Confirmar exclusão',
-      message: 'Deseja realmente excluir este serviço?',
+      title: 'Excluir Serviço',
+      message: 'Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.',
       type: 'danger'
     });
+
     if (!confirmed) return;
 
     try {
@@ -89,147 +62,167 @@ export default function ServicosPage() {
         success('Serviço excluído com sucesso');
         fetchServices();
       } else {
-        error('Erro ao deletar serviço');
+        error('Erro ao excluir serviço');
       }
     } catch (err) {
-      console.error('Erro ao deletar serviço:', err);
-      error('Erro ao deletar serviço');
+      console.error('Erro ao excluir serviço:', err);
+      error('Erro ao excluir serviço');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  const filteredServices = services.filter((service) =>
+    service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Serviços
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie seus serviços
-            </p>
-          </div>
-          <Button
-            type="button"
-            onClick={() => setShowNewModal(true)}
-            icon={Plus}
-            size="lg"
-          >
+    <div className="container-app">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-spacing-section">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
+            Serviços
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Gerencie os serviços oferecidos
+          </p>
+        </div>
+        <Link href="/admin/servicos/novo">
+          <Button size="lg" className="w-full sm:w-auto touch-target">
+            <Plus className="w-5 h-5 mr-2" />
             Novo Serviço
           </Button>
-        </div>
+        </Link>
+      </div>
 
-        {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Total de Serviços</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Preço Médio</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length > 0
-                ? formatCurrency(
-                    services.reduce((acc, s) => acc + s.price, 0) / services.length
-                  )
-                : 'R$ 0,00'}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Duração Média</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length > 0
-                ? Math.round(
-                    services.reduce((acc, s) => acc + s.duration, 0) / services.length
-                  )
-                : 0}{' '}
-              min
-            </p>
-          </div>
+      {/* Search Bar */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-spacing-card shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou descrição..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-transparent border-0 focus:ring-0 focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+          />
         </div>
+      </div>
 
-        {/* Lista de Serviços */}
-        {services.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <Scissors className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-sm text-gray-500">Nenhum serviço encontrado</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Loading State */}
+      {loading && <SkeletonTable />}
+
+      {/* Empty State */}
+      {!loading && filteredServices.length === 0 && searchTerm && (
+        <NoResults
+          searchTerm={searchTerm}
+          onClearSearch={() => setSearchTerm('')}
+        />
+      )}
+
+      {!loading && services.length === 0 && !searchTerm && (
+        <div className="text-center py-12">
+          <Scissors className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Nenhum serviço cadastrado
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Comece adicionando seu primeiro serviço
+          </p>
+          <Link href="/admin/servicos/novo">
+            <Button>
+              <Plus className="w-5 h-5 mr-2" />
+              Adicionar Serviço
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* Desktop Table */}
+      {!loading && filteredServices.length > 0 && (
+        <>
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Serviço
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Duração
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Preço
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {services.map((service) => (
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredServices.map((service) => (
                     <tr
                       key={service.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
-                          <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Scissors className="h-4 w-4 text-gray-600" />
+                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Scissors className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {service.name}
                             </div>
                             {service.description && (
-                              <div className="text-xs text-gray-500 mt-0.5">
+                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-md">
                                 {service.description}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                          <Clock className="w-3 h-3 mr-1" />
                           {service.duration} min
                         </span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
                         {formatCurrency(service.price)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center space-x-2">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center space-x-1">
+                          <Link href={`/admin/servicos/${service.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="touch-target"
+                              aria-label="Visualizar serviço"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/admin/servicos/${service.id}/editar`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="touch-target"
+                              aria-label="Editar serviço"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                          </Link>
                           <Button
-                            onClick={() => handleEdit(service.id)}
                             variant="ghost"
                             size="sm"
-                            icon={Pencil}
-                          />
-                          <Button
                             onClick={() => handleDelete(service.id)}
-                            variant="ghost"
-                            size="sm"
-                            icon={Trash2}
-                          />
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 touch-target"
+                            aria-label="Excluir serviço"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -238,77 +231,72 @@ export default function ServicosPage() {
               </table>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Modal de Edição */}
-      {showEditModal && editingService && (
-        <ServiceModal
-          service={{
-            ...editingService,
-            description: editingService.description ?? ''
-          }}
-          onSave={async (dadosAtualizados) => {
-            try {
-              const response = await fetch('/api/services', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  id: editingService.id,
-                  name: dadosAtualizados.name,
-                  description: dadosAtualizados.description,
-                  duration: dadosAtualizados.duration,
-                  price: dadosAtualizados.price
-                })
-              });
-              if (response.ok) {
-                success('Serviço atualizado com sucesso');
-                setShowEditModal(false);
-                setEditingService(null);
-                fetchServices();
-              } else {
-                error('Erro ao atualizar serviço');
-              }
-            } catch (err) {
-              error('Erro ao atualizar serviço');
-            }
-          }}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingService(null);
-          }}
-        />
-      )}
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-4">
+            {filteredServices.map((service) => (
+              <div
+                key={service.id}
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+              >
+                <div className="flex items-start space-x-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Scissors className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                      {service.name}
+                    </h3>
+                    {service.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-      {/* Modal de Novo Serviço */}
-      {showNewModal && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Duração</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {service.duration} min
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Preço</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {formatCurrency(service.price)}
+                    </p>
+                  </div>
+                </div>
 
-        <ServiceModal
-          onSave={async (novoServico) => {
-            try {
-              const response = await fetch('/api/services', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  name: novoServico.name,
-                  description: novoServico.description,
-                  duration: novoServico.duration,
-                  price: novoServico.price
-                })
-              });
-              if (response.ok) {
-                success('Serviço criado com sucesso');
-                setShowNewModal(false);
-                fetchServices();
-              } else {
-                error('Erro ao criar serviço');
-              }
-            } catch (err) {
-              error('Erro ao criar serviço');
-            }
-          }}
-          onClose={() => setShowNewModal(false)}
-        />
+                <div className="flex space-x-2">
+                  <Link href={`/admin/servicos/${service.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full touch-target">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver
+                    </Button>
+                  </Link>
+                  <Link href={`/admin/servicos/${service.id}/editar`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full touch-target">
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Editar
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(service.id)}
+                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 touch-target"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
