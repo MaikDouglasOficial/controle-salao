@@ -46,7 +46,8 @@ export function Sidebar() {
         <div className="flex items-center justify-between px-4 py-3">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-900"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-900 touch-target"
+            aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -102,7 +103,7 @@ export function Sidebar() {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all text-sm',
+                    'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all text-sm touch-target',
                     isActive
                       ? 'bg-blue-50 text-blue-600 font-medium border border-blue-200'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -123,7 +124,7 @@ export function Sidebar() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all text-sm font-medium"
+              className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all text-sm font-medium touch-target"
             >
               <LogOut className="h-5 w-5" />
               <span>Sair</span>

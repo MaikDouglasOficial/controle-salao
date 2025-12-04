@@ -139,7 +139,7 @@
   
   /* ===== BOTÕES PADRONIZADOS ===== */
   .btn-base {
-    @apply inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-button shadow-button hover:shadow-button-hover;
+    @apply inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-button shadow-button hover:shadow-button-hover touch-target;
   }
   
   .btn-primary {
@@ -205,7 +205,7 @@
   }
   
   .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-input focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-body;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-input focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-body touch-target;
   }
   
   .form-textarea {
@@ -226,7 +226,7 @@
   }
   
   .filter-tab {
-    @apply px-4 py-2 text-body-sm font-medium rounded-filter border transition-all duration-200 cursor-pointer;
+    @apply px-4 py-2 text-body-sm font-medium rounded-filter border transition-all duration-200 cursor-pointer touch-target;
   }
   
   .filter-tab-inactive {
