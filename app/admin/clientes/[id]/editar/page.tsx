@@ -1,737 +1,329 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
-  User, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  DollarSign,
-  ShoppingBag,
-  Scissors,
-  Clock,
-  Filter,
-  TrendingUp,
-  Award,
-  X,
-  Pencil
-} from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useToast } from '@/hooks/useToast';
+import { useState, useRef, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import { useToast } from '@/hooks/useToast'
+import { ArrowLeft, Camera, X } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { LoadingSpinner } from '@/components/ui'
+import Link from 'next/link'
+import Image from 'next/image'
 
-interface Customer {
-  id: number;
-  name: string;
-  email: string | null;
-  phone: string;
-  birthday: string | null;
-  notes: string | null;
-  createdAt: string;
-  photo?: string;
-}
-
-interface Appointment {
-  id: number;
-  date: string;
-  time: string;
-  status: string;
-  notes: string | null;
-  service: {
-    name: string;
-    price: number;
-    duration: number;
-  };
-}
-
-interface Sale {
-  id: number;
-  date: string;
-  total: number;
-  paymentMethod: string;
-  items: {
-    product?: {
-      name: string;
-    };
-    service?: {
-      name: string;
-    };
-    quantity: number;
-    price: number;
-  }[];
-}
-
-export default function ClienteDetalhesPage() {
-  const { success, error } = useToast();
-  const params = useParams();
-  const router = useRouter();
-  const customerId = params.id as string;
-
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-
-  // Filtros
-  const [filterType, setFilterType] = useState<'all' | 'appointments' | 'sales'>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterPeriod, setFilterPeriod] = useState<'all' | '7days' | '30days' | '90days' | 'year'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+export default function EditarClientePage() {
+  const router = useRouter()
+  const params = useParams()
+  const toast = useToast()
+  const id = params?.id as string
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    cpf: '',
+    aniversario: '',
+    observacoes: '',
+    photo: '',
+  })
 
   useEffect(() => {
-    fetchCustomerData();
-  }, [customerId]);
+    if (id) {
+      fetchCustomer()
+    }
+  }, [id])
 
-  const fetchCustomerData = async () => {
-    setLoading(true);
+  const fetchCustomer = async () => {
     try {
-      const [customerRes, appointmentsRes, salesRes] = await Promise.all([
-        fetch(`/api/customers/${customerId}`),
-        fetch(`/api/appointments?customerId=${customerId}`),
-        fetch(`/api/sales?customerId=${customerId}`),
-      ]);
-
-      if (customerRes.ok) {
-        const customerData = await customerRes.json();
-        setCustomer(customerData);
-      }
-
-      if (appointmentsRes.ok) {
-        const appointmentsData = await appointmentsRes.json();
-        setAppointments(appointmentsData);
-      }
-
-      if (salesRes.ok) {
-        const salesData = await salesRes.json();
-        setSales(salesData);
-      }
+      setLoading(true)
+      const response = await fetch(`/api/customers/${id}`)
+      
+      if (!response.ok) throw new Error('Cliente não encontrado')
+      
+      const customer = await response.json()
+      setForm({
+        nome: customer.name || '',
+        email: customer.email || '',
+        telefone: customer.phone || '',
+        cpf: customer.cpf || '',
+        aniversario: customer.birthday || '',
+        observacoes: customer.notes || '',
+        photo: customer.photo || '',
+      })
+      setPhotoPreview(customer.photo)
     } catch (error) {
-      console.error('Erro ao buscar dados do cliente:', error);
+      console.error('Erro ao buscar cliente:', error)
+      toast.error('Erro ao carregar dados do cliente')
+      router.push('/admin/clientes')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleEdit = () => {
-    if (customer) {
-      setEditingCustomer(customer);
-      setShowEditModal(true);
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Arquivo muito grande. Máximo 5MB')
+      return
     }
-  };
 
-  const handleUpdateCustomer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCustomer) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione uma imagem')
+      return
+    }
 
+    setUploading(true)
     try {
-      const response = await fetch('/api/customers', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editingCustomer),
-      });
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
 
       if (response.ok) {
-        await fetchCustomerData();
-        setShowEditModal(false);
-        setEditingCustomer(null);
-        success('Cliente atualizado com sucesso!');
+        const { url } = await response.json()
+        setForm((f) => ({ ...f, photo: url }))
+        setPhotoPreview(url)
+        toast.success('Foto atualizada')
       } else {
-        const err = await response.json();
-        error(err.error || 'Erro ao atualizar cliente');
+        const error = await response.json()
+        toast.error(error.error || 'Erro ao fazer upload')
       }
-    } catch (err) {
-      console.error('Erro ao atualizar cliente:', err);
-      error('Erro ao atualizar cliente');
+    } catch (error) {
+      console.error('Erro ao fazer upload:', error)
+      toast.error('Erro ao fazer upload da foto')
+    } finally {
+      setUploading(false)
     }
-  };
+  }
 
-  // Estatísticas
-  const totalGasto = sales.reduce((sum, sale) => sum + sale.total, 0);
-  const totalAgendamentos = appointments.length;
-  const agendamentosConcluidos = appointments.filter(a => a.status === 'CONCLUIDO').length;
-  const ultimaVisita = appointments.length > 0 
-    ? new Date(Math.max(...appointments.map(a => new Date(a.date).getTime())))
-    : null;
+  const handleRemovePhoto = () => {
+    setForm((f) => ({ ...f, photo: '' }))
+    setPhotoPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
-  // Filtros aplicados
-  const getFilteredData = () => {
-    let filteredAppointments = [...appointments];
-    let filteredSales = [...sales];
-
-    // Filtro por período
-    if (filterPeriod !== 'all') {
-      const now = new Date();
-      const days = {
-        '7days': 7,
-        '30days': 30,
-        '90days': 90,
-        'year': 365
-      }[filterPeriod] || 0;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`/api/customers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.nome,
+          email: form.email,
+          phone: form.telefone,
+          cpf: form.cpf,
+          birthday: form.aniversario,
+          notes: form.observacoes,
+          photo: form.photo || null,
+        }),
+      })
       
-      const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      
-      filteredAppointments = filteredAppointments.filter(
-        a => new Date(a.date) >= cutoffDate
-      );
-      filteredSales = filteredSales.filter(
-        s => new Date(s.date) >= cutoffDate
-      );
+      if (response.ok) {
+        toast.success('Cliente atualizado com sucesso!')
+        router.push(`/admin/clientes/${id}`)
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Erro ao atualizar cliente')
+      }
+    } catch (error) {
+      toast.error('Erro ao atualizar cliente')
     }
-
-    // Filtro por status (agendamentos)
-    if (filterStatus !== 'all') {
-      filteredAppointments = filteredAppointments.filter(
-        a => a.status === filterStatus
-      );
-    }
-
-    // Filtro por tipo
-    if (filterType === 'appointments') {
-      filteredSales = [];
-    } else if (filterType === 'sales') {
-      filteredAppointments = [];
-    }
-
-    // Busca por termo
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filteredAppointments = filteredAppointments.filter(
-        a => a.service.name.toLowerCase().includes(term) ||
-             a.status.toLowerCase().includes(term)
-      );
-      filteredSales = filteredSales.filter(
-        s => s.paymentMethod.toLowerCase().includes(term) ||
-             s.items.some(item => 
-               item.product?.name.toLowerCase().includes(term) ||
-               item.service?.name.toLowerCase().includes(term)
-             )
-      );
-    }
-
-    return { filteredAppointments, filteredSales };
-  };
-
-  const { filteredAppointments, filteredSales } = getFilteredData();
-
-  // Combinar e ordenar por data
-  const combinedHistory = [
-    ...filteredAppointments.map(a => ({ type: 'appointment', data: a, date: new Date(a.date) })),
-    ...filteredSales.map(s => ({ type: 'sale', data: s, date: new Date(s.date) }))
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      agendado: 'bg-blue-100 text-blue-800',
-      confirmado: 'bg-green-100 text-green-800',
-      concluido: 'bg-gray-100 text-gray-800',
-      cancelado: 'bg-red-100 text-red-800',
-      PENDENTE: 'bg-yellow-100 text-yellow-800',
-      CONFIRMADO: 'bg-blue-100 text-blue-800',
-      CONCLUIDO: 'bg-green-100 text-green-800',
-      CANCELADO: 'bg-red-100 text-red-800',
-    };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatStatus = (status: string) => {
-    const labels = {
-      agendado: 'Agendado',
-      confirmado: 'Confirmado',
-      concluido: 'Concluído',
-      cancelado: 'Cancelado',
-      PENDENTE: 'Pendente',
-      CONFIRMADO: 'Confirmado',
-      CONCLUIDO: 'Concluído',
-      CANCELADO: 'Cancelado',
-    };
-    return labels[status as keyof typeof labels] || status;
-  };
-
-  const getPaymentMethodColor = (method: string) => {
-    const colors = {
-      DINHEIRO: 'bg-green-100 text-green-800',
-      CARTAO_CREDITO: 'bg-blue-100 text-blue-800',
-      CARTAO_DEBITO: 'bg-purple-100 text-purple-800',
-      PIX: 'bg-teal-100 text-teal-800',
-    };
-    return colors[method as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatPaymentMethod = (method: string) => {
-    const methods = {
-      DINHEIRO: 'Dinheiro',
-      CARTAO_CREDITO: 'Cartão Crédito',
-      CARTAO_DEBITO: 'Cartão Débito',
-      PIX: 'PIX',
-    };
-    return methods[method as keyof typeof methods] || method;
-  };
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="container-app py-6 flex items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" />
       </div>
-    );
-  }
-
-  if (!customer) {
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="text-center py-12">
-          <p className="text-gray-600">Cliente não encontrado</p>
-          <Link
-            href="/admin/clientes"
-            className="mt-4 inline-block text-primary-600 hover:text-primary-700"
-          >
-            Voltar para clientes
-          </Link>
-        </div>
-      </div>
-    );
+    )
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/admin/clientes"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-600" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Detalhes do Cliente</h1>
-          <p className="text-gray-600 mt-1">Histórico completo e informações</p>
-        </div>
-      </div>
-
-      {/* Informações do Cliente */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-              {customer.photo ? (
-                <Image
-                  src={customer.photo}
-                  alt={customer.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <User className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{customer.name}</h2>
-              <p className="text-gray-600">Cliente desde {new Date(customer.createdAt).toLocaleDateString('pt-BR')}</p>
-            </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container-app py-6 spacing-section">
+        <div className="flex items-center gap-4 spacing-card">
+          <Link href={`/admin/clientes/${id}`}>
+            <Button variant="ghost" icon={ArrowLeft} size="sm">
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
+              Editar Cliente
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Atualize as informações do cliente
+            </p>
           </div>
-          <button
-            onClick={handleEdit}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            <Pencil className="h-4 w-4" />
-            <span>Editar</span>
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {customer.email && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Mail className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm font-medium text-gray-900">{customer.email}</p>
-              </div>
-            </div>
-          )}
-          
-          {customer.phone && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Phone className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Telefone</p>
-                <p className="text-sm font-medium text-gray-900">{customer.phone}</p>
-              </div>
-            </div>
-          )}
-          
-          {customer.birthday && (
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Calendar className="h-5 w-5 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Aniversário</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {new Date(customer.birthday).toLocaleDateString('pt-BR')}
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6 shadow-sm">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Foto do Cliente
+            </label>
+            <div className="flex items-center gap-4">
+              {photoPreview ? (
+                <div className="relative">
+                  <Image
+                    src={photoPreview}
+                    alt="Preview"
+                    width={100}
+                    height={100}
+                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors touch-target"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <Camera className="h-8 w-8 text-gray-400" />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  id="photo-upload"
+                />
+                <label htmlFor="photo-upload">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    icon={Camera}
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploading ? 'Enviando...' : 'Alterar Foto'}
+                  </Button>
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  JPG, PNG ou GIF. Máximo 5MB.
                 </p>
               </div>
             </div>
-          )}
-        </div>
-
-        {customer.notes && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-medium text-blue-900 mb-1">Observações</p>
-            <p className="text-sm text-blue-700">{customer.notes}</p>
           </div>
-        )}
-      </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nome Completo *
+              </label>
+              <input
+                type="text"
+                id="nome"
+                required
+                value={form.nome}
+                onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+
             <div>
-              <p className="text-sm text-gray-600">Total Gasto</p>
-              <p className="text-2xl font-bold text-green-600">
-                R$ {totalGasto.toFixed(2)}
-              </p>
+              <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                CPF
+              </label>
+              <input
+                type="text"
+                id="cpf"
+                value={form.cpf}
+                onChange={(e) => setForm({ ...form, cpf: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
             </div>
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Agendamentos</p>
-              <p className="text-2xl font-bold text-blue-600">{totalAgendamentos}</p>
+              <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Telefone *
+              </label>
+              <input
+                type="tel"
+                id="telefone"
+                required
+                value={form.telefone}
+                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
             </div>
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Concluídos</p>
-              <p className="text-2xl font-bold text-purple-600">{agendamentosConcluidos}</p>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                E-mail
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
             </div>
-            <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Award className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Última Visita</p>
-              <p className="text-lg font-bold text-orange-600">
-                {ultimaVisita ? ultimaVisita.toLocaleDateString('pt-BR') : 'Nunca'}
-              </p>
+              <label htmlFor="aniversario" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Data de Nascimento
+              </label>
+              <input
+                type="date"
+                id="aniversario"
+                value={form.aniversario}
+                onChange={(e) => setForm({ ...form, aniversario: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
             </div>
-            <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Clock className="h-6 w-6 text-orange-600" />
+
+            <div className="md:col-span-2">
+              <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Observações
+              </label>
+              <textarea
+                id="observacoes"
+                rows={4}
+                value={form.observacoes}
+                onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 resize-none"
+              />
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Filter className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tipo
-            </label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push(`/admin/clientes/${id}`)}
+              className="flex-1"
             >
-              <option value="all">Todos</option>
-              <option value="appointments">Agendamentos</option>
-              <option value="sales">Vendas</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
             >
-              <option value="all">Todos</option>
-              <option value="agendado">Agendado</option>
-              <option value="confirmado">Confirmado</option>
-              <option value="concluido">Concluído</option>
-              <option value="cancelado">Cancelado</option>
-            </select>
+              Salvar Alterações
+            </Button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Período
-            </label>
-            <select
-              value={filterPeriod}
-              onChange={(e) => setFilterPeriod(e.target.value as any)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="all">Todo período</option>
-              <option value="7days">Últimos 7 dias</option>
-              <option value="30days">Últimos 30 dias</option>
-              <option value="90days">Últimos 90 dias</option>
-              <option value="year">Último ano</option>
-            </select>
-          </div>
-        </div>
-
-        {(searchTerm || filterType !== 'all' || filterStatus !== 'all' || filterPeriod !== 'all') && (
-          <button
-            onClick={() => {
-              setSearchTerm('');
-              setFilterType('all');
-              setFilterStatus('all');
-              setFilterPeriod('all');
-            }}
-            className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium"
-          >
-            Limpar filtros
-          </button>
-        )}
+        </form>
       </div>
-
-      {/* Histórico */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Histórico ({combinedHistory.length})
-        </h3>
-
-        {combinedHistory.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Nenhum registro encontrado</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {combinedHistory.map((item, index) => (
-              <div
-                key={`${item.type}-${index}`}
-                className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors"
-              >
-                {item.type === 'appointment' ? (
-                  // Agendamento
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Scissors className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-gray-900">
-                            {(item.data as Appointment).service.name}
-                          </h4>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor((item.data as Appointment).status)}`}>
-                            {formatStatus((item.data as Appointment).status)}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                          <span className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{new Date((item.data as Appointment).date).toLocaleDateString('pt-BR')}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{(item.data as Appointment).time}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <DollarSign className="h-4 w-4" />
-                            <span>R$ {(item.data as Appointment).service.price.toFixed(2)}</span>
-                          </span>
-                        </div>
-                        {(item.data as Appointment).notes && (
-                          <p className="mt-2 text-sm text-gray-500 italic">
-                            {(item.data as Appointment).notes}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // Venda
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <ShoppingBag className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-gray-900">Venda</h4>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getPaymentMethodColor((item.data as Sale).paymentMethod)}`}>
-                            {formatPaymentMethod((item.data as Sale).paymentMethod)}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                          <span className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{new Date((item.data as Sale).date).toLocaleDateString('pt-BR')}</span>
-                          </span>
-                          <span className="flex items-center space-x-1 text-green-600 font-semibold">
-                            <DollarSign className="h-4 w-4" />
-                            <span>R$ {(item.data as Sale).total.toFixed(2)}</span>
-                          </span>
-                        </div>
-                        <div className="mt-2 space-y-1">
-                          {(item.data as Sale).items.map((saleItem, idx) => (
-                            <div key={idx} className="text-sm text-gray-600">
-                              • {saleItem.product?.name || saleItem.service?.name} 
-                              <span className="text-gray-400"> x{saleItem.quantity}</span>
-                              <span className="text-gray-500"> - R$ {saleItem.price.toFixed(2)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Modal de Edição */}
-      {showEditModal && editingCustomer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Editar Cliente</h2>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingCustomer(null);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="h-6 w-6 text-gray-600" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleUpdateCustomer} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome Completo *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingCustomer.name}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Ex: João Silva"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telefone *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={editingCustomer.phone}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={editingCustomer.email || ''}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="joao@email.com"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data de Nascimento
-                  </label>
-                  <input
-                    type="date"
-                    value={editingCustomer.birthday ? editingCustomer.birthday.split('T')[0] : ''}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, birthday: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Observações
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={editingCustomer.notes || ''}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, notes: e.target.value || null })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Ex: Cliente VIP, prefere horários pela manhã..."
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditingCustomer(null);
-                  }}
-                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg font-medium"
-                >
-                  Salvar Alterações
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
-  );
+  )
 }
