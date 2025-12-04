@@ -106,23 +106,27 @@ export default function NovoClientePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container-app py-6 spacing-section">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 spacing-card">
           <Link href="/admin/clientes">
             <Button variant="ghost" icon={ArrowLeft} size="sm">
               Voltar
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Novo Cliente</h1>
-            <p className="text-sm text-gray-500 mt-1">Preencha os dados do cliente</p>
+            <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
+              Novo Cliente
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Preencha os dados do cliente
+            </p>
           </div>
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6 shadow-sm">
           {/* Upload de Foto */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
