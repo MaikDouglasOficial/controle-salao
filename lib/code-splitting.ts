@@ -16,64 +16,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-// ===== COMPONENTES DE MODAIS (Lazy) =====
-export const AdicionarClienteModal = dynamic(
-  () => import('@/components/AdicionarClienteModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const EditarClienteModal = dynamic(
-  () => import('@/components/EditarClienteModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const AdicionarProdutoModal = dynamic(
-  () => import('@/components/AdicionarProdutoModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const AdicionarServicoModal = dynamic(
-  () => import('@/components/AdicionarServicoModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const AdicionarProfissionalModal = dynamic(
-  () => import('@/components/AdicionarProfissionalModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const EditarProfissionalModal = dynamic(
-  () => import('@/components/EditarProfissionalModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
-export const AdicionarDespesaModal = dynamic(
-  () => import('@/components/AdicionarDespesaModal'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
-
 // ===== COMPONENTES PESADOS (Charts, Calendários, etc) =====
+// Nota: Modais de CRUD foram substituídos por páginas dedicadas
+// Apenas modais para confirmações e ações críticas devem ser usados
 
 // Chart.js lazy loading
 export const RevenueChart = dynamic(
