@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Users } from 'lucide-react';
-import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
+import { Plus, Search, Eye, Edit2, Trash2, Users, UserCheck, UserX, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { SkeletonTable } from '@/components/ui/Loading';
+import { NoResults } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 
 interface Professional {
@@ -18,20 +20,16 @@ interface Professional {
   createdAt: string;
 }
 
-export default function ProfessionalsPage() {
+export default function ProfissionaisPage() {
+  const router = useRouter();
   const { success, error } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
-  const [apiError, setApiError] = useState<string | null>(null);
-  
-  // Modal de criar/editar
-  const [showModal, setShowModal] = useState(false);
-  const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
-  // Modal de deletar
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingProfessional, setDeletingProfessional] = useState<Professional | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchProfessionals();
@@ -40,169 +38,128 @@ export default function ProfessionalsPage() {
   const fetchProfessionals = async () => {
     try {
       const response = await fetch('/api/professionals');
-      
-      if (!response.ok) {
-        setApiError('A API de profissionais não está disponível. Execute a migration do banco de dados.');
-        throw new Error('Erro ao buscar profissionais');
+      if (response.ok) {
+        const data = await response.json();
+        setProfessionals(Array.isArray(data) ? data : []);
       }
-      
-      const data = await response.json();
-      setProfessionals(Array.isArray(data) ? data : []);
-      setApiError(null);
-    } catch (error) {
-      console.error('Erro ao buscar profissionais:', error);
-      setProfessionals([]);
-      if (!apiError) {
-        setApiError('Não foi possível carregar os profissionais. Verifique se executou: npx prisma migrate dev --name add_professional_model');
-      }
+    } catch (err) {
+      console.error('Erro ao buscar profissionais:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDeleteClick = (professional: Professional) => {
+    setDeletingProfessional(professional);
+    setShowDeleteDialog(true);
+  };
 
-
-  const handleDeleteProfessional = async () => {
+  const handleDelete = async () => {
     if (!deletingProfessional) return;
 
+    setDeleting(true);
     try {
       const response = await fetch(`/api/professionals?id=${deletingProfessional.id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao deletar profissional');
+      if (response.ok) {
+        success('Profissional excluído com sucesso');
+        fetchProfessionals();
+        setShowDeleteDialog(false);
+        setDeletingProfessional(null);
+      } else {
+        const errorData = await response.json();
+        error(errorData.error || 'Erro ao excluir profissional');
       }
-
-      await fetchProfessionals();
-      setShowDeleteModal(false);
-      setDeletingProfessional(null);
-      success('Profissional removido com sucesso!');
-    } catch (error: any) {
-      console.error('Erro ao deletar profissional:', error);
-      error(error.message || 'Erro ao deletar profissional');
+    } catch (err) {
+      console.error('Erro ao excluir profissional:', err);
+      error('Erro ao excluir profissional');
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleDeleteClick = (professional: Professional) => {
-    setDeletingProfessional(professional);
-    setShowDeleteModal(true);
-  };
+  const filteredProfessionals = professionals.filter((prof) => {
+    const matchesSearch =
+      prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prof.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prof.phone?.includes(searchTerm);
 
-  // Filtrar profissionais
-  const filteredProfessionals = Array.isArray(professionals) ? professionals.filter(prof => {
-    const matchesSearch = prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         prof.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         prof.phone?.includes(searchTerm);
-    
-    const matchesActive = filterActive === 'all' || 
-                         (filterActive === 'active' && prof.active) ||
-                         (filterActive === 'inactive' && !prof.active);
-    
+    const matchesActive =
+      filterActive === 'all' ||
+      (filterActive === 'active' && prof.active) ||
+      (filterActive === 'inactive' && !prof.active);
+
     return matchesSearch && matchesActive;
-  }) : [];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    <div className="container-app">
+      {/* Header */}
+      <div className="mb-spacing-section">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
               Profissionais
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie sua equipe
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Gerencie sua equipe de profissionais
             </p>
           </div>
           <Button
-            onClick={() => { setEditingProfessional(null); setShowModal(true); }}
-            icon={Plus}
-            size="lg"
+            onClick={() => router.push('/admin/profissionais/novo')}
+            className="touch-target"
           >
+            <Plus className="w-5 h-5 mr-2" />
             Novo Profissional
           </Button>
         </div>
+      </div>
 
-      {/* Aviso de Erro da API */}
-      {apiError && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-amber-800">Atenção: Configuração necessária</h3>
-              <div className="mt-2 text-sm text-amber-700">
-                <p>{apiError}</p>
-                <p className="mt-2">
-                  <strong>Comandos necessários:</strong>
-                </p>
-                <pre className="mt-1 bg-amber-100 p-2 rounded text-xs overflow-x-auto">
-                  npx prisma migrate dev --name add_professional_model{'\n'}
-                  npx prisma generate{'\n'}
-                  npm run prisma:seed
-                </pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Busca */}
+      {/* Search and Filters */}
+      <div className="mb-spacing-element bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Buscar por nome, especialidade ou telefone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             />
           </div>
 
-          {/* Filtro Status */}
+          {/* Status Filter */}
           <div className="flex gap-2">
             <button
               onClick={() => setFilterActive('all')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
                 filterActive === 'all'
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white dark:bg-blue-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               Todos
             </button>
             <button
               onClick={() => setFilterActive('active')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
                 filterActive === 'active'
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-green-600 text-white dark:bg-green-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               Ativos
             </button>
             <button
               onClick={() => setFilterActive('inactive')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
                 filterActive === 'inactive'
-                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-red-600 text-white dark:bg-red-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               Inativos
@@ -211,159 +168,271 @@ export default function ProfessionalsPage() {
         </div>
       </div>
 
-      {/* Lista de Profissionais */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especialidade</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProfessionals.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
-                    Nenhum profissional encontrado
-                  </td>
-                </tr>
-              ) : (
-                filteredProfessionals.map((professional) => (
-                  <tr key={professional.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                          {professional.photo ? (
-                            <Image
-                              src={professional.photo}
-                              alt={professional.name}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <Users className="h-5 w-5" />
+      {/* Desktop Table */}
+      {loading ? (
+        <div className="hidden lg:block">
+          <SkeletonTable />
+        </div>
+      ) : filteredProfessionals.length === 0 ? (
+        searchTerm ? (
+          <NoResults
+            searchTerm={searchTerm}
+            onClearSearch={() => setSearchTerm('')}
+          />
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center shadow-sm">
+            <Users className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Nenhum profissional cadastrado
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Comece adicionando o primeiro profissional da sua equipe
+            </p>
+            <Button onClick={() => router.push('/admin/profissionais/novo')}>
+              <Plus className="w-5 h-5 mr-2" />
+              Adicionar Profissional
+            </Button>
+          </div>
+        )
+      ) : (
+        <>
+          <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Profissional
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Especialidade
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Contato
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredProfessionals.map((professional) => (
+                    <tr key={professional.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
+                          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                            {professional.photo ? (
+                              <Image
+                                src={professional.photo}
+                                alt={professional.name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                <Users className="w-5 h-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {professional.name}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        {professional.specialty || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        <div className="space-y-1">
+                          {professional.phone && <div>{professional.phone}</div>}
+                          {professional.email && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {professional.email}
                             </div>
                           )}
                         </div>
-                        <div className="font-medium text-gray-900">{professional.name}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {professional.specialty || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {professional.phone || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {professional.email || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {professional.active ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          <UserCheck size={12} />
-                          Ativo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                          <UserX size={12} />
-                          Inativo
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center space-x-1">
-                        <Button
-                          onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
-                          variant="ghost"
-                          size="sm"
-                          icon={Edit2}
-                        />
-                        <Button
-                          onClick={() => handleDeleteClick(professional)}
-                          variant="ghost"
-                          size="sm"
-                          icon={Trash2}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {professional.active ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <UserCheck className="w-3 h-3" />
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                            <UserX className="w-3 h-3" />
+                            Inativo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Visualizar"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/profissionais/${professional.id}/editar`)}
+                            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 dark:text-gray-400 dark:hover:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Editar"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(professional)}
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Excluir"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-      {/* Modal de criar/editar profissional */}
-      {showModal && (
-        <ProfissionalEditarModal
-          profissional={editingProfessional ? {
-            ...editingProfessional,
-            phone: editingProfessional.phone ?? '',
-            email: editingProfessional.email ?? '',
-            specialty: editingProfessional.specialty ?? '',
-            photo: editingProfessional.photo ?? '',
-          } : undefined}
-          onSave={async (data) => {
-            try {
-              const method = editingProfessional ? 'PUT' : 'POST';
-              const url = editingProfessional ? `/api/professionals?id=${editingProfessional.id}` : '/api/professionals';
-              const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-              });
-              if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Erro ao salvar profissional');
-              }
-              await fetchProfessionals();
-              setShowModal(false);
-              setEditingProfessional(null);
-              success(editingProfessional ? 'Profissional atualizado com sucesso!' : 'Profissional cadastrado com sucesso!');
-            } catch (error: any) {
-              error(error.message || 'Erro ao salvar profissional.');
-            }
-          }}
-          onClose={() => { setShowModal(false); setEditingProfessional(null); }}
-        />
+          {/* Mobile Cards */}
+          <div className="lg:hidden grid gap-4">
+            {filteredProfessionals.map((professional) => (
+              <div
+                key={professional.id}
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                    {professional.photo ? (
+                      <Image
+                        src={professional.photo}
+                        alt={professional.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+                        <Users className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      {professional.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      {professional.specialty || 'Sem especialidade'}
+                    </p>
+                    {professional.active ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        <UserCheck className="w-3 h-3" />
+                        Ativo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                        <UserX className="w-3 h-3" />
+                        Inativo
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {(professional.phone || professional.email) && (
+                  <div className="mb-4 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    {professional.phone && <div>{professional.phone}</div>}
+                    {professional.email && <div>{professional.email}</div>}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
+                    className="flex-1 touch-target"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Ver
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/admin/profissionais/${professional.id}/editar`)}
+                    className="flex-1 touch-target"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <button
+                    onClick={() => handleDeleteClick(professional)}
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
-      {/* Modal Confirmar Exclusão */}
-      {showDeleteModal && deletingProfessional && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Confirmar Exclusão</h2>
-            <p className="text-gray-600 mb-6">
-              Tem certeza que deseja excluir o profissional <strong className="text-gray-900">{deletingProfessional.name}</strong>?
-            </p>
-            <div className="flex gap-3">
-              <button
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && deletingProfessional && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Confirmar Exclusão
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Tem certeza que deseja excluir o profissional <strong>{deletingProfessional.name}</strong>? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
                 onClick={() => {
-                  setShowDeleteModal(false);
+                  setShowDeleteDialog(false);
                   setDeletingProfessional(null);
                 }}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium"
+                disabled={deleting}
+                className="touch-target"
               >
                 Cancelar
-              </button>
-              <button
-                onClick={handleDeleteProfessional}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-lg"
+              </Button>
+              <Button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="touch-target bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
               >
-                Excluir
-              </button>
+                {deleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Excluindo...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
       )}
-      </div>
     </div>
   );
 }
