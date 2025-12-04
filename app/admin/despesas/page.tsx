@@ -1,518 +1,439 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import DespesaModal from '@/components/DespesaModal';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Plus, Search, Eye, Edit2, Trash2, Receipt, TrendingUp, TrendingDown, AlertTriangle, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { SkeletonTable } from '@/components/ui/Loading';
+import { NoResults } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 
 interface Expense {
   id: number;
-  description: string;
-  amount: number;
+  name: string;
   category: string;
+  value: number;
+  type: string;
   date: string;
   notes: string | null;
 }
 
 export default function DespesasPage() {
-  const { success, error, confirm } = useToast();
+  const router = useRouter();
+  const { success, error } = useToast();
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  
-  // Filtros
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'FIXA' | 'VARIAVEL'>('all');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [expenses, selectedMonth, selectedYear, selectedCategory, startDate, endDate]);
-
   const fetchExpenses = async () => {
     try {
       const response = await fetch('/api/expenses');
-      const data = await response.json();
-      setExpenses(data);
-      setFilteredExpenses(data);
-    } catch (error) {
-      console.error('Erro ao buscar despesas:', error);
+      if (response.ok) {
+        const data = await response.json();
+        setExpenses(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar despesas:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...expenses];
-
-    // Filtrar por intervalo de datas (prioritário sobre mês/ano)
-    if (startDate || endDate) {
-      filtered = filtered.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        const start = startDate ? new Date(startDate) : new Date('1900-01-01');
-        const end = endDate ? new Date(endDate) : new Date('2100-12-31');
-        
-        // Ajustar para incluir o dia inteiro
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        
-        return expenseDate >= start && expenseDate <= end;
-      });
-    } else {
-      // Filtrar por mês (somente se não houver intervalo de datas)
-      if (selectedMonth) {
-        filtered = filtered.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getMonth() + 1 === parseInt(selectedMonth);
-        });
-      }
-
-      // Filtrar por ano (somente se não houver intervalo de datas)
-      if (selectedYear) {
-        filtered = filtered.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getFullYear() === parseInt(selectedYear);
-        });
-      }
-    }
-
-    // Filtrar por categoria
-    if (selectedCategory) {
-      filtered = filtered.filter(expense => expense.category === selectedCategory);
-    }
-
-    setFilteredExpenses(filtered);
+  const handleDeleteClick = (expense: Expense) => {
+    setDeletingExpense(expense);
+    setShowDeleteDialog(true);
   };
 
-  const clearFilters = () => {
-    setSelectedMonth('');
-    setSelectedYear('');
-    setSelectedCategory('');
-    setStartDate('');
-    setEndDate('');
-    setFilteredExpenses(expenses);
-  };
+  const handleDelete = async () => {
+    if (!deletingExpense) return;
 
-  const handleDelete = async (id: number) => {
-    const confirmed = await confirm({
-      title: 'Excluir Despesa',
-      message: 'Tem certeza que deseja excluir esta despesa?',
-      type: 'danger'
-    });
-
-    if (!confirmed) {
-      return;
-    }
-
+    setDeleting(true);
     try {
-      const response = await fetch('/api/expenses', {
+      const response = await fetch(`/api/expenses?id=${deletingExpense.id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
       });
 
       if (response.ok) {
-        success('Despesa excluída com sucesso!');
+        success('Despesa excluída com sucesso');
         fetchExpenses();
+        setShowDeleteDialog(false);
+        setDeletingExpense(null);
       } else {
-        error('Erro ao deletar despesa');
+        const errorData = await response.json();
+        error(errorData.error || 'Erro ao excluir despesa');
       }
     } catch (err) {
-      console.error('Erro ao deletar despesa:', err);
-      error('Erro ao deletar despesa');
+      console.error('Erro ao excluir despesa:', err);
+      error('Erro ao excluir despesa');
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleEdit = (expense: Expense) => {
-    setEditingExpense(expense);
-    setShowEditModal(true);
-  };
+  const filteredExpenses = expenses.filter((expense) => {
+    const matchesSearch =
+      expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      expense.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const handleSaveExpense = async (expenseData: any) => {
-    try {
-      const isEdit = !!expenseData.id;
-      const method = isEdit ? 'PUT' : 'POST';
-      
-      const response = await fetch('/api/expenses', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(expenseData),
-      });
+    const matchesType =
+      filterType === 'all' || expense.type === filterType;
 
-      if (response.ok) {
-        success(`Despesa ${isEdit ? 'atualizada' : 'criada'} com sucesso!`);
-        setShowEditModal(false);
-        setShowCreateModal(false);
-        setEditingExpense(null);
-        fetchExpenses();
-      } else {
-        const err = await response.json();
-        error(err.error || `Erro ao ${isEdit ? 'atualizar' : 'criar'} despesa`);
-      }
-    } catch (err) {
-      console.error('Erro ao salvar despesa:', err);
-      error('Erro ao salvar despesa');
-    }
-  };
+    return matchesSearch && matchesType;
+  });
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      PRODUTOS: 'bg-blue-100 text-blue-700',
-      SALARIO: 'bg-green-100 text-green-700',
-      ALUGUEL: 'bg-indigo-100 text-indigo-700',
-      MARKETING: 'bg-rose-100 text-rose-700',
-      OUTROS: 'bg-gray-100 text-gray-700',
-    };
-    return colors[category] || colors.OUTROS;
-  };
-
-  const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + exp.amount, 0);
-
-  // Gerar lista de anos (últimos 5 anos + ano atual)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.value, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="container-app">
+      {/* Header */}
+      <div className="mb-spacing-section">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Despesas</h1>
-            <p className="text-sm text-gray-500 mt-1">Controle seus gastos</p>
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
+              Despesas
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Gerencie suas despesas fixas e variáveis
+            </p>
           </div>
           <Button
-            onClick={() => setShowCreateModal(true)}
-            icon={Plus}
-            size="lg"
+            onClick={() => router.push('/admin/despesas/nova')}
+            className="touch-target"
           >
+            <Plus className="w-5 h-5 mr-2" />
             Nova Despesa
           </Button>
         </div>
-
-      {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <h3 className="text-sm font-medium text-gray-700">Filtros</h3>
-          </div>
-          {(selectedMonth || selectedYear || selectedCategory) && (
-            <button
-              onClick={clearFilters}
-              className="flex items-center space-x-1 px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded-md transition-colors"
-            >
-              <X className="h-3 w-3" />
-              <span>Limpar</span>
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase">
-              Data Inicial
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                if (e.target.value) {
-                  setSelectedMonth('');
-                  setSelectedYear('');
-                }
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase">
-              Data Final
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                if (e.target.value) {
-                  setSelectedMonth('');
-                  setSelectedYear('');
-                }
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase">
-              Mês
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => {
-                setSelectedMonth(e.target.value);
-                if (e.target.value) {
-                  setStartDate('');
-                  setEndDate('');
-                }
-              }}
-              disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="">Todos os meses</option>
-              <option value="1">Janeiro</option>
-              <option value="2">Fevereiro</option>
-              <option value="3">Março</option>
-              <option value="4">Abril</option>
-              <option value="5">Maio</option>
-              <option value="6">Junho</option>
-              <option value="7">Julho</option>
-              <option value="8">Agosto</option>
-              <option value="9">Setembro</option>
-              <option value="10">Outubro</option>
-              <option value="11">Novembro</option>
-              <option value="12">Dezembro</option>
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase">
-              Ano
-            </label>
-            <select
-              value={selectedYear}
-              onChange={(e) => {
-                setSelectedYear(e.target.value);
-                if (e.target.value) {
-                  setStartDate('');
-                  setEndDate('');
-                }
-              }}
-              disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="">Todos os anos</option>
-              {years.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase">
-              Categoria
-            </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            >
-              <option value="">Todas as categorias</option>
-              <option value="PRODUTOS">Produtos</option>
-              <option value="SALARIO">Salário</option>
-              <option value="ALUGUEL">Aluguel</option>
-              <option value="MARKETING">Marketing</option>
-              <option value="OUTROS">Outros</option>
-            </select>
-          </div>
-        </div>
-        
-        {(selectedMonth || selectedYear || selectedCategory || startDate || endDate) && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <div className="text-sm font-medium text-blue-900">
-              Mostrando {filteredExpenses.length} de {expenses.length} despesas
-            </div>
-            <div className="text-xs text-blue-600 mt-1">
-              {startDate && `De: ${new Date(startDate).toLocaleDateString('pt-BR')}`}
-              {startDate && endDate && ' • '}
-              {endDate && `Até: ${new Date(endDate).toLocaleDateString('pt-BR')}`}
-              {(startDate || endDate) && selectedCategory && ' • '}
-              {!startDate && !endDate && selectedMonth && `Mês: ${['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][parseInt(selectedMonth) - 1]}`}
-              {!startDate && !endDate && selectedMonth && selectedYear && ' • '}
-              {!startDate && !endDate && selectedYear && `Ano: ${selectedYear}`}
-              {(!startDate && !endDate && (selectedMonth || selectedYear)) && selectedCategory && ' • '}
-              {selectedCategory && `Categoria: ${selectedCategory}`}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Total de Despesas</p>
-              <p className="text-2xl font-semibold text-gray-900">{formatCurrency(totalExpenses)}</p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <TrendingDown className="h-5 w-5 text-gray-600" />
-            </div>
+      {/* Stats Card */}
+      <div className="mb-spacing-element bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <TrendingDown className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Total de Registros</p>
-              <p className="text-2xl font-semibold text-gray-900">{filteredExpenses.length}</p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-red-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Média por Despesa</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
-              </p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-gray-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Lista de Despesas */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {filteredExpenses.length === 0 ? (
-          <div className="text-center py-12">
-            <DollarSign className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">
-              {expenses.length === 0 
-                ? 'Nenhuma despesa registrada' 
-                : 'Nenhuma despesa encontrada com os filtros selecionados'}
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Despesas</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              R$ {totalExpenses.toFixed(2)}
             </p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Data
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descrição
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoria
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredExpenses.map((expense) => (
-                  <tr
-                    key={expense.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {formatDate(expense.date)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-gray-900">
-                        {expense.description}
-                      </div>
-                      {expense.notes && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          {expense.notes}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(
-                          expense.category
-                        )}`}
-                      >
-                        {expense.category}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-right">
-                      <span className="text-sm font-semibold text-red-600">
-                        {formatCurrency(expense.amount)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium">
-                      <div className="flex items-center justify-center space-x-1">
-                        <Button
-                          onClick={() => handleEdit(expense)}
-                          variant="ghost"
-                          size="sm"
-                          icon={Pencil}
-                          title="Editar despesa"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        />
-                        <Button
-                          onClick={() => handleDelete(expense.id)}
-                          variant="ghost"
-                          size="sm"
-                          icon={Trash2}
-                          title="Excluir despesa"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-spacing-element bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <input
+              type="text"
+              placeholder="Buscar por nome ou categoria..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
           </div>
-        )}
+
+          {/* Type Filter */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
+                filterType === 'all'
+                  ? 'bg-blue-600 text-white dark:bg-blue-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setFilterType('FIXA')}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
+                filterType === 'FIXA'
+                  ? 'bg-purple-600 text-white dark:bg-purple-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              Fixas
+            </button>
+            <button
+              onClick={() => setFilterType('VARIAVEL')}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors touch-target ${
+                filterType === 'VARIAVEL'
+                  ? 'bg-orange-600 text-white dark:bg-orange-500'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              Variáveis
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Modal de Criação */}
-      {showCreateModal && (
-        <DespesaModal
-          onSave={handleSaveExpense}
-          onClose={() => setShowCreateModal(false)}
-        />
+      {/* Desktop Table */}
+      {loading ? (
+        <div className="hidden lg:block">
+          <SkeletonTable />
+        </div>
+      ) : filteredExpenses.length === 0 ? (
+        searchTerm ? (
+          <NoResults
+            searchTerm={searchTerm}
+            onClearSearch={() => setSearchTerm('')}
+          />
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center shadow-sm">
+            <Receipt className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Nenhuma despesa cadastrada
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Comece registrando sua primeira despesa
+            </p>
+            <Button onClick={() => router.push('/admin/despesas/nova')}>
+              <Plus className="w-5 h-5 mr-2" />
+              Adicionar Despesa
+            </Button>
+          </div>
+        )
+      ) : (
+        <>
+          <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Despesa
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Categoria
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Tipo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Valor
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredExpenses.map((expense) => (
+                    <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Receipt className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          </div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {expense.name}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        {expense.category}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {expense.type === 'FIXA' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                            Fixa
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                            Variável
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          {new Date(expense.date).toLocaleDateString('pt-BR')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="text-base font-semibold text-red-600 dark:text-red-400">
+                          R$ {expense.value.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => router.push(`/admin/despesas/${expense.id}`)}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Visualizar"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/despesas/${expense.id}/editar`)}
+                            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 dark:text-gray-400 dark:hover:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Editar"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(expense)}
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
+                            aria-label="Excluir"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden grid gap-4">
+            {filteredExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Receipt className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {expense.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {expense.category}
+                      </p>
+                    </div>
+                  </div>
+                  {expense.type === 'FIXA' ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                      Fixa
+                    </span>
+                  ) : (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                      Variável
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Data</p>
+                    <div className="flex items-center gap-1 text-sm text-gray-900 dark:text-white">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(expense.date).toLocaleDateString('pt-BR')}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Valor</p>
+                    <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                      R$ {expense.value.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/admin/despesas/${expense.id}`)}
+                    className="flex-1 touch-target"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Ver
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/admin/despesas/${expense.id}/editar`)}
+                    className="flex-1 touch-target"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <button
+                    onClick={() => handleDeleteClick(expense)}
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors touch-target"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
-      {/* Modal de Edição */}
-      {showEditModal && editingExpense && (
-        <DespesaModal
-          despesa={editingExpense}
-          onSave={handleSaveExpense}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingExpense(null);
-          }}
-        />
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && deletingExpense && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Confirmar Exclusão
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Tem certeza que deseja excluir a despesa <strong>{deletingExpense.name}</strong>? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeletingExpense(null);
+                }}
+                disabled={deleting}
+                className="touch-target"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="touch-target bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+              >
+                {deleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Excluindo...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
-      </div>
     </div>
   );
 }
