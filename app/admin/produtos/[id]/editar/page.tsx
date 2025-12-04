@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, X, ArrowLeft, Package } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { LoadingSpinner, ErrorState } from '@/components/ui/Loading';
+import { LoadingSpinner } from '@/components/ui/Loading';
+import { ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { put } from '@vercel/blob';
 
@@ -157,8 +158,8 @@ export default function EditarProdutoPage({ params }: { params: { id: string } }
 
   if (loading) {
     return (
-      <div className="container-app">
-        <LoadingSpinner size="lg" message="Carregando produto..." />
+      <div className="container-app flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

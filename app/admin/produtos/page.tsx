@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Search, Eye, Pencil, Trash2, Package } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { SkeletonTable, NoResults } from '@/components/ui/Loading';
+import { SkeletonTable } from '@/components/ui/Loading';
+import { NoResults } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { formatCurrency } from '@/lib/utils';
 

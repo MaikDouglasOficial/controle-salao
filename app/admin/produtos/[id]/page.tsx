@@ -6,7 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Pencil, Trash2, Package, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { LoadingSpinner, ErrorState } from '@/components/ui/Loading';
+import { LoadingSpinner } from '@/components/ui/Loading';
+import { ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { formatCurrency } from '@/lib/utils';
 
@@ -82,8 +83,8 @@ export default function VisualizarProdutoPage({ params }: { params: { id: string
 
   if (loading) {
     return (
-      <div className="container-app">
-        <LoadingSpinner size="lg" message="Carregando produto..." />
+      <div className="container-app flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
