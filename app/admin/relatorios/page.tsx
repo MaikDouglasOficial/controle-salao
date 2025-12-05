@@ -15,18 +15,21 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        {/* Header */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
               Relatórios
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Análises do seu negócio
-            </p>
           </div>
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+            Análises do seu negócio
+          </p>
         </div>
 
       {/* Seletor de Relatório */}

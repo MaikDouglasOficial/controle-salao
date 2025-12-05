@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, Edit2, Trash2, Scissors, Clock, DollarSign, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -101,13 +102,10 @@ export default function VisualizarServicoPage({ params }: PageProps) {
     <div className="container-app">
       {/* Header */}
       <div className="mb-spacing-section">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target"
-        >
+        <Link href="/admin/servicos" className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target">
           <ArrowLeft className="w-5 h-5 mr-2" />
           Voltar
-        </button>
+        </Link>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">

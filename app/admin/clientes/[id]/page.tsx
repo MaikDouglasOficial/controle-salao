@@ -309,17 +309,16 @@ export default function ClienteDetalhesPage() {
     <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
+        <div className="mb-4 sm:mb-6">
           <Link
             href="/admin/clientes"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 touch-target"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Voltar
           </Link>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalhes do Cliente</h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Histórico completo e informações</p>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalhes do Cliente</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Histórico completo e informações</p>
         </div>
 
       {/* Informações do Cliente */}

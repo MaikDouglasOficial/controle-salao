@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
-import AgendamentoModal from "@/components/AgendamentoModal";
 import { Button } from "@/components/ui/Button";
 import { Plus, Calendar, CheckCircle, XCircle, Trash2, ShoppingCart, Clock, User, Scissors, Edit } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -31,13 +31,9 @@ interface Appointment {
 }
 
 export default function AgendamentosPage() {
+  const router = useRouter();
   const toast = useToast();
-  const [showModal, setShowModal] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [customers, setCustomers] = useState([]);
-  const [services, setServices] = useState([]);
-  const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<'all' | 'agendado' | 'confirmado' | 'concluido' | 'cancelado'>('all');
 
@@ -47,21 +43,8 @@ export default function AgendamentosPage() {
 
   async function fetchData() {
     try {
-      const [customersRes, servicesRes, professionalsRes, appointmentsRes] = await Promise.all([
-        fetch('/api/customers'),
-        fetch('/api/services'),
-        fetch('/api/professionals'),
-        fetch('/api/appointments')
-      ]);
-
-      const customersData = await customersRes.json();
-      const servicesData = await servicesRes.json();
-      const professionalsData = await professionalsRes.json();
+      const appointmentsRes = await fetch('/api/appointments');
       const appointmentsData = await appointmentsRes.json();
-
-      setCustomers(customersData);
-      setServices(servicesData);
-      setProfessionals(professionalsData.filter((p: any) => p.active).map((p: any) => p.name));
       setAppointments(appointmentsData);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -70,41 +53,8 @@ export default function AgendamentosPage() {
     }
   }
 
-  async function handleSave(agendamento: any) {
-    try {
-      console.log('Enviando agendamento:', agendamento);
-      
-      const isEditing = editingAppointment !== null;
-      const method = isEditing ? 'PUT' : 'POST';
-      const body = isEditing ? { ...agendamento, id: editingAppointment.id } : agendamento;
-      
-      const response = await fetch('/api/appointments', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-      console.log('Resposta da API:', data);
-
-      if (response.ok) {
-        setShowModal(false);
-        setEditingAppointment(null);
-        toast.success(isEditing ? 'Agendamento atualizado com sucesso!' : 'Agendamento criado com sucesso!');
-        fetchData(); // Recarregar lista
-      } else {
-        console.error('Erro da API:', data);
-        toast.error(data.error || `Erro ao ${isEditing ? 'atualizar' : 'criar'} agendamento`);
-      }
-    } catch (error) {
-      console.error('Erro ao salvar agendamento:', error);
-      toast.error('Erro ao salvar agendamento. Verifique o console para mais detalhes.');
-    }
-  }
-
-  function handleEditar(appointment: Appointment) {
-    setEditingAppointment(appointment);
-    setShowModal(true);
+  function handleEditar(id: number) {
+    router.push(`/admin/agendamentos/${id}/editar`);
   }
 
   async function handleConfirmar(id: number) {
@@ -301,24 +251,34 @@ export default function AgendamentosPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Agendamentos
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie seus agendamentos
-            </p>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                  <Calendar className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                  Agendamentos
+                </h1>
+              </div>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                Gerencie seus agendamentos
+              </p>
+            </div>
+            
+            <Button
+              onClick={() => router.push('/admin/agendamentos/novo')}
+              size="lg"
+              className="w-full sm:w-auto min-h-[44px]"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Novo Agendamento
+            </Button>
           </div>
-          <Button
-            onClick={() => setShowModal(true)}
-            icon={Plus}
-            className="w-full sm:w-auto"
-          >
-            Novo Agendamento
-          </Button>
         </div>
 
         {/* Filtros */}
@@ -457,7 +417,7 @@ export default function AgendamentosPage() {
                           {/* 1. Editar - disponível para agendado e confirmado */}
                           {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
                             <Button
-                              onClick={() => handleEditar(appointment)}
+                              onClick={() => handleEditar(appointment.id)}
                               variant="ghost"
                               size="sm"
                               icon={Edit}
@@ -578,7 +538,7 @@ export default function AgendamentosPage() {
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
                     {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
                       <Button
-                        onClick={() => handleEditar(appointment)}
+                        onClick={() => handleEditar(appointment.id)}
                         variant="outline"
                         size="sm"
                         icon={Edit}
@@ -647,28 +607,7 @@ export default function AgendamentosPage() {
             </div>
           </>
         )}
-
-      {/* Modal de Novo/Editar Agendamento */}
-      {showModal && (
-        <AgendamentoModal
-          customers={customers}
-          services={services}
-          professionals={professionals}
-          agendamento={editingAppointment ? {
-            id: editingAppointment.id,
-            customerId: editingAppointment.customerId,
-            serviceId: editingAppointment.serviceId,
-            date: editingAppointment.date,
-            professional: editingAppointment.professional || '',
-            notes: editingAppointment.notes || ''
-          } : undefined}
-          onSave={handleSave}
-          onClose={() => {
-            setShowModal(false);
-            setEditingAppointment(null);
-          }}
-        />
-      )}
+      </div>
     </div>
   );
 }

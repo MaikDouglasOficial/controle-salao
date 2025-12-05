@@ -212,14 +212,19 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Minimalista */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Dashboard
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        {/* Header */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Dashboard
+            </h1>
+          </div>
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
             Visão geral do negócio
           </p>
         </div>
@@ -398,14 +403,10 @@ export default function DashboardPage() {
               icon={<Calendar className="h-8 w-8 text-gray-400" />}
               title="Nenhum agendamento próximo"
               description="Crie um novo agendamento para começar"
-              action={
-                <Button
-                  variant="primary"
-                  onClick={() => router.push('/admin/agendamentos')}
-                >
-                  Criar agendamento
-                </Button>
-              }
+              action={{
+                label: 'Criar agendamento',
+                onClick: () => router.push('/admin/agendamentos')
+              }}
             />
           ) : (
             <div className="space-y-3">
@@ -584,14 +585,10 @@ export default function DashboardPage() {
               icon={<ShoppingBag className="h-8 w-8 text-gray-400" />}
               title="Nenhuma venda registrada"
               description="Realize uma venda no PDV para começar"
-              action={
-                <Button
-                  variant="primary"
-                  onClick={() => router.push('/admin/pdv')}
-                >
-                  Ir para PDV
-                </Button>
-              }
+              action={{
+                label: 'Ir para PDV',
+                onClick: () => router.push('/admin/pdv')
+              }}
             />
           ) : (
             <div className="space-y-3">

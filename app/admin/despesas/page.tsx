@@ -47,8 +47,8 @@ export default function DespesasPage() {
     
     return expenses.filter((expense: Expense) => {
       const matchesSearch =
-        expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        expense.category.toLowerCase().includes(searchTerm.toLowerCase());
+        expense.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        expense.category?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesType =
         filterType === 'all' || expense.type === filterType;
@@ -62,21 +62,29 @@ export default function DespesasPage() {
   }, [filteredExpenses]);
 
   return (
-    <div className="container-app">
-      {/* Header */}
-      <div className="mb-spacing-section">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
-              Despesas
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Gerencie suas despesas fixas e variáveis
-            </p>
-          </div>
-          <Button
-            onClick={() => router.push('/admin/despesas/nova')}
-            className="touch-target"
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        {/* Header */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
+                  <Receipt className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                  Despesas
+                </h1>
+              </div>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                Gerencie suas despesas fixas e variáveis
+              </p>
+            </div>
+            
+            <Button
+              onClick={() => router.push('/admin/despesas/nova')}
+              size="lg"
+              className="w-full sm:w-auto min-h-[44px]"
           >
             <Plus className="w-5 h-5 mr-2" />
             Nova Despesa
@@ -110,7 +118,7 @@ export default function DespesasPage() {
               placeholder="Buscar por nome ou categoria..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              className="w-full pl-10 pr-4 py-2.5 md:py-3 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
             />
           </div>
 
@@ -241,7 +249,7 @@ export default function DespesasPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-base font-semibold text-red-600 dark:text-red-400">
-                          R$ {expense.value.toFixed(2)}
+                          R$ {expense.value?.toFixed(2) ?? '0.00'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -319,7 +327,7 @@ export default function DespesasPage() {
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Valor</p>
                     <p className="text-lg font-bold text-red-600 dark:text-red-400">
-                      R$ {expense.value.toFixed(2)}
+                      R$ {expense.value?.toFixed(2) ?? '0.00'}
                     </p>
                   </div>
                 </div>
@@ -356,6 +364,7 @@ export default function DespesasPage() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

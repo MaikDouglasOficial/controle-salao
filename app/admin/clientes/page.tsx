@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Pencil, Trash2, Eye, Users } from 'lucide-react'
 import { formatPhone, formatDate } from '@/lib/utils'
+import { Button } from '@/components/ui/Button'
 import { SkeletonTable, NoResults, ErrorState } from '@/components/ui'
 import { ConfirmDialog } from '@/components/ui/Toast'
 import { OptimizedAvatar } from '@/components/OptimizedImage'
@@ -46,38 +47,44 @@ export default function ClientesPage() {
   }, [customers, searchTerm])
 
   return (
-    <div className="container-app py-6">
-      {/* Header */}
-      <div className="spacing-section">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100">
-              Clientes
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Gerencie seus clientes cadastrados
-            </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        {/* Header */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg">
+                  <Users className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                  Clientes
+                </h1>
+              </div>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                Gerencie seus clientes cadastrados
+              </p>
+            </div>
+            
+            <Link href="/admin/clientes/novo">
+              <Button size="lg" className="w-full sm:w-auto min-h-[44px]">
+                <Plus className="w-5 h-5 mr-2" />
+                Novo Cliente
+              </Button>
+            </Link>
           </div>
-          <Link
-            href="/admin/clientes/novo"
-            className="btn-primary inline-flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Novo Cliente</span>
-          </Link>
         </div>
-      </div>
 
-      {/* Search */}
-      <div className="spacing-card">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por nome, telefone, email ou CPF..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <input
+              type="text"
+              placeholder="Buscar por nome, telefone, email ou CPF..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 md:py-3 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
           />
         </div>
       </div>
@@ -251,6 +258,7 @@ export default function ClientesPage() {
           onCancel={() => setDeleteId(null)}
         />
       )}
+      </div>
     </div>
   )
 }

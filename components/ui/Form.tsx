@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn, components, typography, spacing } from '@/lib/design-tokens';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,19 +9,24 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export function Input({ label, error, helperText, className = '', ...props }: InputProps) {
   return (
-    <div className="form-group">
+    <div className={spacing.compactGap}>
       {label && (
-        <label className="form-label" htmlFor={props.id}>
+        <label className={cn(typography.label, 'block mb-2')} htmlFor={props.id}>
           {label}
+          {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <input
-        className={`form-input ${error ? 'border-danger-300 focus:border-danger-500 focus:ring-danger-500' : ''} ${className}`}
+        className={cn(
+          components.input.base,
+          error && components.input.error,
+          className
+        )}
         {...props}
       />
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className={cn(typography.error, 'mt-1.5')}>{error}</p>}
       {helperText && !error && (
-        <p className="text-body-sm text-gray-500 mt-1">{helperText}</p>
+        <p className={cn(typography.hint, 'mt-1.5')}>{helperText}</p>
       )}
     </div>
   );
@@ -34,19 +40,25 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export function Textarea({ label, error, helperText, className = '', ...props }: TextareaProps) {
   return (
-    <div className="form-group">
+    <div className={spacing.compactGap}>
       {label && (
-        <label className="form-label" htmlFor={props.id}>
+        <label className={cn(typography.label, 'block mb-2')} htmlFor={props.id}>
           {label}
+          {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <textarea
-        className={`form-textarea ${error ? 'border-danger-300 focus:border-danger-500 focus:ring-danger-500' : ''} ${className}`}
+        className={cn(
+          components.input.base,
+          'resize-none',
+          error && components.input.error,
+          className
+        )}
         {...props}
       />
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className={cn(typography.error, 'mt-1.5')}>{error}</p>}
       {helperText && !error && (
-        <p className="text-body-sm text-gray-500 mt-1">{helperText}</p>
+        <p className={cn(typography.hint, 'mt-1.5')}>{helperText}</p>
       )}
     </div>
   );
@@ -61,14 +73,19 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 
 export function Select({ label, error, helperText, options, className = '', ...props }: SelectProps) {
   return (
-    <div className="form-group">
+    <div className={spacing.compactGap}>
       {label && (
-        <label className="form-label" htmlFor={props.id}>
+        <label className={cn(typography.label, 'block mb-2')} htmlFor={props.id}>
           {label}
+          {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <select
-        className={`form-select ${error ? 'border-danger-300 focus:border-danger-500 focus:ring-danger-500' : ''} ${className}`}
+        className={cn(
+          components.input.base,
+          error && components.input.error,
+          className
+        )}
         {...props}
       >
         {options.map((option) => (
@@ -77,9 +94,9 @@ export function Select({ label, error, helperText, options, className = '', ...p
           </option>
         ))}
       </select>
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className={cn(typography.error, 'mt-1.5')}>{error}</p>}
       {helperText && !error && (
-        <p className="text-body-sm text-gray-500 mt-1">{helperText}</p>
+        <p className={cn(typography.hint, 'mt-1.5')}>{helperText}</p>
       )}
     </div>
   );

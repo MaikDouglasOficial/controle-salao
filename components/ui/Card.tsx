@@ -1,18 +1,33 @@
 import React from 'react';
+import { cn, components, typography } from '@/lib/design-tokens';
 
 interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   onClick?: () => void;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
-export function Card({ children, className = '', hover = false, onClick }: CardProps) {
-  const baseClass = hover ? 'card-hover' : 'card';
-  const classes = `${baseClass} ${className}`;
+export function Card({ children, className = '', hover = false, onClick, padding = 'md' }: CardProps) {
+  const paddingClasses = {
+    none: '',
+    sm: 'p-4',
+    md: 'p-4 md:p-6',
+    lg: 'p-6 md:p-8',
+  };
   
   return (
-    <div className={classes} onClick={onClick}>
+    <div 
+      className={cn(
+        components.card.base,
+        hover && components.card.hover,
+        paddingClasses[padding],
+        onClick && 'cursor-pointer',
+        className
+      )}
+      onClick={onClick}
+    >
       {children}
     </div>
   );
@@ -27,11 +42,11 @@ interface CardHeaderProps {
 
 export function CardHeader({ title, subtitle, children, className = '' }: CardHeaderProps) {
   return (
-    <div className={`card-header ${className}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="card-title">{title}</h3>
-          {subtitle && <p className="card-subtitle">{subtitle}</p>}
+    <div className={cn(components.card.header, className)}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className={typography.cardTitle}>{title}</h3>
+          {subtitle && <p className={typography.cardSubtitle}>{subtitle}</p>}
         </div>
         {children}
       </div>
@@ -45,7 +60,11 @@ interface CardBodyProps {
 }
 
 export function CardBody({ children, className = '' }: CardBodyProps) {
-  return <div className={`card-body ${className}`}>{children}</div>;
+  return (
+    <div className={cn('p-4 md:p-6', className)}>
+      {children}
+    </div>
+  );
 }
 
 interface CardFooterProps {
@@ -54,5 +73,9 @@ interface CardFooterProps {
 }
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
-  return <div className={`card-footer ${className}`}>{children}</div>;
+  return (
+    <div className={cn('px-4 md:px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700', className)}>
+      {children}
+    </div>
+  );
 }

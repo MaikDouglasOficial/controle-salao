@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn, colors, components } from '@/lib/design-tokens';
 
 type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'gray';
 
@@ -10,16 +11,22 @@ interface BadgeProps {
 
 export function Badge({ variant, children, className = '' }: BadgeProps) {
   const variantClasses = {
-    success: 'badge-success',
-    warning: 'badge-warning',
-    danger: 'badge-danger',
-    info: 'badge-info',
-    gray: 'badge-gray',
+    success: colors.badge.success,
+    warning: colors.badge.warning,
+    danger: colors.badge.danger,
+    info: colors.badge.info,
+    gray: colors.badge.gray,
   };
   
-  const classes = `${variantClasses[variant]} ${className}`;
-  
-  return <span className={classes}>{children}</span>;
+  return (
+    <span className={cn(
+      components.badge.base,
+      variantClasses[variant],
+      className
+    )}>
+      {children}
+    </span>
+  );
 }
 
 // Função helper para mapear status para variantes de badge

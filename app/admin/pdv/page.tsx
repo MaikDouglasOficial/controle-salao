@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { ShoppingCart, Search, Plus, Minus, Trash2, User, Package, Camera, X } from 'lucide-react';
+import { ShoppingCart, Search, Plus, Minus, Trash2, User, Package, Camera, X, CreditCard } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
@@ -479,30 +479,33 @@ export default function PDVPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        {/* Header */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg">
+              <CreditCard className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
               PDV - Ponto de Venda
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Sistema de vendas
-            </p>
           </div>
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+            Sistema de vendas
+          </p>
         </div>
 
       {/* Busca */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
+      <div className="mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Pesquisar produtos e serviços..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
+            className="w-full pl-10 pr-4 py-2.5 md:py-3 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
           />
         </div>
       </div>

@@ -114,11 +114,11 @@ export default function EditarProfissionalPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <Link href="/admin/profissionais" className="flex items-center text-primary-600 hover:text-primary-700 mb-4">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Voltar para Profissionais
+    <div className="container-app">
+      <div className="mb-spacing-section">
+        <Link href="/admin/profissionais" className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target">
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Voltar
         </Link>
         <h1 className="text-3xl font-bold text-gray-900">Editar Profissional</h1>
         <p className="text-gray-600 mt-1">Atualize os dados de {professional.name}</p>

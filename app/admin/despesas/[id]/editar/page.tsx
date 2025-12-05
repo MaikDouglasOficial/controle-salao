@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, Receipt, Tag, DollarSign, Calendar, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -125,13 +126,10 @@ export default function EditarDespesaPage({ params }: PageProps) {
     <div className="container-app">
       {/* Header */}
       <div className="mb-spacing-section">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target"
-        >
+        <Link href={`/admin/despesas/${params.id}`} className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target">
           <ArrowLeft className="w-5 h-5 mr-2" />
           Voltar
-        </button>
+        </Link>
         <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
           Editar Despesa
         </h1>
@@ -140,7 +138,7 @@ export default function EditarDespesaPage({ params }: PageProps) {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl">
+      <form onSubmit={handleSubmit}>
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6 shadow-sm">
           {/* Form Fields - Grid 2 columns on desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

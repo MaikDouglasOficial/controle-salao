@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, Edit2, Trash2, Receipt, Tag, DollarSign, Calendar, FileText, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -104,13 +105,10 @@ export default function VisualizarDespesaPage({ params }: PageProps) {
     <div className="container-app">
       {/* Header */}
       <div className="mb-spacing-section">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target"
-        >
+        <Link href="/admin/despesas" className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target">
           <ArrowLeft className="w-5 h-5 mr-2" />
           Voltar
-        </button>
+        </Link>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 dark:text-white">
@@ -217,7 +215,7 @@ export default function VisualizarDespesaPage({ params }: PageProps) {
                   Valor
                 </label>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  R$ {expense.value.toFixed(2)}
+                  R$ {expense.value?.toFixed(2) ?? '0.00'}
                 </p>
               </div>
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">

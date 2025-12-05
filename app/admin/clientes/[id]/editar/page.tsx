@@ -152,11 +152,10 @@ export default function EditarClientePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container-app py-6 spacing-section">
-        <div className="flex items-center gap-4 spacing-card">
-          <Link href={`/admin/clientes/${id}`}>
-            <Button variant="ghost" icon={ArrowLeft} size="sm">
-              Voltar
-            </Button>
+        <div className="spacing-card">
+          <Link href={`/admin/clientes/${id}`} className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 touch-target">
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Voltar
           </Link>
           <div>
             <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
