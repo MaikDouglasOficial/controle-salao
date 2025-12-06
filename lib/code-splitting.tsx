@@ -6,6 +6,7 @@
  * carregados quando o usuário navega para a respectiva página.
  */
 
+import React from 'react';
 import dynamic from 'next/dynamic';
 import { LoadingSpinner } from '@/components/ui/Loading';
 
