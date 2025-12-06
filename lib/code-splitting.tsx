@@ -21,52 +21,53 @@ const LoadingFallback = () => (
 // Nota: Modais de CRUD foram substituídos por páginas dedicadas
 // Apenas modais para confirmações e ações críticas devem ser usados
 
+// TODO: Descomentar quando os componentes forem criados
 // Chart.js lazy loading
-export const RevenueChart = dynamic(
-  () => import('@/components/charts/RevenueChart').then(mod => ({ default: mod.RevenueChart })),
-  {
-    loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    ),
-    ssr: false,
-  }
-);
+// export const RevenueChart = dynamic(
+//   () => import('@/components/charts/RevenueChart').then(mod => ({ default: mod.RevenueChart })),
+//   {
+//     loading: () => (
+//       <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
+//         <LoadingSpinner />
+//       </div>
+//     ),
+//     ssr: false,
+//   }
+// );
 
-export const AppointmentsChart = dynamic(
-  () => import('@/components/charts/AppointmentsChart').then(mod => ({ default: mod.AppointmentsChart })),
-  {
-    loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    ),
-    ssr: false,
-  }
-);
+// export const AppointmentsChart = dynamic(
+//   () => import('@/components/charts/AppointmentsChart').then(mod => ({ default: mod.AppointmentsChart })),
+//   {
+//     loading: () => (
+//       <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
+//         <LoadingSpinner />
+//       </div>
+//     ),
+//     ssr: false,
+//   }
+// );
 
 // Calendário lazy loading
-export const CalendarView = dynamic(
-  () => import('@/components/calendar/CalendarView'),
-  {
-    loading: () => (
-      <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    ),
-    ssr: false,
-  }
-);
+// export const CalendarView = dynamic(
+//   () => import('@/components/calendar/CalendarView'),
+//   {
+//     loading: () => (
+//       <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
+//         <LoadingSpinner size="lg" />
+//       </div>
+//     ),
+//     ssr: false,
+//   }
+// );
 
 // Editor de rich text (se houver)
-export const RichTextEditor = dynamic(
-  () => import('@/components/editor/RichTextEditor'),
-  {
-    loading: LoadingFallback,
-    ssr: false,
-  }
-);
+// export const RichTextEditor = dynamic(
+//   () => import('@/components/editor/RichTextEditor'),
+//   {
+//     loading: LoadingFallback,
+//     ssr: false,
+//   }
+// );
 
 // ===== EXPORTAÇÕES DE CONFIGURAÇÃO =====
 
