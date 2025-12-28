@@ -8,16 +8,7 @@ import { SkeletonTable } from '@/components/ui/Loading';
 import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { useExpenses, useDeleteExpense } from '@/hooks/useApi';
-
-interface Expense {
-  id: number;
-  name: string;
-  category: string;
-  value: number;
-  type: string;
-  date: string;
-  notes: string | null;
-}
+import type { Expense } from '@/types';
 
 export default function DespesasPage() {
   const router = useRouter();

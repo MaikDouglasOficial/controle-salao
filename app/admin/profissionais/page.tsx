@@ -9,17 +9,7 @@ import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { OptimizedAvatar } from '@/components/OptimizedImage';
 import { useProfessionals, useDeleteProfessional } from '@/hooks/useApi';
-
-interface Professional {
-  id: number;
-  name: string;
-  phone: string | null;
-  email: string | null;
-  specialty: string | null;
-  active: boolean;
-  photo: string | null;
-  createdAt: string;
-}
+import type { Professional } from '@/types';
 
 export default function ProfissionaisPage() {
   const router = useRouter();

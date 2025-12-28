@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ImageIcon } from 'lucide-react';
 
 interface OptimizedImageProps {
-  src: string | null;
+  src: string | null | undefined;
   alt: string;
   width?: number;
   height?: number;
@@ -59,7 +59,7 @@ export function OptimizedImage({
 
 // Avatar otimizado específico
 interface OptimizedAvatarProps {
-  src: string | null;
+  src: string | null | undefined;
   alt: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   fallbackIcon?: React.ReactNode;

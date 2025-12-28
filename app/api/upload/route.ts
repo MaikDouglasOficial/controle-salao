@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,18 +31,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Converter para buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
     // Gerar nome único
     const timestamp = Date.now();
-    const originalName = file.name.replace(/\s+/g, '-').toLowerCase();
-    const filename = `controle-salao/${timestamp}-${originalName}`;
+    const extension = file.name.split('.').pop();
+    const filename = `${timestamp}.${extension}`;
 
-    // Upload para Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
-    });
+    // Salvar no diretório public/uploads
+    const uploadsDir = join(process.cwd(), 'public', 'uploads');
+    
+    // Criar diretório se não existir
+    try {
+      await mkdir(uploadsDir, { recursive: true });
+    } catch (error) {
+      // Diretório já existe
+    }
+
+    // Salvar arquivo
+    const filepath = join(uploadsDir, filename);
+    await writeFile(filepath, buffer);
 
     // Retornar URL pública
-    const url = blob.url;
+    const url = `/uploads/${filename}`;
 
     return NextResponse.json({ url }, { status: 200 });
   } catch (error) {

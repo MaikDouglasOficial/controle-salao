@@ -4,6 +4,18 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+interface Credentials {
+  email: string;
+  password: string;
+}
+
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -12,7 +24,7 @@ export const authOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Senha', type: 'password' },
       },
-      async authorize(credentials: any): Promise<any> {
+      async authorize(credentials: Record<string, string> | undefined): Promise<AuthUser | null> {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email e senha são obrigatórios');
         }

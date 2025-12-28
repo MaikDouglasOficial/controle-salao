@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('Body recebido:', body);
     
     // Aceitar tanto name/value quanto description/amount
     const name = body.name || body.description;
@@ -58,10 +57,7 @@ export async function POST(request: NextRequest) {
     const date = body.date;
     const notes = body.notes;
 
-    console.log('Valores processados:', { name, value, category, type, date, notes });
-
     if (!name || !category || value === undefined || value === null || value === '' || !date) {
-      console.error('Validação falhou:', { name, category, value, date });
       return NextResponse.json(
         { error: 'Campos obrigatórios faltando: descrição, categoria, valor e data são obrigatórios' },
         { status: 400 }
@@ -79,7 +75,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('Despesa criada:', expense);
     return NextResponse.json(expense, { status: 201 });
   } catch (error) {
     console.error('Erro ao criar despesa:', error);

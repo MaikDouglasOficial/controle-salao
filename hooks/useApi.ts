@@ -1,9 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './useToast';
+import type { 
+  Customer, 
+  ClienteFormData, 
+  Professional, 
+  ProfissionalFormData,
+  Service,
+  ServicoFormData,
+  Product,
+  ProdutoFormData,
+  Agendamento,
+  AgendamentoFormData,
+  Expense,
+  DespesaFormData
+} from '@/types';
 
 // ===== CLIENTES =====
 export function useCustomers() {
-  return useQuery({
+  return useQuery<Customer[]>({
     queryKey: ['customers'],
     queryFn: async () => {
       const response = await fetch('/api/customers');
@@ -14,7 +28,7 @@ export function useCustomers() {
 }
 
 export function useCustomer(id: string) {
-  return useQuery({
+  return useQuery<Customer>({
     queryKey: ['customers', id],
     queryFn: async () => {
       const response = await fetch(`/api/customers?id=${id}`);
@@ -30,7 +44,7 @@ export function useCreateCustomer() {
   const { success, error } = useToast();
 
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: ClienteFormData) => {
       const response = await fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,7 +68,7 @@ export function useUpdateCustomer() {
   const { success, error } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: ClienteFormData }) => {
       const response = await fetch('/api/customers', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -98,7 +112,7 @@ export function useDeleteCustomer() {
 
 // ===== PRODUTOS =====
 export function useProducts() {
-  return useQuery({
+  return useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
       const response = await fetch('/api/products');
@@ -109,7 +123,7 @@ export function useProducts() {
 }
 
 export function useProduct(id: string) {
-  return useQuery({
+  return useQuery<Product>({
     queryKey: ['products', id],
     queryFn: async () => {
       const response = await fetch(`/api/products?id=${id}`);
@@ -144,7 +158,7 @@ export function useDeleteProduct() {
 
 // ===== SERVIÇOS =====
 export function useServices() {
-  return useQuery({
+  return useQuery<Service[]>({
     queryKey: ['services'],
     queryFn: async () => {
       const response = await fetch('/api/services');
@@ -155,7 +169,7 @@ export function useServices() {
 }
 
 export function useService(id: string) {
-  return useQuery({
+  return useQuery<Service>({
     queryKey: ['services', id],
     queryFn: async () => {
       const response = await fetch(`/api/services?id=${id}`);
@@ -190,7 +204,7 @@ export function useDeleteService() {
 
 // ===== PROFISSIONAIS =====
 export function useProfessionals() {
-  return useQuery({
+  return useQuery<Professional[]>({
     queryKey: ['professionals'],
     queryFn: async () => {
       const response = await fetch('/api/professionals');
@@ -201,7 +215,7 @@ export function useProfessionals() {
 }
 
 export function useProfessional(id: string) {
-  return useQuery({
+  return useQuery<Professional>({
     queryKey: ['professionals', id],
     queryFn: async () => {
       const response = await fetch(`/api/professionals?id=${id}`);
@@ -236,7 +250,7 @@ export function useDeleteProfessional() {
 
 // ===== DESPESAS =====
 export function useExpenses() {
-  return useQuery({
+  return useQuery<Expense[]>({
     queryKey: ['expenses'],
     queryFn: async () => {
       const response = await fetch('/api/expenses');
@@ -247,7 +261,7 @@ export function useExpenses() {
 }
 
 export function useExpense(id: string) {
-  return useQuery({
+  return useQuery<Expense>({
     queryKey: ['expenses', id],
     queryFn: async () => {
       const response = await fetch(`/api/expenses?id=${id}`);

@@ -10,17 +10,7 @@ import { useToast } from '@/hooks/useToast';
 import { formatCurrency } from '@/lib/utils';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useProducts, useDeleteProduct } from '@/hooks/useApi';
-
-interface Product {
-  id: number;
-  name: string;
-  description: string | null;
-  price: number;
-  stock: number;
-  sku: string | null;
-  photo: string | null;
-  createdAt: string;
-}
+import type { Product } from '@/types';
 
 export default function ProdutosPage() {
   const { confirm } = useToast();

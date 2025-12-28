@@ -47,12 +47,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('Dados recebidos na API:', body);
     
     const { customerId, serviceId, date, status, professional, notes } = body;
 
     if (!customerId || !serviceId || !date) {
-      console.error('Validação falhou:', { customerId, serviceId, date });
       return NextResponse.json(
         { error: 'Cliente, serviço e data são obrigatórios' },
         { status: 400 }
@@ -67,8 +65,6 @@ export async function POST(request: NextRequest) {
       professional: professional || null,
       notes: notes || null,
     };
-    
-    console.log('Criando agendamento com dados:', appointmentData);
 
     const appointment = await prisma.appointment.create({
       data: appointmentData,
@@ -78,7 +74,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('Agendamento criado com sucesso:', appointment);
     return NextResponse.json(appointment, { status: 201 });
   } catch (error: any) {
     console.error('Erro ao criar agendamento:', error);

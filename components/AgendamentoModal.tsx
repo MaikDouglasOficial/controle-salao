@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, X, User } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
+import type { Customer as CustomerType, Agendamento } from '@/types';
 
 interface Customer {
   id: number;
@@ -13,20 +14,22 @@ interface Customer {
   photo?: string;
 }
 
+interface AgendamentoData {
+  id?: number;
+  customerId?: number;
+  serviceId?: number;
+  date?: string;
+  status?: string;
+  notes?: string | undefined;
+  professional?: string;
+}
+
 interface AgendamentoModalProps {
-  agendamento?: {
-    id?: number;
-    customerId?: number;
-    serviceId?: number;
-    date?: string;
-    status?: string;
-    notes?: string | undefined;
-    professional?: string;
-  };
+  agendamento?: AgendamentoData;
   customers: Customer[];
   services: { id: number; name: string }[];
   professionals: string[];
-  onSave: (agendamento: any) => void;
+  onSave: (agendamento: AgendamentoData) => void;
   onClose: () => void;
 }
 
@@ -109,8 +112,8 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       serviceId: Number(serviceId), 
       date, 
       status, 
-      notes: notes || null, 
-      professional: professional || null 
+      notes: notes || undefined,
+      professional: professional || undefined
     });
   }
 

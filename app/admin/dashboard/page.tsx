@@ -105,8 +105,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Dashboard Frontend - Iniciando busca de dados...');
-        
         const [dashboardResponse, chartResponse] = await Promise.all([
           fetch('/api/dashboard', { 
             cache: 'no-store',
@@ -122,24 +120,12 @@ export default function DashboardPage() {
           }),
         ]);
 
-        console.log('Dashboard Frontend - Respostas recebidas:', {
-          dashboardOk: dashboardResponse.ok,
-          chartOk: chartResponse.ok
-        });
-
         if (!dashboardResponse.ok || !chartResponse.ok) {
           throw new Error('Falha ao buscar dados do dashboard');
         }
 
         const dashboardData = await dashboardResponse.json();
         const chartData = await chartResponse.json();
-
-        console.log('Dashboard Frontend - Dados processados:', {
-          stats: dashboardData.stats,
-          proximosAgendamentos: dashboardData.proximosAgendamentos?.length || 0,
-          aniversariantes: dashboardData.aniversariantes?.length || 0,
-          chartData: chartData?.length || 0
-        });
 
         setStats(dashboardData.stats);
         setProximosAgendamentos(dashboardData.proximosAgendamentos || []);

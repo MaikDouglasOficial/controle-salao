@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import type { Customer } from '@/types';
 
 interface Product {
   id: number;
@@ -96,7 +97,6 @@ export default function PDVPage() {
     if (savedData) {
       try {
         const appointmentData = JSON.parse(savedData);
-        console.log('📋 Carregando dados do agendamento para PDV:', appointmentData);
         
         // Adiciona o serviço ao carrinho com o preço EXATO do agendamento
         const serviceItem: CartItem = {
@@ -107,13 +107,11 @@ export default function PDVPage() {
           quantity: 1
         };
         
-        console.log('Adicionando serviço ao carrinho:', serviceItem);
         setCart([serviceItem]); // Iniciar carrinho com o serviço
         
         // Encontra e seleciona o cliente
-        const customer = customers.find((c: any) => c.id === appointmentData.customerId);
+        const customer = customers.find((c: Customer) => c.id === appointmentData.customerId);
         if (customer) {
-          console.log('Cliente selecionado:', customer.name);
           setSelectedCustomer(customer);
           setCustomerSearchTerm(customer.name);
         }
@@ -127,8 +125,7 @@ export default function PDVPage() {
         
         // Limpa os dados salvos
         localStorage.removeItem('pdv_appointment_data');
-        
-        // Mostra mensagem de sucesso
+                // Mostra mensagem de sucesso
         setTimeout(() => {
           info(`Agendamento carregado!\n\nCliente: ${appointmentData.customerName}\nServiço: ${appointmentData.serviceName}\nValor: R$ ${appointmentData.servicePrice.toFixed(2)}\n\nAdicione produtos extras se necessário e finalize a venda.`);
         }, 500);

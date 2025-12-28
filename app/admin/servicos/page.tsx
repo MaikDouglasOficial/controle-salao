@@ -9,15 +9,7 @@ import { SkeletonTable } from '@/components/ui/Loading';
 import { NoResults, ErrorState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/useToast';
 import { useServices, useDeleteService } from '@/hooks/useApi';
-
-interface Service {
-  id: number;
-  name: string;
-  description: string | null;
-  duration: number;
-  price: number;
-  createdAt: string;
-}
+import type { Service } from '@/types';
 
 export default function ServicosPage() {
   const { confirm } = useToast();

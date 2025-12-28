@@ -9,17 +9,7 @@ import { SkeletonTable, NoResults, ErrorState } from '@/components/ui'
 import { ConfirmDialog } from '@/components/ui/Toast'
 import { OptimizedAvatar } from '@/components/OptimizedImage'
 import { useCustomers, useDeleteCustomer } from '@/hooks/useApi'
-
-interface Customer {
-  id: number
-  name: string
-  phone: string
-  email: string | null
-  birthday: string | null
-  notes: string | null
-  photo: string | null
-  cpf: string | null
-}
+import type { Customer } from '@/types'
 
 export default function ClientesPage() {
   const [searchTerm, setSearchTerm] = useState('')

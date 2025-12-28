@@ -36,6 +36,10 @@ prisma/dev.db-journal
 *.db
 *.db-journal
 
+# Uploads (fotos de clientes/produtos)
+public/uploads/*
+!public/uploads/.gitkeep
+
 # IDE
 .vscode/
 .idea/

@@ -19,13 +19,6 @@ export async function GET() {
     const inicioAno = new Date(hoje.getFullYear(), 0, 1);
     const fimAno = new Date(hoje.getFullYear(), 11, 31, 23, 59, 59);
 
-    console.log('Dashboard API - Datas calculadas:', {
-      hoje: hoje.toISOString(),
-      amanha: amanha.toISOString(),
-      inicioMes: inicioMes.toISOString(),
-      fimMes: fimMes.toISOString()
-    });
-
     // Calcular lucro do dia
     const vendasDia = await prisma.sale.aggregate({
       where: {
@@ -232,13 +225,6 @@ export async function GET() {
       atendimentosMes,
       produtosEstoqueBaixo,
     };
-
-    console.log('Dashboard API - Dados retornados:', {
-      stats,
-      proximosAgendamentos: proximosAgendamentos.length,
-      aniversariantes: aniversariantesFiltrados.length,
-      vendasRecentes: vendasRecentes.length
-    });
 
     return NextResponse.json({
       stats,
