@@ -196,8 +196,7 @@ export default function VendasPage() {
   const totalRevenue = filteredSales?.reduce((acc, sale) => acc + sale.total, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="page-container space-y-8 animate-fade-in">
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
@@ -522,7 +521,6 @@ export default function VendasPage() {
           </div>
         )}
         </div>
-      </div>
     </div>
   );
 }

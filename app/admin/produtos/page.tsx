@@ -90,25 +90,24 @@ export default function ProdutosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Produtos
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie seu estoque
-            </p>
-          </div>
-          <Button
-            onClick={() => setShowNewModal(true)}
-            icon={Plus}
-            size="lg"
-          >
-            Novo Produto
-          </Button>
+    <div className="page-container space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Produtos
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Gerencie seu estoque
+          </p>
         </div>
+        <Button
+          onClick={() => setShowNewModal(true)}
+          icon={Plus}
+          size="lg"
+        >
+          Novo Produto
+        </Button>
+      </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-3">
           <div className="relative">
@@ -124,7 +123,7 @@ export default function ProdutosPage() {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="table-responsive">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -185,7 +184,6 @@ export default function ProdutosPage() {
             </table>
           </div>
         </div>
-      </div>
 
       {showEditModal && editingProduct && (
         <ProdutoEditarModal

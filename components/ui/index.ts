@@ -7,3 +7,4 @@ export { Input, Textarea, Select } from './Form';
 export { ModalBase } from './ModalBase';
 export { Alert } from './Alert';
 export { PageHeader, PageContainer, LoadingSpinner, EmptyState } from './Layout';
+export { ElasticScroll } from './ElasticScroll';

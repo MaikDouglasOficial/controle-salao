@@ -107,15 +107,17 @@ export default function EditarProfissionalPage() {
 
   if (!professional) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Profissional não encontrado</p>
+      <div className="page-container">
+        <div className="text-center py-12">
+          <p className="text-gray-500">Profissional não encontrado</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
+    <div className="page-container space-y-6">
+      <div>
         <Link href="/admin/profissionais" className="flex items-center text-primary-600 hover:text-primary-700 mb-4">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Voltar para Profissionais

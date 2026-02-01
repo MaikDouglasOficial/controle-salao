@@ -298,11 +298,10 @@ export default function AgendamentosPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
-    return (
-      <div className="bg-gray-50 p-6 touch-pan-y overscroll-y-auto">
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6 touch-pan-y overscroll-y-auto">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="page-container space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -670,7 +669,6 @@ export default function AgendamentosPage() {
           }}
         />
       )}
-      </div>
     </div>
   );
 }

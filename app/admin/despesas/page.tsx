@@ -192,8 +192,7 @@ export default function DespesasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="page-container space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -512,7 +511,6 @@ export default function DespesasPage() {
           }}
         />
       )}
-      </div>
     </div>
   );
 }

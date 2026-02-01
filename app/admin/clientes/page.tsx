@@ -198,8 +198,7 @@ export default function ClientesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="page-container space-y-6">
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
@@ -244,7 +243,7 @@ export default function ClientesPage() {
             <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="table-responsive">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -516,7 +515,6 @@ export default function ClientesPage() {
           </form>
         </Modal>
       )}
-      </div>
     </div>
   );
 }

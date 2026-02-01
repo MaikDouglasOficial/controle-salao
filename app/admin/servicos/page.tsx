@@ -106,27 +106,26 @@ export default function ServicosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Serviços
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie seus serviços
-            </p>
-          </div>
-          <Button
-            type="button"
-            onClick={() => setShowNewModal(true)}
-            icon={Plus}
-            size="lg"
-          >
-            Novo Serviço
-          </Button>
+    <div className="page-container space-y-6">
+      {/* Header Minimalista */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Serviços
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Gerencie seus serviços
+          </p>
         </div>
+        <Button
+          type="button"
+          onClick={() => setShowNewModal(true)}
+          icon={Plus}
+          size="lg"
+        >
+          Novo Serviço
+        </Button>
+      </div>
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -167,7 +166,7 @@ export default function ServicosPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="table-responsive">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -239,7 +238,6 @@ export default function ServicosPage() {
             </div>
           </div>
         )}
-      </div>
 
       {/* Modal de Edição */}
       {showEditModal && editingService && (

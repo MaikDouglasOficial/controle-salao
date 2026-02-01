@@ -291,7 +291,7 @@ export default function ClienteDetalhesPage() {
 
   if (!customer) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="page-container space-y-6 animate-fade-in">
         <div className="text-center py-12">
           <p className="text-gray-600">Cliente não encontrado</p>
           <Link
@@ -306,8 +306,7 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <div className="page-container space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           <Link
@@ -743,7 +742,6 @@ export default function ClienteDetalhesPage() {
             </form>
         )}
       </ModalBase>
-      </div>
     </div>
   );
 }

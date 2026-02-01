@@ -15,8 +15,7 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="page-container space-y-8 animate-fade-in">
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
@@ -138,7 +137,6 @@ export default function RelatoriosPage() {
           <strong>💡 Em desenvolvimento:</strong> Os relatórios detalhados serão gerados em formato PDF e Excel. Por enquanto, você pode visualizar as informações no Dashboard.
         </p>
         </div>
-      </div>
     </div>
   );
 }

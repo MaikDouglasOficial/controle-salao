@@ -26,39 +26,18 @@ export const ModalBase: React.FC<ModalProps> = ({
   size = 'lg',
   footer,
 }) => {
-  const scrollYRef = React.useRef(0);
-
   // Bloquear scroll do body quando modal abrir e prevenir overflow lateral
   useEffect(() => {
     if (isOpen) {
-      scrollYRef.current = window.scrollY || 0;
-      document.documentElement.classList.add('modal-no-scroll');
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.width = '100%';
       document.body.classList.add('overflow-x-hidden', 'modal-no-scroll-x');
     } else {
-      document.documentElement.classList.remove('modal-no-scroll');
       document.body.style.overflow = 'unset';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
       document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
-      if (scrollYRef.current) {
-        window.scrollTo(0, scrollYRef.current);
-      }
     }
     return () => {
-      document.documentElement.classList.remove('modal-no-scroll');
       document.body.style.overflow = 'unset';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
       document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
-      if (scrollYRef.current) {
-        window.scrollTo(0, scrollYRef.current);
-      }
     };
   }, [isOpen]);
 
@@ -128,7 +107,7 @@ export const ModalBase: React.FC<ModalProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y px-6 py-6 bg-white">
-          <div className="w-full break-words modal-content-safe">
+          <div className="w-full break-words modal-content-safe pb-8">
             {children}
           </div>
         </div>

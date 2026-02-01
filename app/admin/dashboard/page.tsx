@@ -212,8 +212,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="page-container space-y-6">
         {/* Header Minimalista */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -676,7 +675,6 @@ export default function DashboardPage() {
           )}
         </CardBody>
         </Card>
-      </div>
     </div>
   );
 }
