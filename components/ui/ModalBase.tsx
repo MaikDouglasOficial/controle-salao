@@ -26,17 +26,53 @@ export const ModalBase: React.FC<ModalProps> = ({
   size = 'lg',
   footer,
 }) => {
-  // Bloquear scroll do body quando modal abrir
+  const scrollYRef = React.useRef(0);
+
+  // Bloquear scroll do body quando modal abrir e prevenir overflow lateral
   useEffect(() => {
     if (isOpen) {
+      scrollYRef.current = window.scrollY || 0;
+      document.documentElement.classList.add('modal-no-scroll');
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.width = '100%';
+      document.body.classList.add('overflow-x-hidden', 'modal-no-scroll-x');
     } else {
+      document.documentElement.classList.remove('modal-no-scroll');
       document.body.style.overflow = 'unset';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
+      if (scrollYRef.current) {
+        window.scrollTo(0, scrollYRef.current);
+      }
     }
     return () => {
+      document.documentElement.classList.remove('modal-no-scroll');
       document.body.style.overflow = 'unset';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
+      if (scrollYRef.current) {
+        window.scrollTo(0, scrollYRef.current);
+      }
     };
   }, [isOpen]);
+
+  // Fechar no ESC
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -52,27 +88,27 @@ export const ModalBase: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-sm overflow-x-hidden overflow-y-hidden overscroll-contain touch-none p-3 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+var(--app-header-offset,56px)+1.5rem)] pb-[calc(env(safe-area-inset-bottom,0px)+var(--app-header-offset,56px)+1.5rem)]"
       tabIndex={-1}
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div
-        className={`bg-white shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col rounded-2xl overflow-hidden border border-gray-100`}
+        className={`bg-white shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full ${sizeClasses[size]} max-w-[calc(100vw-1.5rem)] max-h-[calc(100svh-(var(--app-header-offset,56px)+var(--app-header-offset,56px)+3rem))] sm:max-h-[90vh] flex flex-col rounded-2xl overflow-hidden border border-gray-100`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || typeof onClose !== 'undefined') && (
           <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
-            <div className="flex flex-col items-start flex-1 pr-2">
+            <div className="flex flex-col items-start flex-1 pr-2 overflow-hidden">
               {title && (
-                <h2 className="text-xl font-bold text-gray-900 leading-tight break-words">
+                <h2 className="text-xl font-bold text-gray-900 leading-tight truncate w-full">
                   {title}
                 </h2>
               )}
               {subtitle && (
-                <p className="text-sm text-gray-600 mt-1 break-words">
+                <p className="text-sm text-gray-600 mt-1 truncate w-full">
                   {subtitle}
                 </p>
               )}
@@ -91,13 +127,15 @@ export const ModalBase: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
-          {children}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y px-6 py-6 bg-white">
+          <div className="w-full break-words modal-content-safe">
+            {children}
+          </div>
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex-shrink-0 px-6 py-4 bg-gray-50/80 border-t border-gray-200 flex flex-wrap gap-3 justify-end items-center">
+          <div className="flex-shrink-0 px-6 py-4 bg-gray-50/80 border-t border-gray-200 flex flex-row gap-3 justify-end items-center [&>button]:min-w-[120px]">
             {footer}
           </div>
         )}

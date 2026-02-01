@@ -38,8 +38,14 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       title={service ? 'Editar Serviço' : 'Novo Serviço'}
       subtitle={service ? 'Atualize os dados do serviço abaixo' : 'Preencha os dados para cadastrar um novo serviço'}
       size="lg"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="service-form">Salvar</Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="service-form" onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome do Serviço *</label>
@@ -91,10 +97,6 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
               placeholder="Descrição detalhada do serviço..."
             />
           </div>
-        </div>
-        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
-          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </ModalBase>

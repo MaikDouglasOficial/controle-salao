@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Camera, X, Trash2, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Camera, Trash2, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
+import { ModalBase } from './ui/ModalBase';
 
 interface GalleryPhoto {
   id: number;
@@ -195,18 +196,14 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       )}
 
       {/* Modal de Visualização */}
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 bg-black/90 z-[10000] flex items-center justify-center p-4"
-          onClick={() => setSelectedPhoto(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] w-full h-full">
-            <button
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 bg-white text-gray-900 p-2 rounded-full hover:bg-gray-100"
-            >
-              <X className="h-5 w-5" />
-            </button>
+      <ModalBase
+        isOpen={Boolean(selectedPhoto)}
+        onClose={() => setSelectedPhoto(null)}
+        title="Visualização da Foto"
+        size="full"
+      >
+        {selectedPhoto && (
+          <div className="w-full h-[70vh] sm:h-[80vh] bg-black rounded-xl overflow-hidden">
             <div className="relative w-full h-full">
               <Image
                 src={selectedPhoto}
@@ -216,15 +213,23 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
               />
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalBase>
 
       {/* Modal de Adicionar Descrição */}
-      {showModal && photoToUpload && (
-        <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Adicionar Detalhes</h3>
-            
+      <ModalBase
+        isOpen={Boolean(showModal && photoToUpload)}
+        onClose={() => {
+          setShowModal(false);
+          setPhotoToUpload(null);
+          setDescription('');
+          setServiceDate('');
+        }}
+        title="Adicionar Detalhes"
+        size="md"
+      >
+        {photoToUpload && (
+          <div className="space-y-4">
             <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100">
               <Image
                 src={photoToUpload}
@@ -259,7 +264,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="modal-actions flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 type="button"
                 variant="secondary"
@@ -282,8 +287,8 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalBase>
 
       {/* Toast de Notificação */}
       {toast && (

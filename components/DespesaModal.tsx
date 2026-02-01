@@ -58,8 +58,14 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
       title={despesa ? 'Editar Despesa' : 'Nova Despesa'}
       subtitle={despesa ? 'Atualize os dados da despesa abaixo' : 'Preencha os dados para cadastrar uma nova despesa'}
       size="lg"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="expense-form">Salvar</Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="expense-form" onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Descrição *</label>
           <input
@@ -129,10 +135,6 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
           />
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
-          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
-        </div>
       </form>
     </ModalBase>
   );

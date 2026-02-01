@@ -388,7 +388,7 @@ export default function ClientesPage() {
           subtitle={editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente'}
           size="md"
           footer={
-            <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <div className="modal-actions flex flex-row gap-3 justify-end">
               <Button variant="secondary" type="button" onClick={() => {
                 setShowModal(false);
                 setEditingCustomer(null);

@@ -15,13 +15,13 @@ import {
   Filter,
   TrendingUp,
   Award,
-  X,
   Pencil
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CustomerGallery from '@/components/CustomerGallery';
 import { useToast } from '@/hooks/useToast';
+import { ModalBase } from '@/components/ui/ModalBase';
 
 interface Customer {
   id: number;
@@ -643,23 +643,17 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Modal de Edição */}
-      {showEditModal && editingCustomer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Editar Cliente</h2>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingCustomer(null);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleUpdateCustomer} className="p-4 sm:p-6 space-y-4">
+      <ModalBase
+        isOpen={Boolean(showEditModal && editingCustomer)}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingCustomer(null);
+        }}
+        title="Editar Cliente"
+        size="2xl"
+      >
+        {editingCustomer && (
+          <form onSubmit={handleUpdateCustomer} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
@@ -728,7 +722,7 @@ export default function ClienteDetalhesPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-200">
+              <div className="modal-actions flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => {
@@ -747,9 +741,8 @@ export default function ClienteDetalhesPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+        )}
+      </ModalBase>
       </div>
     </div>
   );

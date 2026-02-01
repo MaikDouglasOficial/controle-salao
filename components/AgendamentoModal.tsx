@@ -121,8 +121,16 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       title={agendamento ? 'Editar Agendamento' : 'Novo Agendamento'}
       subtitle={agendamento ? 'Atualize os dados do agendamento abaixo' : 'Preencha os dados para criar um novo agendamento'}
       size="xl"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="appointment-form">
+            {agendamento ? 'Salvar Alterações' : 'Criar Agendamento'}
+          </Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="appointment-form" onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-4">
           <div className="relative" ref={customerSearchRef}>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Cliente *</label>
@@ -321,14 +329,6 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
               placeholder="Observações do agendamento"
             />
           </div>
-        </div>
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
-            Cancelar
-          </Button>
-          <Button type="submit" variant="primary" className="w-full sm:w-auto">
-            {agendamento ? 'Salvar Alterações' : 'Criar Agendamento'}
-          </Button>
         </div>
       </form>
     </ModalBase>

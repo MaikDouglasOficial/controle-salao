@@ -91,8 +91,14 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       title={profissional ? 'Editar Profissional' : 'Novo Profissional'}
       subtitle={profissional ? 'Atualize os dados do profissional abaixo' : 'Preencha os dados para cadastrar um novo profissional'}
       size="lg"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="professional-form">Salvar</Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="professional-form" onSubmit={handleSubmit} className="space-y-4">
         {/* Upload de Foto */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">Foto do Profissional</label>
@@ -194,10 +200,6 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
               </label>
             </div>
           </div>
-        </div>
-  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
-          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </Modal>

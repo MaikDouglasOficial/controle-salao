@@ -3,9 +3,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Fonte de dados - PostgreSQL
+// Fonte de dados - SQLite (desenvolvimento local)
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

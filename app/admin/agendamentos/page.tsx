@@ -298,10 +298,11 @@ export default function AgendamentosPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
-  }
-
+    return (
+      <div className="bg-gray-50 p-6 touch-pan-y overscroll-y-auto">
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-6 touch-pan-y overscroll-y-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -575,7 +576,7 @@ export default function AgendamentosPage() {
                   </div>
 
                   {/* Ações */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 [&>button]:min-w-[110px]">
                     {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
                       <Button
                         onClick={() => handleEditar(appointment)}
@@ -669,6 +670,7 @@ export default function AgendamentosPage() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

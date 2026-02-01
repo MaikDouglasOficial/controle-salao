@@ -5,6 +5,10 @@
 /* ===== SISTEMA DE DESIGN GLOBAL ===== */
 
 @layer base {
+  :root {
+    --app-header-offset: 56px;
+  }
+
   /* Fonte padrão do sistema */
   * {
     font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
@@ -39,6 +43,7 @@
     -webkit-overflow-scrolling: touch;
     /* Garantir que o body possa rolar */
     position: relative;
+    overscroll-behavior-y: auto;
   }
   
   /* Corrigir problema de altura em mobile para evitar travamento */
@@ -633,4 +638,41 @@ textarea:focus {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #0369a1;
+}
+
+@layer utilities {
+  .modal-no-scroll-x {
+    overflow-x: hidden !important;
+  }
+
+  .modal-content-safe {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .modal-content-safe input,
+  .modal-content-safe textarea,
+  .modal-content-safe select {
+    font-size: 16px;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .modal-content-safe input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .modal-no-scroll {
+    overscroll-behavior: none;
+    height: 100%;
+  }
+
+
 }

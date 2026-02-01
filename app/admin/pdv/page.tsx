@@ -1165,7 +1165,7 @@ export default function PDVPage() {
           subtitle="O cliente não foi localizado no sistema"
           size="md"
           footer={
-            <>
+            <div className="modal-actions flex flex-row gap-3 justify-end">
               <Button 
                 variant="secondary" 
                 onClick={() => {
@@ -1184,7 +1184,7 @@ export default function PDVPage() {
               >
                 Cadastrar Cliente
               </Button>
-            </>
+            </div>
           }
         >
           <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6">
@@ -1216,7 +1216,7 @@ export default function PDVPage() {
           subtitle="Preencha os dados para cadastrar um novo cliente"
           size="md"
           footer={
-            <>
+            <div className="modal-actions flex flex-row gap-3 justify-end">
               <Button 
                 variant="secondary" 
                 type="button" 
@@ -1234,7 +1234,7 @@ export default function PDVPage() {
               >
                 Cadastrar
               </Button>
-            </>
+            </div>
           }
         >
           <form id="new-customer-form" onSubmit={(e) => { e.preventDefault(); handleRegisterNewCustomer(); }} className="space-y-4">

@@ -99,8 +99,14 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
       title={produto ? 'Editar Produto' : 'Novo Produto'}
       subtitle={produto ? 'Atualize os dados do produto abaixo' : 'Preencha os dados para cadastrar um novo produto'}
       size="lg"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="product-form">Salvar</Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
         {/* Upload de Foto */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Produto</label>
@@ -210,10 +216,6 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
               placeholder="Descrição detalhada do produto..."
             />
           </div>
-        </div>
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
-          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
         </div>
       </form>
     </Modal>

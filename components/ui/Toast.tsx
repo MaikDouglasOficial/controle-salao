@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { ModalBase } from '@/components/ui/ModalBase';
 import { CheckCircle2, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -78,12 +79,13 @@ export function ConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600 whitespace-pre-line">{message}</p>
-        
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+    <ModalBase
+      isOpen
+      onClose={onCancel}
+      title={title}
+      size="md"
+      footer={
+        <div className="modal-actions flex flex-row gap-3 w-full justify-end">
           <button
             onClick={onCancel}
             className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -100,7 +102,11 @@ export function ConfirmDialog({
             {confirmText}
           </button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <p className="text-sm text-gray-600 whitespace-pre-line break-words">
+        {message}
+      </p>
+    </ModalBase>
   );
 }

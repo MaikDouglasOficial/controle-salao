@@ -27,8 +27,14 @@ export default function ClienteEditarModal({ cliente, onSave, onClose }: Cliente
       title={cliente ? 'Editar Cliente' : 'Novo Cliente'}
       subtitle={cliente ? 'Atualize os dados do cliente abaixo' : 'Preencha os dados para cadastrar um novo cliente'}
       size="xl"
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="customer-form">Salvar</Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form id="customer-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome *</label>
@@ -52,10 +58,6 @@ export default function ClienteEditarModal({ cliente, onSave, onClose }: Cliente
           </div>
         </div>
         {/* Adicione outros campos aqui */}
-  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
-          <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
-        </div>
       </form>
     </Modal>
   );

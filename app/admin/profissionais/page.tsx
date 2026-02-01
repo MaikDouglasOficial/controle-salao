@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Users } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
+import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 
@@ -336,33 +337,41 @@ export default function ProfessionalsPage() {
       )}
 
       {/* Modal Confirmar Exclusão */}
-      {showDeleteModal && deletingProfessional && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Confirmar Exclusão</h2>
-            <p className="text-gray-600 mb-6">
-              Tem certeza que deseja excluir o profissional <strong className="text-gray-900">{deletingProfessional.name}</strong>?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeletingProfessional(null);
-                }}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteProfessional}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-lg"
-              >
-                Excluir
-              </button>
-            </div>
+      <ModalBase
+        isOpen={Boolean(showDeleteModal && deletingProfessional)}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeletingProfessional(null);
+        }}
+        title="Confirmar Exclusão"
+        size="md"
+        footer={
+          <div className="modal-actions flex flex-row gap-3 w-full justify-end">
+            <button
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeletingProfessional(null);
+              }}
+              className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleDeleteProfessional}
+              className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-lg"
+            >
+              Excluir
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        {deletingProfessional && (
+          <p className="text-gray-600">
+            Tem certeza que deseja excluir o profissional{' '}
+            <strong className="text-gray-900">{deletingProfessional.name}</strong>?
+          </p>
+        )}
+      </ModalBase>
       </div>
     </div>
   );

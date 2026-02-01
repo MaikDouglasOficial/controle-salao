@@ -56,8 +56,20 @@ export const FormModal: React.FC<FormModalProps> = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} subtitle={subtitle}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      subtitle={subtitle}
+      footer={
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" form="form-modal">{loading ? 'Salvando...' : 'Salvar'}</Button>
+          {footer}
+        </div>
+      }
+    >
+      <form id="form-modal" onSubmit={handleSubmit} className="space-y-4">
         {fields.map((field) => (
           <div key={field.name}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -101,11 +113,6 @@ export const FormModal: React.FC<FormModalProps> = ({
             )}
           </div>
         ))}
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar'}</Button>
-        </div>
-        {footer}
       </form>
     </Modal>
   );
