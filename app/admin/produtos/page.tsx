@@ -1,6 +1,7 @@
 ﻿'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Search, Pencil, Trash2, Package, Camera, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
