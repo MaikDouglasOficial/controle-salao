@@ -1,6 +1,6 @@
 import React from 'react';
 
-type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'gray';
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'gray' | 'purple' | 'orange' | 'blue-dark';
 
 interface BadgeProps {
   variant: BadgeVariant;
@@ -15,6 +15,9 @@ export function Badge({ variant, children, className = '' }: BadgeProps) {
     danger: 'badge-danger',
     info: 'badge-info',
     gray: 'badge-gray',
+    purple: 'badge-purple',
+    orange: 'badge-orange',
+    'blue-dark': 'badge-blue-dark',
   };
   
   const classes = `${variantClasses[variant]} ${className}`;
@@ -25,10 +28,11 @@ export function Badge({ variant, children, className = '' }: BadgeProps) {
 // Função helper para mapear status para variantes de badge
 export function getStatusBadgeVariant(status: string): BadgeVariant {
   const statusMap: Record<string, BadgeVariant> = {
+    'AGENDADO': 'orange',
     'CONFIRMADO': 'success',
     'PENDENTE': 'warning',
     'CANCELADO': 'danger',
-    'CONCLUIDO': 'info',
+    'CONCLUIDO': 'blue-dark',
     'ATIVO': 'success',
     'INATIVO': 'gray',
   };
@@ -39,6 +43,7 @@ export function getStatusBadgeVariant(status: string): BadgeVariant {
 // Função helper para formatar texto de status
 export function formatStatusText(status: string): string {
   const statusMap: Record<string, string> = {
+    'AGENDADO': 'Agendado',
     'CONFIRMADO': 'Confirmado',
     'PENDENTE': 'Pendente',
     'CANCELADO': 'Cancelado',

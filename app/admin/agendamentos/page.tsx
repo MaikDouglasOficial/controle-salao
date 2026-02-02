@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { Button } from "@/components/ui/Button";
-import { Plus, Calendar, CheckCircle, XCircle, Trash2, ShoppingCart, Clock, User, Scissors, Edit } from "lucide-react";
+import { Plus, Calendar, CheckCircle, XCircle, Trash2, ShoppingCart, Clock, User, Scissors, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import Image from 'next/image';
 
@@ -272,9 +272,9 @@ export default function AgendamentosPage() {
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      agendado: 'bg-blue-100 text-blue-800',
+      agendado: 'bg-orange-100 text-orange-800',
       confirmado: 'bg-green-100 text-green-800',
-      concluido: 'bg-gray-100 text-gray-800',
+      concluido: 'bg-blue-200 text-blue-900',
       cancelado: 'bg-red-100 text-red-800'
     };
     
@@ -284,10 +284,12 @@ export default function AgendamentosPage() {
       concluido: 'Concluído',
       cancelado: 'Cancelado'
     };
+
+    const key = status.toLowerCase();
     
     return (
-      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[status as keyof typeof labels] || status}
+      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badges[key as keyof typeof badges] || 'bg-gray-100 text-gray-800'}`}>
+        {labels[key as keyof typeof labels] || status}
       </span>
     );
   };
@@ -458,9 +460,9 @@ export default function AgendamentosPage() {
                           {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
                             <Button
                               onClick={() => handleEditar(appointment)}
-                              variant="ghost"
+                              variant="edit"
                               size="sm"
-                              icon={Edit}
+                              icon={Pencil}
                               title="Editar"
                             />
                           )}
@@ -469,7 +471,7 @@ export default function AgendamentosPage() {
                           {appointment.status === 'agendado' && (
                             <Button
                               onClick={() => handleConfirmar(appointment.id)}
-                              variant="ghost"
+                              variant="orange"
                               size="sm"
                               icon={CheckCircle}
                               title="Passo 1: Confirmar Agendamento"
@@ -480,7 +482,7 @@ export default function AgendamentosPage() {
                           {appointment.status === 'confirmado' && (
                             <Button
                               onClick={() => handleConcluir(appointment.id)}
-                              variant="ghost"
+                              variant="success"
                               size="sm"
                               icon={CheckCircle}
                               title="Passo 2: Finalizar Serviço"
@@ -491,7 +493,7 @@ export default function AgendamentosPage() {
                           {appointment.status === 'concluido' && (
                             <Button
                               onClick={() => handleIrParaPDV(appointment)}
-                              variant="ghost"
+                              variant="blue-dark"
                               size="sm"
                               icon={ShoppingCart}
                               title="🛒 Passo 3: Ir para PDV e Faturar"
@@ -502,7 +504,7 @@ export default function AgendamentosPage() {
                           {appointment.status !== 'cancelado' && appointment.status !== 'concluido' && (
                             <Button
                               onClick={() => handleCancelar(appointment.id)}
-                              variant="ghost"
+                              variant="danger"
                               size="sm"
                               icon={XCircle}
                               title="Cancelar Agendamento"
@@ -512,7 +514,7 @@ export default function AgendamentosPage() {
                           {/* Excluir - sempre disponível */}
                           <Button
                             onClick={() => handleExcluir(appointment.id)}
-                            variant="ghost"
+                            variant="danger"
                             size="sm"
                             icon={Trash2}
                             title="Excluir"
@@ -579,9 +581,9 @@ export default function AgendamentosPage() {
                     {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
                       <Button
                         onClick={() => handleEditar(appointment)}
-                        variant="outline"
+                        variant="edit"
                         size="sm"
-                        icon={Edit}
+                        icon={Pencil}
                       >
                         Editar
                       </Button>
@@ -590,7 +592,7 @@ export default function AgendamentosPage() {
                     {appointment.status === 'agendado' && (
                       <Button
                         onClick={() => handleConfirmar(appointment.id)}
-                        variant="success"
+                        variant="orange"
                         size="sm"
                         icon={CheckCircle}
                       >
@@ -601,7 +603,7 @@ export default function AgendamentosPage() {
                     {appointment.status === 'confirmado' && (
                       <Button
                         onClick={() => handleConcluir(appointment.id)}
-                        variant="primary"
+                        variant="success"
                         size="sm"
                         icon={CheckCircle}
                       >
@@ -612,7 +614,7 @@ export default function AgendamentosPage() {
                     {appointment.status === 'concluido' && (
                       <Button
                         onClick={() => handleIrParaPDV(appointment)}
-                        variant="success"
+                        variant="blue-dark"
                         size="sm"
                         icon={ShoppingCart}
                       >

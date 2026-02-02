@@ -153,15 +153,11 @@ export async function GET() {
       return birthdayMonth === mesAtual;
     });
 
-    // Próximos agendamentos (próximos 7 dias)
-    const proximosDias = new Date(hoje);
-    proximosDias.setDate(proximosDias.getDate() + 7);
-
+    // Próximos agendamentos (a partir de hoje)
     const proximosAgendamentos = await prisma.appointment.findMany({
       where: {
         date: {
           gte: hoje,
-          lte: proximosDias,
         },
         status: {
           in: ['agendado', 'confirmado'],

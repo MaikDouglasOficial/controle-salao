@@ -159,7 +159,9 @@ export default function ClientesPage() {
     const confirmed = await toast.confirm({
       title: 'Confirmar Exclusão',
       message: `Tem certeza que deseja excluir o cliente "${name}"?\n\nEsta ação não pode ser desfeita e irá remover:\n• Todos os agendamentos\n• Histórico de vendas\n• Todas as informações do cliente`,
-      type: 'warning'
+      type: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
     });
 
     if (!confirmed) {
@@ -231,7 +233,7 @@ export default function ClientesPage() {
             placeholder="Buscar por nome ou telefone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
+            className="w-full h-11 pl-10 pr-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
@@ -321,14 +323,14 @@ export default function ClientesPage() {
                         </Link>
                         <Button
                           onClick={() => handleEdit(customer.id)}
-                          variant="ghost"
+                          variant="edit"
                           size="sm"
                           icon={Pencil}
                           title="Editar Cliente"
                         />
                         <Button
                           onClick={() => handleDelete(customer.id, customer.name)}
-                          variant="ghost"
+                          variant="danger"
                           size="sm"
                           icon={Trash2}
                           title="Excluir Cliente"

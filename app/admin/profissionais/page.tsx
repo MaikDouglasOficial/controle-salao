@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Users } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, UserCheck, UserX, Users } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
-import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 
@@ -20,7 +19,7 @@ interface Professional {
 }
 
 export default function ProfessionalsPage() {
-  const { success, error } = useToast();
+  const { success, error, confirm } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,9 +29,6 @@ export default function ProfessionalsPage() {
   // Modal de criar/editar
   const [showModal, setShowModal] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
-  // Modal de deletar
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletingProfessional, setDeletingProfessional] = useState<Professional | null>(null);
 
   useEffect(() => {
     fetchProfessionals();
@@ -63,11 +59,19 @@ export default function ProfessionalsPage() {
 
 
 
-  const handleDeleteProfessional = async () => {
-    if (!deletingProfessional) return;
+  const handleDeleteProfessional = async (professional: Professional) => {
+    const confirmed = await confirm({
+      title: 'Confirmar exclusão',
+      message: `Tem certeza que deseja excluir o profissional "${professional.name}"?`,
+      type: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    });
+
+    if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/professionals?id=${deletingProfessional.id}`, {
+      const response = await fetch(`/api/professionals?id=${professional.id}`, {
         method: 'DELETE',
       });
 
@@ -77,18 +81,11 @@ export default function ProfessionalsPage() {
       }
 
       await fetchProfessionals();
-      setShowDeleteModal(false);
-      setDeletingProfessional(null);
       success('Profissional removido com sucesso!');
     } catch (error: any) {
       console.error('Erro ao deletar profissional:', error);
       error(error.message || 'Erro ao deletar profissional');
     }
-  };
-
-  const handleDeleteClick = (professional: Professional) => {
-    setDeletingProfessional(professional);
-    setShowDeleteModal(true);
   };
 
   // Filtrar profissionais
@@ -280,13 +277,13 @@ export default function ProfessionalsPage() {
                       <div className="flex items-center justify-center space-x-1">
                         <Button
                           onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
-                          variant="ghost"
+                          variant="edit"
                           size="sm"
-                          icon={Edit2}
+                          icon={Pencil}
                         />
                         <Button
-                          onClick={() => handleDeleteClick(professional)}
-                          variant="ghost"
+                          onClick={() => handleDeleteProfessional(professional)}
+                          variant="danger"
                           size="sm"
                           icon={Trash2}
                         />
@@ -335,42 +332,6 @@ export default function ProfessionalsPage() {
         />
       )}
 
-      {/* Modal Confirmar Exclusão */}
-      <ModalBase
-        isOpen={Boolean(showDeleteModal && deletingProfessional)}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setDeletingProfessional(null);
-        }}
-        title="Confirmar Exclusão"
-        size="md"
-        footer={
-          <div className="modal-actions flex flex-row gap-3 w-full justify-end">
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setDeletingProfessional(null);
-              }}
-              className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleDeleteProfessional}
-              className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-lg"
-            >
-              Excluir
-            </button>
-          </div>
-        }
-      >
-        {deletingProfessional && (
-          <p className="text-gray-600">
-            Tem certeza que deseja excluir o profissional{' '}
-            <strong className="text-gray-900">{deletingProfessional.name}</strong>?
-          </p>
-        )}
-      </ModalBase>
     </div>
   );
 }

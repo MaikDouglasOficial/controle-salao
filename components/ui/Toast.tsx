@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { ModalBase } from '@/components/ui/ModalBase';
+import { Button } from '@/components/ui/Button';
 import { CheckCircle2, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -72,11 +73,7 @@ export function ConfirmDialog({
   cancelText = 'Cancelar',
   type = 'warning'
 }: ConfirmDialogProps) {
-  const colors = {
-    danger: 'bg-red-500 hover:bg-red-600',
-    warning: 'bg-yellow-500 hover:bg-yellow-600',
-    info: 'bg-blue-500 hover:bg-blue-600'
-  };
+  const confirmVariant = type === 'danger' ? 'danger' : type === 'warning' ? 'outline' : 'primary';
 
   return (
     <ModalBase
@@ -86,21 +83,25 @@ export function ConfirmDialog({
       size="md"
       footer={
         <div className="modal-actions flex flex-row gap-3 w-full justify-end">
-          <button
+          <Button
             onClick={onCancel}
-            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            variant="secondary"
+            size="sm"
+            className="w-full sm:w-auto"
           >
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => {
               onConfirm();
               onCancel();
             }}
-            className={`w-full sm:w-auto px-4 py-2 text-sm font-medium text-white ${colors[type]} rounded-lg transition-colors`}
+            variant={confirmVariant}
+            size="sm"
+            className="w-full sm:w-auto"
           >
             {confirmText}
-          </button>
+          </Button>
         </div>
       }
     >

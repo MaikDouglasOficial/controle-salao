@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,7 +13,7 @@
 
   /* Fonte padrão do sistema */
   * {
-    font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+    font-family: 'Manrope', 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
   }
   .modal-subtitle {
     font-size: 1rem;
@@ -23,6 +25,7 @@
   /* Reset e configurações básicas */
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
     /* Prevenir overflow horizontal em dispositivos móveis */
     overflow-x: hidden;
     /* Altura mínima para mobile */
@@ -30,6 +33,12 @@
     /* Corrigir problemas de scroll em iOS */
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17px;
+    }
   }
   
   body {
@@ -234,6 +243,18 @@
   
   .badge-info {
     @apply badge bg-primary-100 text-primary-800 border border-primary-200;
+  }
+
+  .badge-purple {
+    @apply badge bg-purple-100 text-purple-800 border border-purple-200;
+  }
+
+  .badge-orange {
+    @apply badge bg-orange-100 text-orange-800 border border-orange-200;
+  }
+
+  .badge-blue-dark {
+    @apply badge bg-blue-200 text-blue-900 border border-blue-300;
   }
   
   .badge-gray {
@@ -512,6 +533,19 @@ select,
 textarea {
   color: #1e293b !important;
   font-weight: 500;
+  font-size: 16px;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+input[type="date"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 input::placeholder,

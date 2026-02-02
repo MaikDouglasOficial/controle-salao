@@ -219,13 +219,13 @@ export default function ServicosPage() {
                         <div className="flex items-center justify-center space-x-2">
                           <Button
                             onClick={() => handleEdit(service.id)}
-                            variant="ghost"
+                            variant="edit"
                             size="sm"
                             icon={Pencil}
                           />
                           <Button
                             onClick={() => handleDelete(service.id)}
-                            variant="ghost"
+                            variant="danger"
                             size="sm"
                             icon={Trash2}
                           />

@@ -173,8 +173,8 @@ export default function ProdutosPage() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center space-x-1">
-                          <Button onClick={() => handleEdit(product.id)} variant="ghost" size="sm" icon={Pencil} />
-                          <Button onClick={() => handleDelete(product.id)} variant="ghost" size="sm" icon={Trash2} />
+                          <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
+                          <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
                         </div>
                       </td>
                     </tr>

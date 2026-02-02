@@ -207,7 +207,7 @@ export default function DespesasPage() {
             Nova Despesa
           </Button>
         </div>
-
+                          variant="danger"
       {/* Filtros */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -241,7 +241,7 @@ export default function DespesasPage() {
                   setSelectedYear('');
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
 
@@ -259,7 +259,7 @@ export default function DespesasPage() {
                   setSelectedYear('');
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
 
@@ -277,7 +277,7 @@ export default function DespesasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os meses</option>
               <option value="1">Janeiro</option>
@@ -309,7 +309,7 @@ export default function DespesasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os anos</option>
               {years.map(year => (
@@ -325,7 +325,7 @@ export default function DespesasPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               <option value="">Todas as categorias</option>
               <option value="PRODUTOS">Produtos</option>
@@ -468,19 +468,17 @@ export default function DespesasPage() {
                       <div className="flex items-center justify-center space-x-1">
                         <Button
                           onClick={() => handleEdit(expense)}
-                          variant="ghost"
+                          variant="edit"
                           size="sm"
                           icon={Pencil}
                           title="Editar despesa"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         />
                         <Button
                           onClick={() => handleDelete(expense.id)}
-                          variant="ghost"
+                          variant="danger"
                           size="sm"
                           icon={Trash2}
                           title="Excluir despesa"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         />
                       </div>
                     </td>

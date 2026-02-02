@@ -283,7 +283,7 @@ export default function DashboardPage() {
               subtitle="Últimos 6 meses"
               className="pb-4"
             />
-            <CardBody className="pt-0">
+            <CardBody className="pt-3">
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />

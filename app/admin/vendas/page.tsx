@@ -248,7 +248,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
@@ -268,7 +268,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
@@ -388,7 +388,7 @@ export default function VendasPage() {
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
               >
                 {/* Header com ID, Data/Hora e Valor */}
-                <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-4 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-2.5 flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="h-12 w-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
                       <ShoppingBag className="h-6 w-6 text-white" />
@@ -414,10 +414,10 @@ export default function VendasPage() {
                     </p>
                     <button
                       onClick={() => handleDeleteSale(sale.id)}
-                      className="mt-1 p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all"
+                      className="mt-1 p-1.5 text-red-100 hover:text-white hover:bg-red-600/30 rounded-lg transition-all"
                       title="Deletar venda"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-red-200" />
                     </button>
                   </div>
                 </div>
