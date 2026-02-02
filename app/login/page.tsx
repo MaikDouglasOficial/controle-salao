@@ -71,13 +71,13 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
         {/* Logo e Título */}
         <div className="text-center">
-          <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden bg-white shadow-lg">
+          <div className="mx-auto h-36 w-36 rounded-2xl overflow-hidden bg-transparent">
             <Image
               src="/logo-corte-ja.png"
               alt="Corte-Já"
-              width={96}
-              height={96}
-              className="h-24 w-24 object-cover"
+              width={144}
+              height={144}
+              className="h-36 w-36 object-contain"
               priority
             />
           </div>
