@@ -12,10 +12,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [setupMessage, setSetupMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSetupMessage('');
     setLoading(true);
 
     try {
@@ -36,6 +39,30 @@ export default function LoginPage() {
       setError('Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSetupAdmin = async () => {
+    setError('');
+    setSetupMessage('');
+    setSetupLoading(true);
+
+    try {
+      const response = await fetch('/api/setup', { method: 'POST' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSetupMessage(data?.details || data?.error || 'Erro ao criar usuário admin');
+        return;
+      }
+
+      setSetupMessage(data?.message || 'Usuário admin criado com sucesso!');
+      setEmail('admin@salao.com');
+      setPassword('admin123');
+    } catch (err) {
+      setSetupMessage('Erro ao criar usuário admin');
+    } finally {
+      setSetupLoading(false);
     }
   };
 
@@ -122,7 +149,7 @@ export default function LoginPage() {
           </button>
 
           {/* Credenciais de exemplo */}
-          <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
             <p className="text-xs text-slate-600 text-center font-semibold mb-2">
               Credenciais de teste:
             </p>
@@ -132,6 +159,22 @@ export default function LoginPage() {
             <p className="text-xs text-gray-500 text-center">
               Senha: <span className="font-mono">admin123</span>
             </p>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleSetupAdmin}
+                disabled={setupLoading}
+                className="w-full text-xs font-semibold py-2 px-3 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {setupLoading ? 'Criando usuário...' : 'Criar usuário temporário'}
+              </button>
+              {setupMessage && (
+                <p className="mt-2 text-xs text-center text-slate-600">
+                  {setupMessage}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Link para portal do cliente */}
