@@ -1,12 +1,12 @@
 # 1. Imagem base
-FROM node:21-alpine AS base
+FROM node:20-alpine AS base
 
 # 2. Imagem para dependências
 FROM base AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install --production=false
+RUN npm ci
 
 # 3. Builder (gera o .next/)
 FROM base AS builder

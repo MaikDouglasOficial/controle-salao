@@ -1,22 +1,4 @@
-# Credenciais de Produção
-
-## Usuário Administrador Padrão
-
-**Email:** `admin@salao.com`  
-**Senha:** `admin123`
-
----
-
-## ⚠️ IMPORTANTE - Segurança
-
-Após o primeiro acesso em produção:
-
-1. **ALTERE IMEDIATAMENTE a senha padrão**
-2. Considere criar usuários específicos para cada pessoa
-3. Nunca compartilhe essas credenciais publicamente
-4. Use senhas fortes em produção
-
----
+REMOVIDO
 
 ## Como rodar o seed na Vercel
 
