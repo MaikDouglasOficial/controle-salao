@@ -12,6 +12,9 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 
+ENV DATABASE_URL="file:/app/data/prod.db"
+RUN mkdir -p /app/data
+
 COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 
@@ -25,6 +28,9 @@ ENV NODE_ENV=production
 
 # Habilitar modo standalone (Next 13+)
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV DATABASE_URL="file:/app/data/prod.db"
+
+RUN mkdir -p /app/data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
