@@ -8,7 +8,7 @@ export default function AdminPanelLayout({
 }) {
   return (
     <AdminLayout>
-      <div className="flex min-h-screen w-full bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50">
         <Sidebar />
         <main className="flex-1 min-w-0 overflow-x-hidden">
           <div className="pt-16 lg:pt-6">{children}</div>

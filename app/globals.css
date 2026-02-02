@@ -26,11 +26,8 @@
   html {
     scroll-behavior: smooth;
     font-size: 16px;
-    /* Prevenir overflow horizontal em dispositivos móveis */
-    overflow-x: hidden;
-    /* Altura mínima para mobile */
-    min-height: 100%;
-    height: 100%;
+    /* Altura mínima para mobile (evita espaço extra no fim) */
+    min-height: 100svh;
     /* Garantir fundo consistente ao fazer overscroll */
     background-color: #f9fafb;
     /* Corrigir problemas de scroll em iOS */
@@ -46,12 +43,10 @@
   
   body {
     @apply text-gray-900 bg-gray-50;
-    /* Prevenir overflow horizontal em dispositivos móveis */
-    overflow-x: hidden;
     /* Garantir largura máxima da viewport */
     max-width: 100vw;
-    /* Altura mínima 100% para evitar travamento de scroll */
-    min-height: 100%;
+    /* Altura mínima para evitar espaço extra no fim */
+    min-height: 100svh;
     /* Garantir fundo consistente ao fazer overscroll */
     background-color: #f9fafb;
     /* Corrigir problemas de scroll em iOS */
@@ -63,9 +58,10 @@
   
   /* Corrigir problema de altura em mobile para evitar travamento */
   #__next {
-    min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     background-color: #f9fafb;
   }
   
@@ -487,6 +483,11 @@
   .flex-safe {
     min-width: 0;
     min-height: 0;
+  }
+
+  /* Corrigir 100vh no mobile (evita espaço fantasma) */
+  .min-h-screen {
+    min-height: 100svh;
   }
 }
 

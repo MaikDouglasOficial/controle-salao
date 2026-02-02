@@ -19,7 +19,7 @@ import {
   X,
   UserCheck,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
@@ -39,6 +39,39 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let startY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      startY = event.touches[0]?.clientY ?? 0;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const currentY = event.touches[0]?.clientY ?? 0;
+      const isPullingDown = currentY > startY;
+      const isAtTop = window.scrollY <= 0;
+
+      if (isPullingDown && isAtTop) {
+        return;
+      }
+
+      event.preventDefault();
+    };
+
+    if (isOpen) {
+      document.body.style.touchAction = 'pan-y';
+      window.addEventListener('touchstart', handleTouchStart, { passive: true });
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    }
+
+    return () => {
+      document.body.style.touchAction = '';
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isOpen]);
 
   return (
     <>
@@ -109,7 +142,7 @@ export function Sidebar() {
           </div>
 
           {/* Menu */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <nav className="flex-1 p-3 pt-5 space-y-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
