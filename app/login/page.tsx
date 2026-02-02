@@ -81,7 +81,7 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-slate-900">
+          <h2 className="mt-3 text-3xl font-bold text-slate-900">
             Corte-Já
           </h2>
           <p className="mt-2 text-sm text-slate-600">
