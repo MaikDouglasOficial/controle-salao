@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
 
-import { Plus, Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
+import { Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
@@ -217,7 +217,6 @@ export default function ClientesPage() {
               setForm({ nome: '', email: '', telefone: '', aniversario: '', observacoes: '' });
               setShowModal(true);
             }}
-            icon={Plus}
             size="lg"
           >
             Novo Cliente

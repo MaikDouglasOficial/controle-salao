@@ -3,7 +3,8 @@
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Scissors, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,14 +44,21 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
         {/* Logo e Título */}
         <div className="text-center">
-          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-            <Scissors className="h-10 w-10 text-white" />
+          <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden bg-white shadow-lg">
+            <Image
+              src="/logo-corte-ja.png"
+              alt="Corte-Já"
+              width={96}
+              height={96}
+              className="h-24 w-24 object-cover"
+              priority
+            />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-slate-900">
-            Sistema de Gestão
+            Corte-Já
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Salão de Beleza Profissional
+            Sistema de Gestão de Salão
           </p>
         </div>
 

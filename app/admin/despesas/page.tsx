@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X } from 'lucide-react';
+import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
@@ -201,7 +201,6 @@ export default function DespesasPage() {
           </div>
           <Button
             onClick={() => setShowCreateModal(true)}
-            icon={Plus}
             size="lg"
           >
             Nova Despesa

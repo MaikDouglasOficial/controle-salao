@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { Button } from "@/components/ui/Button";
-import { Plus, Calendar, CheckCircle, XCircle, Trash2, ShoppingCart, Clock, User, Scissors, Pencil } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import Image from 'next/image';
+import { CheckCircle, XCircle, Trash2, ShoppingCart, Pencil } from "lucide-react";
+import AgendaCalendar from "@/components/AgendaCalendar";
+import { ModalBase } from "@/components/ui/ModalBase";
 
 interface Appointment {
   id: number;
@@ -40,6 +40,7 @@ export default function AgendamentosPage() {
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<'all' | 'agendado' | 'confirmado' | 'concluido' | 'cancelado'>('all');
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -270,29 +271,19 @@ export default function AgendamentosPage() {
     return apt.status === filterStatus;
   });
 
-  const getStatusBadge = (status: string) => {
-    const badges = {
-      agendado: 'bg-orange-100 text-orange-800',
-      confirmado: 'bg-green-100 text-green-800',
-      concluido: 'bg-blue-200 text-blue-900',
-      cancelado: 'bg-red-100 text-red-800'
-    };
-    
-    const labels = {
-      agendado: 'Agendado',
-      confirmado: 'Confirmado',
-      concluido: 'Concluído',
-      cancelado: 'Cancelado'
-    };
+  const calendarAppointments = filteredAppointments.map((appointment) => ({
+    id: appointment.id,
+    dataHora: appointment.date,
+    cliente: { nome: appointment.customer.name },
+    servico: { nome: appointment.service.name, duracaoMinutos: appointment.service.duration },
+    status: appointment.status,
+    profissional: appointment.professional,
+  }));
 
-    const key = status.toLowerCase();
-    
-    return (
-      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badges[key as keyof typeof badges] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[key as keyof typeof labels] || status}
-      </span>
-    );
-  };
+  function handleSelectCalendarEvent(event: { id: number }) {
+    const appointment = appointments.find((apt) => apt.id === event.id) || null;
+    setSelectedAppointment(appointment);
+  }
 
   if (loading) {
     return (
@@ -316,62 +307,70 @@ export default function AgendamentosPage() {
           </div>
           <Button
             onClick={() => setShowModal(true)}
-            icon={Plus}
             className="w-full sm:w-auto"
           >
             Novo Agendamento
           </Button>
         </div>
 
+        {/* Calendário de Agendamentos */}
+        {filteredAppointments.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <p className="text-gray-500">Nenhum agendamento encontrado</p>
+          </div>
+        ) : (
+          <AgendaCalendar agendamentos={calendarAppointments} onSelectEvent={handleSelectCalendarEvent} />
+        )}
+
         {/* Filtros */}
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'all'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-slate-900 border-slate-900'
+                  : 'bg-slate-700 border-slate-700'
               }`}
             >
               Todos ({appointments.length})
             </button>
             <button
               onClick={() => setFilterStatus('agendado')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'agendado'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-orange-600 border-orange-600'
+                  : 'bg-orange-500 border-orange-500'
               }`}
             >
               Agendados ({appointments.filter(a => a.status === 'agendado').length})
             </button>
             <button
               onClick={() => setFilterStatus('confirmado')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'confirmado'
-                  ? 'bg-green-50 text-green-600 border border-green-200'
-                  : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-green-600 border-green-600'
+                  : 'bg-green-500 border-green-500'
               }`}
             >
               Confirmados ({appointments.filter(a => a.status === 'confirmado').length})
             </button>
             <button
               onClick={() => setFilterStatus('concluido')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'concluido'
-                  ? 'bg-purple-50 text-purple-600 border border-purple-200'
-                  : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-blue-600 border-blue-600'
+                  : 'bg-blue-500 border-blue-500'
               }`}
             >
               Concluídos ({appointments.filter(a => a.status === 'concluido').length})
             </button>
             <button
               onClick={() => setFilterStatus('cancelado')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'cancelado'
-                  ? 'bg-red-50 text-red-600 border border-red-200'
-                  : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-red-600 border-red-600'
+                  : 'bg-red-500 border-red-500'
               }`}
             >
               Cancelados ({appointments.filter(a => a.status === 'cancelado').length})
@@ -379,276 +378,115 @@ export default function AgendamentosPage() {
           </div>
         </div>
 
-        {/* Lista de Agendamentos */}
-        {filteredAppointments.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Nenhum agendamento encontrado</p>
-          </div>
-        ) : (
-          <>
-            {/* Desktop - Tabela */}
-            <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profissional</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-3 w-3 text-gray-400" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {new Date(appointment.date).toLocaleDateString('pt-BR')}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(appointment.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            {appointment.customer.photo ? (
-                              <Image
-                                src={appointment.customer.photo}
-                                alt={appointment.customer.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <User className="h-4 w-4 text-gray-400" />
-                            )}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{appointment.customer.name}</div>
-                            <div className="text-xs text-gray-500">{appointment.customer.phone}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <Scissors className="h-3 w-3 text-gray-400" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{appointment.service.name}</div>
-                            <div className="text-xs text-gray-500">{appointment.service.duration} min</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                        {appointment.professional || '-'}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        {getStatusBadge(appointment.status)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center space-x-1">
-                          {/* SEQUÊNCIA OBRIGATÓRIA: agendado → confirmado → concluido → PDV */}
-                          
-                          {/* 1. Editar - disponível para agendado e confirmado */}
-                          {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
-                            <Button
-                              onClick={() => handleEditar(appointment)}
-                              variant="edit"
-                              size="sm"
-                              icon={Pencil}
-                              title="Editar"
-                            />
-                          )}
-                          
-                          {/* 2. Confirmar - PRIMEIRO PASSO (apenas para agendado) */}
-                          {appointment.status === 'agendado' && (
-                            <Button
-                              onClick={() => handleConfirmar(appointment.id)}
-                              variant="orange"
-                              size="sm"
-                              icon={CheckCircle}
-                              title="Passo 1: Confirmar Agendamento"
-                            />
-                          )}
-                          
-                          {/* 3. Finalizar Serviço - SEGUNDO PASSO (apenas para confirmado) */}
-                          {appointment.status === 'confirmado' && (
-                            <Button
-                              onClick={() => handleConcluir(appointment.id)}
-                              variant="success"
-                              size="sm"
-                              icon={CheckCircle}
-                              title="Passo 2: Finalizar Serviço"
-                            />
-                          )}
-                          
-                          {/* 4. Ir para PDV - TERCEIRO PASSO (apenas para concluído) */}
-                          {appointment.status === 'concluido' && (
-                            <Button
-                              onClick={() => handleIrParaPDV(appointment)}
-                              variant="blue-dark"
-                              size="sm"
-                              icon={ShoppingCart}
-                              title="🛒 Passo 3: Ir para PDV e Faturar"
-                            />
-                          )}
-                          
-                          {/* Cancelar - não disponível para concluído e cancelado */}
-                          {appointment.status !== 'cancelado' && appointment.status !== 'concluido' && (
-                            <Button
-                              onClick={() => handleCancelar(appointment.id)}
-                              variant="danger"
-                              size="sm"
-                              icon={XCircle}
-                              title="Cancelar Agendamento"
-                            />
-                          )}
-                          
-                          {/* Excluir - sempre disponível */}
-                          <Button
-                            onClick={() => handleExcluir(appointment.id)}
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            title="Excluir"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-            {/* Mobile - Cards */}
-            <div className="lg:hidden space-y-3">
-              {filteredAppointments.map((appointment) => (
-                <div key={`mobile-${appointment.id}`} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
-                  {/* Header do Card */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
-                        {appointment.customer.photo ? (
-                          <Image
-                            src={appointment.customer.photo}
-                            alt={appointment.customer.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <User className="h-5 w-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{appointment.customer.name}</div>
-                        <div className="text-xs text-gray-500">{appointment.customer.phone}</div>
-                      </div>
-                    </div>
-                    {getStatusBadge(appointment.status)}
-                  </div>
-
-                  {/* Info do Agendamento */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span>
-                        {new Date(appointment.date).toLocaleDateString('pt-BR')} às{' '}
-                        {new Date(appointment.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Scissors className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span>{appointment.service.name} ({appointment.service.duration} min)</span>
-                    </div>
-                    {appointment.professional && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span>{appointment.professional}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Ações */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 [&>button]:min-w-[110px]">
-                    {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
-                      <Button
-                        onClick={() => handleEditar(appointment)}
-                        variant="edit"
-                        size="sm"
-                        icon={Pencil}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                    
-                    {appointment.status === 'agendado' && (
-                      <Button
-                        onClick={() => handleConfirmar(appointment.id)}
-                        variant="orange"
-                        size="sm"
-                        icon={CheckCircle}
-                      >
-                        Confirmar
-                      </Button>
-                    )}
-                    
-                    {appointment.status === 'confirmado' && (
-                      <Button
-                        onClick={() => handleConcluir(appointment.id)}
-                        variant="success"
-                        size="sm"
-                        icon={CheckCircle}
-                      >
-                        Concluir
-                      </Button>
-                    )}
-                    
-                    {appointment.status === 'concluido' && (
-                      <Button
-                        onClick={() => handleIrParaPDV(appointment)}
-                        variant="blue-dark"
-                        size="sm"
-                        icon={ShoppingCart}
-                      >
-                        PDV
-                      </Button>
-                    )}
-                    
-                    {(appointment.status === 'agendado' || appointment.status === 'confirmado') && (
-                      <Button
-                        onClick={() => handleCancelar(appointment.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={XCircle}
-                      >
-                        Cancelar
-                      </Button>
-                    )}
-                    
-                    {(appointment.status === 'cancelado' || appointment.status === 'concluido') && (
-                      <Button
-                        onClick={() => handleExcluir(appointment.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={Trash2}
-                      >
-                        Excluir
-                      </Button>
-                    )}
-                  </div>
+      <ModalBase
+        isOpen={Boolean(selectedAppointment)}
+        onClose={() => setSelectedAppointment(null)}
+        title="Ações do agendamento"
+        size="md"
+      >
+        {selectedAppointment && (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-gray-200 p-4 bg-white">
+              <div className="text-sm font-semibold text-gray-900">
+                {selectedAppointment.service.name} - {selectedAppointment.customer.name}
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                {new Date(selectedAppointment.date).toLocaleDateString('pt-BR')} às{' '}
+                {new Date(selectedAppointment.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+              {selectedAppointment.professional && (
+                <div className="mt-1 text-xs text-gray-500">
+                  Profissional: {selectedAppointment.professional}
                 </div>
-              ))}
+              )}
             </div>
-          </>
+
+            <div className="flex flex-wrap gap-2">
+              {(selectedAppointment.status === 'agendado' || selectedAppointment.status === 'confirmado') && (
+                <Button
+                  onClick={() => {
+                    setSelectedAppointment(null);
+                    handleEditar(selectedAppointment);
+                  }}
+                  variant="edit"
+                  size="sm"
+                  icon={Pencil}
+                >
+                  Editar
+                </Button>
+              )}
+
+              {selectedAppointment.status === 'agendado' && (
+                <Button
+                  onClick={() => {
+                    handleConfirmar(selectedAppointment.id);
+                    setSelectedAppointment(null);
+                  }}
+                  variant="orange"
+                  size="sm"
+                  icon={CheckCircle}
+                >
+                  Confirmar
+                </Button>
+              )}
+
+              {selectedAppointment.status === 'confirmado' && (
+                <Button
+                  onClick={() => {
+                    handleConcluir(selectedAppointment.id);
+                    setSelectedAppointment(null);
+                  }}
+                  variant="success"
+                  size="sm"
+                  icon={CheckCircle}
+                >
+                  Concluir
+                </Button>
+              )}
+
+              {selectedAppointment.status === 'concluido' && (
+                <Button
+                  onClick={() => {
+                    handleIrParaPDV(selectedAppointment);
+                    setSelectedAppointment(null);
+                  }}
+                  variant="blue-dark"
+                  size="sm"
+                  icon={ShoppingCart}
+                >
+                  PDV
+                </Button>
+              )}
+
+              {selectedAppointment.status !== 'cancelado' && selectedAppointment.status !== 'concluido' && (
+                <Button
+                  onClick={() => {
+                    handleCancelar(selectedAppointment.id);
+                    setSelectedAppointment(null);
+                  }}
+                  variant="dark"
+                  size="sm"
+                  icon={XCircle}
+                >
+                  Cancelar
+                </Button>
+              )}
+
+              <Button
+                onClick={() => {
+                  handleExcluir(selectedAppointment.id);
+                  setSelectedAppointment(null);
+                }}
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+              >
+                Excluir
+              </Button>
+            </div>
+          </div>
         )}
+      </ModalBase>
 
       {/* Modal de Novo/Editar Agendamento */}
       {showModal && (

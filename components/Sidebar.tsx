@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import {
@@ -43,18 +44,28 @@ export function Sidebar() {
     <>
       {/* Header mobile fixo */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-2">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-900"
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <Scissors className="h-4 w-4 text-white" />
+          <div className="flex items-center space-x-3">
+            <div className="h-14 w-14 rounded-2xl overflow-hidden bg-white">
+              <Image
+                src="/logo-corte-ja.png"
+                alt="Corte-Já"
+                width={56}
+                height={56}
+                className="h-14 w-14 object-cover"
+                priority
+              />
             </div>
-            <span className="text-sm font-semibold text-gray-900">Gestão Salão</span>
+            <div className="leading-tight">
+              <span className="block text-lg font-semibold text-gray-900">Corte-Já</span>
+              <span className="block text-[11px] text-gray-500">Sistema de Gestão de Salão</span>
+            </div>
           </div>
           <div className="w-10" />
         </div>
@@ -80,12 +91,19 @@ export function Sidebar() {
           {/* Logo - apenas desktop */}
           <div className="hidden lg:block p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <Scissors className="h-5 w-5 text-white" />
+              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-white">
+                <Image
+                  src="/logo-corte-ja.png"
+                  alt="Corte-Já"
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 object-cover"
+                  priority
+                />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Gestão Salão</h1>
-                <p className="text-xs text-gray-500">Sistema Profissional</p>
+                <h1 className="text-2xl font-semibold text-gray-900">Corte-Já</h1>
+                <p className="text-xs text-gray-500">Sistema de Gestão de Salão</p>
               </div>
             </div>
           </div>

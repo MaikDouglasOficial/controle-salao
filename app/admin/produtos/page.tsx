@@ -1,8 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Image from 'next/image';
-import { Plus, Search, Pencil, Trash2, Package, Camera, X } from 'lucide-react';
+import { Search, Pencil, Trash2, Package, Camera, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
@@ -97,12 +96,10 @@ export default function ProdutosPage() {
             Produtos
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Gerencie seu estoque
           </p>
         </div>
         <Button
           onClick={() => setShowNewModal(true)}
-          icon={Plus}
           size="lg"
         >
           Novo Produto
@@ -167,7 +164,7 @@ export default function ProdutosPage() {
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.sku || '-'}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(product.price)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${product.stock > 10 ? 'bg-green-100 text-green-800' : product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ${product.stock > 10 ? 'bg-green-600' : product.stock > 0 ? 'bg-yellow-500' : 'bg-red-600'}`}>
                           {product.stock} unid.
                         </span>
                       </td>

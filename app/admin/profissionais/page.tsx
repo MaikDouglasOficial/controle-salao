@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Search, Pencil, Trash2, UserCheck, UserX, Users } from 'lucide-react';
+import { Search, Pencil, Trash2, UserCheck, UserX, Users } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
@@ -123,13 +123,11 @@ export default function ProfessionalsPage() {
           </div>
           <Button
             onClick={() => { setEditingProfessional(null); setShowModal(true); }}
-            icon={Plus}
             size="lg"
           >
             Novo Profissional
           </Button>
         </div>
-
       {/* Aviso de Erro da API */}
       {apiError && (
         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">

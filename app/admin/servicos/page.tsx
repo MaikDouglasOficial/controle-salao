@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Scissors, Pencil, Trash2 } from 'lucide-react';
+import { Search, Scissors, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ServiceModal from '@/components/ServiceModal';
 import { Button } from '@/components/ui/Button';
@@ -120,14 +120,11 @@ export default function ServicosPage() {
         <Button
           type="button"
           onClick={() => setShowNewModal(true)}
-          icon={Plus}
           size="lg"
         >
           Novo Serviço
         </Button>
       </div>
-
-        {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <p className="text-xs text-gray-500 uppercase font-medium">Total de Serviços</p>

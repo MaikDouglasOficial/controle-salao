@@ -2,7 +2,7 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'edit' | 'orange' | 'blue-dark';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'edit' | 'orange' | 'blue-dark' | 'dark';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   icon?: LucideIcon;
   loading?: boolean;
@@ -39,6 +39,7 @@ export function Button({
     edit: 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:text-indigo-800 focus:ring-indigo-400',
     orange: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 focus:ring-orange-500 border border-orange-600',
     'blue-dark': 'bg-gradient-to-r from-blue-700 to-blue-800 text-white hover:from-blue-800 hover:to-blue-900 focus:ring-blue-700 border border-blue-800',
+    dark: 'bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-black hover:to-gray-900 focus:ring-gray-900 border border-gray-900',
   };
   
   // Tamanhos com espaçamentos e tipografia consistentes (responsivos)
