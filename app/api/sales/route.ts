@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerId, professional, paymentMethod, total, items, installments, installmentValue } = body;
+    const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId } = body;
 
     // Validações
     if (!paymentMethod || !['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'].includes(paymentMethod)) {
@@ -93,10 +93,30 @@ export async function POST(request: NextRequest) {
 
     // Criar venda e itens em uma transação
     const sale = await prisma.$transaction(async (tx) => {
+      if (appointmentId) {
+        const appointment = await tx.appointment.findUnique({
+          where: { id: parseInt(appointmentId) },
+          select: { id: true, status: true },
+        });
+
+        if (!appointment) {
+          throw new Error('Agendamento não encontrado');
+        }
+
+        if (appointment.status === 'faturado') {
+          throw new Error('Este agendamento já foi faturado');
+        }
+
+        if (appointment.status !== 'concluido') {
+          throw new Error('O agendamento precisa estar concluído para faturar');
+        }
+      }
+
       // Criar a venda
       const newSale = await tx.sale.create({
         data: {
           customerId: customerId || null,
+          appointmentId: appointmentId ? parseInt(appointmentId) : null,
           professional,
           paymentMethod,
           total,
@@ -142,6 +162,13 @@ export async function POST(request: NextRequest) {
             },
           });
         }
+      }
+
+      if (appointmentId) {
+        await tx.appointment.update({
+          where: { id: parseInt(appointmentId) },
+          data: { status: 'faturado' },
+        });
       }
 
       return newSale;

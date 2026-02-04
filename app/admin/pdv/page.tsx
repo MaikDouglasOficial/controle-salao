@@ -51,6 +51,7 @@ export default function PDVPage() {
   const [customerSuggestions, setCustomerSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [appointmentId, setAppointmentId] = useState<number | null>(null);
   const [checkoutData, setCheckoutData] = useState({
     customerId: '',
     professional: '',
@@ -124,6 +125,8 @@ export default function PDVPage() {
           customerId: appointmentData.customerId.toString(),
           professional: appointmentData.professional || '',
         }));
+
+        setAppointmentId(appointmentData.appointmentId || null);
         
         // Limpa os dados salvos
         localStorage.removeItem('pdv_appointment_data');
@@ -275,6 +278,10 @@ export default function PDVPage() {
         })),
       };
 
+      if (appointmentId) {
+        saleData.appointmentId = appointmentId;
+      }
+
       // Adicionar dados de parcelamento se for cartão de crédito
       if (checkoutData.paymentMethod === 'CARTAO_CREDITO') {
         saleData.installments = checkoutData.installments;
@@ -292,6 +299,7 @@ export default function PDVPage() {
         setCart([]);
         setShowCheckoutModal(false);
         setCheckoutData({ customerId: '', professional: '', paymentMethod: 'DINHEIRO', installments: 1, installmentValue: 0 });
+        setAppointmentId(null);
         fetchData();
       } else {
         const errorData = await response.json();

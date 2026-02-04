@@ -39,7 +39,7 @@ export default function AgendamentosPage() {
   const [services, setServices] = useState([]);
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'agendado' | 'confirmado' | 'concluido' | 'cancelado'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'agendado' | 'confirmado' | 'concluido' | 'faturado' | 'cancelado'>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
@@ -247,6 +247,10 @@ export default function AgendamentosPage() {
   function handleIrParaPDV(appointment: Appointment) {
     // Verificar se o serviço foi concluído
     if (appointment.status !== 'concluido') {
+      if (appointment.status === 'faturado') {
+        toast.error('Este agendamento já foi faturado!');
+        return;
+      }
       toast.error('O serviço precisa ser finalizado antes de ir para o PDV!');
       return;
     }
@@ -327,10 +331,10 @@ export default function AgendamentosPage() {
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap border shadow-sm hover:shadow-md ${
                 filterStatus === 'all'
-                  ? 'bg-slate-900 border-slate-900'
-                  : 'bg-slate-700 border-slate-700'
+                  ? 'bg-gray-300 text-gray-900 border-gray-400 ring-2 ring-gray-400 shadow-inner'
+                  : 'bg-gray-100 text-gray-700 border-gray-200'
               }`}
             >
               Todos ({appointments.length})
@@ -339,8 +343,8 @@ export default function AgendamentosPage() {
               onClick={() => setFilterStatus('agendado')}
               className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'agendado'
-                  ? 'bg-orange-600 border-orange-600'
-                  : 'bg-orange-500 border-orange-500'
+                  ? 'bg-[#F59E0B] border-[#F59E0B] shadow-inner ring-2 ring-[#F59E0B]/50'
+                  : 'bg-[#F59E0B] border-[#F59E0B]'
               }`}
             >
               Agendados ({appointments.filter(a => a.status === 'agendado').length})
@@ -349,8 +353,8 @@ export default function AgendamentosPage() {
               onClick={() => setFilterStatus('confirmado')}
               className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'confirmado'
-                  ? 'bg-green-600 border-green-600'
-                  : 'bg-green-500 border-green-500'
+                  ? 'bg-[#10B981] border-[#10B981] shadow-inner ring-2 ring-[#10B981]/50'
+                  : 'bg-[#10B981] border-[#10B981]'
               }`}
             >
               Confirmados ({appointments.filter(a => a.status === 'confirmado').length})
@@ -359,18 +363,28 @@ export default function AgendamentosPage() {
               onClick={() => setFilterStatus('concluido')}
               className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'concluido'
-                  ? 'bg-blue-600 border-blue-600'
-                  : 'bg-blue-500 border-blue-500'
+                  ? 'bg-[#3B82F6] border-[#3B82F6] shadow-inner ring-2 ring-[#3B82F6]/50'
+                  : 'bg-[#3B82F6] border-[#3B82F6]'
               }`}
             >
               Concluídos ({appointments.filter(a => a.status === 'concluido').length})
             </button>
             <button
+              onClick={() => setFilterStatus('faturado')}
+              className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
+                filterStatus === 'faturado'
+                  ? 'bg-[#8B5CF6] border-[#8B5CF6] shadow-inner ring-2 ring-[#8B5CF6]/50'
+                  : 'bg-[#8B5CF6] border-[#8B5CF6]'
+              }`}
+            >
+              Faturados ({appointments.filter(a => a.status === 'faturado').length})
+            </button>
+            <button
               onClick={() => setFilterStatus('cancelado')}
               className={`w-full sm:w-auto px-3 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap text-white border shadow-sm hover:shadow-md ${
                 filterStatus === 'cancelado'
-                  ? 'bg-red-600 border-red-600'
-                  : 'bg-red-500 border-red-500'
+                  ? 'bg-[#EF4444] border-[#EF4444] shadow-inner ring-2 ring-[#EF4444]/50'
+                  : 'bg-[#EF4444] border-[#EF4444]'
               }`}
             >
               Cancelados ({appointments.filter(a => a.status === 'cancelado').length})
@@ -458,7 +472,7 @@ export default function AgendamentosPage() {
                 </Button>
               )}
 
-              {selectedAppointment.status !== 'cancelado' && selectedAppointment.status !== 'concluido' && (
+              {selectedAppointment.status !== 'cancelado' && selectedAppointment.status !== 'concluido' && selectedAppointment.status !== 'faturado' && (
                 <Button
                   onClick={() => {
                     handleCancelar(selectedAppointment.id);

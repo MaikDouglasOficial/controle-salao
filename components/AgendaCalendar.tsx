@@ -47,6 +47,8 @@ const STATUS_COLORS: Record<string, string> = {
   confirmado: '#10B981',
   agendado: '#F59E0B',
   concluido: '#3B82F6',
+  faturado: '#8B5CF6',
+  cancelado: '#EF4444',
 };
 
 type CalendarEvent = {

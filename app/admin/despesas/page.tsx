@@ -206,7 +206,6 @@ export default function DespesasPage() {
             Nova Despesa
           </Button>
         </div>
-                          variant="danger"
       {/* Filtros */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">

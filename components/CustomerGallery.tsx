@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Image from 'next/image';
 import { Camera, Trash2, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { ModalBase } from './ui/ModalBase';
@@ -166,11 +165,11 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
           {photos.map((photo) => (
             <div key={photo.id} className="relative group">
               <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                <Image
+                <img
                   src={photo.photoUrl}
                   alt={photo.description || 'Foto do serviço'}
-                  fill
-                  className="object-cover cursor-pointer hover:scale-105 transition-transform"
+                  className="h-full w-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                  loading="lazy"
                   onClick={() => setSelectedPhoto(photo.photoUrl)}
                 />
                 <button
@@ -204,14 +203,11 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       >
         {selectedPhoto && (
           <div className="w-full h-[70vh] sm:h-[80vh] bg-black rounded-xl overflow-hidden">
-            <div className="relative w-full h-full">
-              <Image
-                src={selectedPhoto}
-                alt="Foto ampliada"
-                fill
-                className="object-contain"
-              />
-            </div>
+            <img
+              src={selectedPhoto}
+              alt="Foto ampliada"
+              className="h-full w-full object-contain"
+            />
           </div>
         )}
       </ModalBase>
@@ -231,11 +227,10 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
         {photoToUpload && (
           <div className="space-y-4">
             <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100">
-              <Image
+              <img
                 src={photoToUpload}
                 alt="Preview"
-                fill
-                className="object-cover"
+                className="h-full w-full object-cover"
               />
             </div>
 

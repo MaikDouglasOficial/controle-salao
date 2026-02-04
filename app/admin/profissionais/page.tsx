@@ -176,7 +176,7 @@ export default function ProfessionalsPage() {
               onClick={() => setFilterActive('all')}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
                 filterActive === 'all'
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-md'
+                  ? 'bg-gray-300 text-gray-900 shadow-inner ring-2 ring-gray-400'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

@@ -25,7 +25,7 @@
   /* Reset e configurações básicas */
   html {
     scroll-behavior: smooth;
-    font-size: 16px;
+    font-size: 17px;
     /* Altura mínima para mobile (evita espaço extra no fim) */
     min-height: 100svh;
     /* Garantir fundo consistente ao fazer overscroll */
@@ -37,7 +37,7 @@
 
   @media (min-width: 1024px) {
     html {
-      font-size: 17px;
+      font-size: 18px;
     }
   }
   
