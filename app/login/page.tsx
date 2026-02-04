@@ -68,37 +68,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 px-4 py-10">
-      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
+    <div className="min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 px-4 py-6">
+      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-200">
         {/* Logo e Título */}
         <div className="text-center">
-          <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden bg-transparent">
+          <div className="mx-auto h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden bg-transparent">
             <Image
               src="/logo-corte-ja.png"
               alt="Corte-Já"
               width={96}
               height={96}
-              className="h-24 w-24 object-contain"
+              className="h-20 w-20 sm:h-24 sm:w-24 object-contain"
               priority
             />
           </div>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900">
+          <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900">
             Corte-Já
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
             Gerencie seu salão de forma simples e profissional
           </p>
         </div>
 
         {/* Formulário */}
-        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
                 Email

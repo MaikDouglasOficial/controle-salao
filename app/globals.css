@@ -40,6 +40,12 @@
       font-size: 18px;
     }
   }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 15px;
+    }
+  }
   
   body {
     @apply text-gray-900 bg-gray-50;
