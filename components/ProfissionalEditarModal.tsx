@@ -12,6 +12,7 @@ interface ProfissionalEditarModalProps {
     phone?: string;
     email?: string;
     specialty?: string;
+    commissionPercentage?: number;
     active?: boolean;
     photo?: string;
   };
@@ -25,6 +26,9 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
   const [specialty, setSpecialty] = useState<string>(profissional?.specialty || '');
   const [phone, setPhone] = useState<string>(profissional?.phone || '');
   const [email, setEmail] = useState<string>(profissional?.email || '');
+  const [commissionPercentage, setCommissionPercentage] = useState<number>(
+    typeof profissional?.commissionPercentage === 'number' ? profissional.commissionPercentage : 0
+  );
   const [active, setActive] = useState<boolean>(profissional?.active ?? true);
   const [photo, setPhoto] = useState<string>(profissional?.photo || '');
   const [photoPreview, setPhotoPreview] = useState<string | null>(profissional?.photo || null);
@@ -81,7 +85,16 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSave({ ...profissional, name, specialty, phone, email, active, photo });
+    onSave({
+      ...profissional,
+      name,
+      specialty,
+      phone,
+      email,
+      commissionPercentage,
+      active,
+      photo,
+    });
   }
 
   return (
@@ -184,6 +197,19 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Comissão (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.1}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              value={commissionPercentage}
+              onChange={e => setCommissionPercentage(parseFloat(e.target.value || '0'))}
+              placeholder="Ex: 10"
             />
           </div>
           <div className="md:col-span-2">

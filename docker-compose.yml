@@ -5,12 +5,24 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: "file:/app/data/prod.db"
+      DATABASE_URL: "postgresql://controle_salao:controle_salao@db:5432/controle_salao?schema=public"
     env_file:
       - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: controle_salao
+      POSTGRES_PASSWORD: controle_salao
+      POSTGRES_DB: controle_salao
+    ports:
+      - "5432:5432"
     volumes:
-      - app-data:/app/data
+      - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
 volumes:
-  app-data:
+  postgres-data:

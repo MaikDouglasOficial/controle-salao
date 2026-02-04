@@ -12,6 +12,7 @@ interface Professional {
   phone: string | null;
   email: string | null;
   specialty: string | null;
+  commissionPercentage: number;
   active: boolean;
 }
 
@@ -28,6 +29,7 @@ export default function EditarProfissionalPage() {
     phone: '',
     email: '',
     specialty: '',
+    commissionPercentage: 0,
     active: true,
   });
 
@@ -51,6 +53,7 @@ export default function EditarProfissionalPage() {
         phone: data.phone || '',
         email: data.email || '',
         specialty: data.specialty || '',
+        commissionPercentage: typeof data.commissionPercentage === 'number' ? data.commissionPercentage : 0,
         active: data.active,
       });
     } catch (err) {
@@ -180,6 +183,22 @@ export default function EditarProfissionalPage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="email@exemplo.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Comissão (%)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={0.1}
+                value={formData.commissionPercentage}
+                onChange={(e) => setFormData({ ...formData, commissionPercentage: parseFloat(e.target.value || '0') })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="Ex: 10"
               />
             </div>
 

@@ -56,6 +56,7 @@ model Professional {
   email     String?
   specialty String?  // especialidade (cabeleireiro, manicure, etc)
   photo     String?  // URL ou caminho da foto
+  commissionPercentage Float @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

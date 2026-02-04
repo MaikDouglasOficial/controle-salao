@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, email, specialty, active, photo } = body;
+    const { name, phone, email, specialty, active, photo, commissionPercentage } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
         phone,
         email,
         specialty,
+        commissionPercentage: commissionPercentage ?? 0,
         active: active ?? true,
         photo: photo || null,
       },
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, name, phone, email, specialty, active, photo } = body;
+    const { id, name, phone, email, specialty, active, photo, commissionPercentage } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -79,6 +80,7 @@ export async function PUT(request: Request) {
         phone,
         email,
         specialty,
+        commissionPercentage: commissionPercentage ?? 0,
         active,
         photo: photo || null,
       },

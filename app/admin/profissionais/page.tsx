@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Search, Pencil, Trash2, UserCheck, UserX, Users } from 'lucide-react';
+import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3 } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import { useRouter } from 'next/navigation';
 
 interface Professional {
   id: number;
@@ -13,6 +14,7 @@ interface Professional {
   phone: string | null;
   email: string | null;
   specialty: string | null;
+  commissionPercentage: number;
   active: boolean;
   photo: string | null;
   createdAt: string;
@@ -20,6 +22,7 @@ interface Professional {
 
 export default function ProfessionalsPage() {
   const { success, error, confirm } = useToast();
+  const router = useRouter();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,6 +276,12 @@ export default function ProfessionalsPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center space-x-1">
+                        <Button
+                          onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
+                          variant="secondary"
+                          size="sm"
+                          icon={BarChart3}
+                        />
                         <Button
                           onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
                           variant="edit"

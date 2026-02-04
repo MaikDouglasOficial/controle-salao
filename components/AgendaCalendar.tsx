@@ -86,6 +86,7 @@ export default function AgendaCalendar({ agendamentos, onSelectEvent }: AgendaCa
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [view, setView] = useState<'day' | 'week'>('week');
   const initialized = useRef(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 640px)');
@@ -156,9 +157,30 @@ export default function AgendaCalendar({ agendamentos, onSelectEvent }: AgendaCa
     </div>
   );
 
+  const handleWheelCapture = (event: React.WheelEvent<HTMLDivElement>) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const scroller = container.querySelector('.rbc-time-content') as HTMLElement | null;
+    if (!scroller) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scroller;
+    const atTop = scrollTop <= 0;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+    if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
+      window.scrollBy({ top: event.deltaY });
+      event.preventDefault();
+    }
+  };
+
   return (
     <div className={`agenda-calendar bg-white rounded-2xl shadow-sm border border-gray-200 p-4 ${isMobile ? 'is-mobile' : ''} ${view === 'week' ? 'is-week' : ''}`}>
-      <div className="agenda-calendar-scroll h-[600px]">
+      <div
+        ref={scrollRef}
+        onWheelCapture={handleWheelCapture}
+        className="agenda-calendar-scroll h-[600px]"
+      >
         <Calendar
           localizer={localizer}
           culture="pt-br"
