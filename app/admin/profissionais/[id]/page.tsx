@@ -266,12 +266,12 @@ export default function ProfessionalProfilePage() {
       </div>
 
       {/* Serviços realizados */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2 text-sm font-semibold text-gray-700">
           <Calendar className="h-4 w-4" />
           Serviços realizados
         </div>
-        <div className="table-responsive">
+        <div className="table-responsive touch-pan-y">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
