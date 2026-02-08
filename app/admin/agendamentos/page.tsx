@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
+import { ModalBase } from '@/components/ui/ModalBase';
+import { Button } from '@/components/ui/Button';
 import { 
   Trash2, Pencil, User, Plus, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, MessageSquare, Scissors, Info, AlertCircle, Lock
@@ -392,19 +394,20 @@ export default function AgendamentosPage() {
 
       {/* CONFIRMAÇÃO DE STATUS: Z-INDEX MÁXIMO E FLUXO CORRIGIDO */}
       {showStatusConfirm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[300] flex items-center justify-center p-6">
-          <div className="bg-white rounded-[32px] p-8 w-full max-w-sm shadow-2xl text-center">
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="h-8 w-8 text-blue-600" />
+        <ModalBase
+          isOpen={true}
+          onClose={() => setShowStatusConfirm(null)}
+          title="Confirmar alteração de status"
+          size="sm"
+          footer={
+            <div className="flex gap-3 w-full">
+              <Button variant="secondary" onClick={() => setShowStatusConfirm(null)} className="flex-1">Cancelar</Button>
+              <Button variant="danger" onClick={() => saveAppointment(showStatusConfirm.data, 'confirmado')} className="flex-1">Confirmar</Button>
             </div>
-            <h3 className="text-xl font-black text-gray-900 mb-2">Confirmar Agendamento?</h3>
-            <p className="text-gray-500 font-bold text-sm mb-8">Deseja salvar e já mudar o status para Confirmado ou manter apenas como Agendado?</p>
-            <div className="space-y-3">
-              <button onClick={() => saveAppointment(showStatusConfirm.data, 'confirmado')} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-base active:scale-95 transition-all">Salvar e Confirmar</button>
-              <button onClick={() => saveAppointment(showStatusConfirm.data, 'agendado')} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-base active:scale-95 transition-all">Manter como Agendado</button>
-            </div>
-          </div>
-        </div>
+          }
+        >
+          <p className="text-gray-700 text-sm mb-6 text-center">Tem certeza que deseja alterar o status deste agendamento?</p>
+        </ModalBase>
       )}
 
       {showFormModal && (
