@@ -76,31 +76,32 @@ export function Sidebar() {
   return (
     <>
       {/* Header mobile fixo */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-4 py-2">
+      {/* Header mobile fixo */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-900 shadow-sm h-16">
+        <div className="flex items-center justify-between px-4 py-3 h-16">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-900"
+            className="p-1 rounded-lg hover:bg-gray-800 transition-colors text-white"
           >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <div className="flex items-center space-x-3">
-            <div className="h-14 w-14 rounded-2xl overflow-hidden bg-white">
+          <div className="flex items-center space-x-4">
+            <div className="h-12 w-12 rounded-2xl overflow-hidden">
               <Image
                 src="/logo-corte-ja.png"
                 alt="Corte-Já"
-                width={56}
-                height={56}
-                className="h-14 w-14 object-cover"
+                width={48}
+                height={48}
+                className="h-12 w-12 object-cover"
                 priority
               />
             </div>
             <div className="leading-tight">
-              <span className="block text-lg font-semibold text-gray-900">Corte-Já</span>
-              <span className="block text-[11px] text-gray-500">Sistema de Gestão de Salão</span>
+              <span className="block text-base font-semibold text-white">Corte-Já</span>
+              <span className="block text-[12px] text-gray-300">Gestão de Salão</span>
             </div>
           </div>
-          <div className="w-10" />
+          <div className="w-8" />
         </div>
       </div>
 
@@ -115,7 +116,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white text-gray-900 transform transition-transform duration-200 ease-in-out shadow-lg border-r border-gray-200',
+          'fixed lg:static inset-y-0 left-0 z-40 w-52 bg-white text-gray-900 transform transition-transform duration-200 ease-in-out shadow-lg border-r border-gray-200',
           'top-[57px] lg:top-0',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}

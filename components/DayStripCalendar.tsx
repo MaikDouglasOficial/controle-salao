@@ -14,7 +14,7 @@ const DayStripCalendar: React.FC<DayStripCalendarProps> = ({ selectedDate, onSel
   }
 
   return (
-    <div className="flex overflow-x-auto py-2 px-1 mb-6 bg-white rounded-xl shadow-sm">
+    <div className="flex overflow-x-auto py-1 px-1 mb-6 bg-white rounded-xl shadow-sm">
       {days.map((day) => {
         const isSelected = selectedDate.toDateString() === day.toDateString();
         return (

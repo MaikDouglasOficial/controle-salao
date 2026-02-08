@@ -58,6 +58,11 @@ export default function PDVPage() {
     paymentMethod: 'DINHEIRO',
     installments: 1,
     installmentValue: 0,
+    entradaValue: 0,
+    entradaMethod: 'DINHEIRO',
+    restanteMethod: 'CARTAO_CREDITO',
+    restanteInstallments: 12,
+    restanteInstallmentValue: 0,
   });
   const [customers, setCustomers] = useState<any[]>([]);
   const [newCustomerData, setNewCustomerData] = useState({
@@ -1084,29 +1089,80 @@ export default function PDVPage() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Método de Pagamento *
-                </label>
-                <select
-                  value={checkoutData.paymentMethod}
-                  onChange={(e) => {
-                    const newPaymentMethod = e.target.value;
-                    setCheckoutData({ 
-                      ...checkoutData, 
-                      paymentMethod: newPaymentMethod,
-                      installments: newPaymentMethod === 'CARTAO_CREDITO' ? 1 : 1,
-                      installmentValue: newPaymentMethod === 'CARTAO_CREDITO' ? total : 0,
-                    });
-                  }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="DINHEIRO">Dinheiro</option>
-                  <option value="CARTAO_CREDITO">Cartão de Crédito</option>
-                  <option value="CARTAO_DEBITO">Cartão de Débito</option>
-                  <option value="PIX">PIX</option>
-                </select>
+              {/* NOVO BLOCO: ENTRADA */}
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-2">
+                <label className="block text-sm font-bold text-blue-900 mb-2">Entrada (opcional)</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="number"
+                    min={0}
+                    max={total}
+                    value={checkoutData.entradaValue}
+                    onChange={e => {
+                      let entrada = Number(e.target.value);
+                      if (entrada > total) entrada = total;
+                      setCheckoutData({ ...checkoutData, entradaValue: entrada });
+                    }}
+                    className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-right"
+                    placeholder="Valor da entrada"
+                  />
+                  <select
+                    value={checkoutData.entradaMethod}
+                    onChange={e => setCheckoutData({ ...checkoutData, entradaMethod: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="DINHEIRO">Dinheiro</option>
+                    <option value="PIX">PIX</option>
+                    <option value="CARTAO_DEBITO">Cartão Débito</option>
+                  </select>
+                </div>
+                <p className="text-xs text-blue-700 mt-1">Deixe 0 para não usar entrada.</p>
               </div>
+
+              {/* RESTANTE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pagamento do Restante *</label>
+                <div className="flex gap-2 items-center">
+                  <span className="font-bold text-lg text-gray-900">R$ {(total - (checkoutData.entradaValue || 0)).toFixed(2)}</span>
+                  <select
+                    value={checkoutData.restanteMethod}
+                    onChange={e => setCheckoutData({ ...checkoutData, restanteMethod: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="CARTAO_CREDITO">Cartão Crédito</option>
+                    <option value="CARTAO_DEBITO">Cartão Débito</option>
+                    <option value="PIX">PIX</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Parcelamento do restante - só se for crédito */}
+              {checkoutData.restanteMethod === 'CARTAO_CREDITO' && (
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Parcelas do Restante *</label>
+                  <select
+                    value={checkoutData.restanteInstallments}
+                    onChange={e => {
+                      const n = parseInt(e.target.value);
+                      setCheckoutData({
+                        ...checkoutData,
+                        restanteInstallments: n,
+                        restanteInstallmentValue: ((total - (checkoutData.entradaValue || 0)) / n) || 0,
+                      });
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(num => (
+                      <option key={num} value={num}>{num}x de R$ {((total - (checkoutData.entradaValue || 0)) / num).toFixed(2)}</option>
+                    ))}
+                  </select>
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-2 mt-1">
+                    <p className="text-sm font-semibold text-blue-900">
+                      Parcelamento: {checkoutData.restanteInstallments}x de R$ {((total - (checkoutData.entradaValue || 0)) / checkoutData.restanteInstallments).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Campos de Parcelamento - Apenas para Cartão de Crédito */}
               {checkoutData.paymentMethod === 'CARTAO_CREDITO' && (

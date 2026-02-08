@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { 
@@ -39,19 +39,40 @@ export default function AgendamentosPage() {
   const END_HOUR = 22;
   const HOUR_HEIGHT = 140;
 
-  const [weekOffset, setWeekOffset] = useState(0);
-  const dateStrip = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i + (weekOffset * 7));
-    return d;
-  });
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isInitialLoad = useRef(true);
+
+  const dateStrip = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1));
+  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
   useEffect(() => {
     fetchData();
     updateNowPosition();
     const interval = setInterval(updateNowPosition, 60000);
     return () => clearInterval(interval);
-  }, [selectedDate, weekOffset]);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    const scrollToSelected = () => {
+      if (scrollRef.current) {
+        const selectedElement = scrollRef.current.querySelector('[data-selected="true"]');
+        if (selectedElement) {
+          if (isInitialLoad.current) {
+            scrollRef.current.scrollLeft = (selectedElement as HTMLElement).offsetLeft - 12;
+            isInitialLoad.current = false;
+          } else {
+            selectedElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
+        }
+      }
+    };
+    const timer = setTimeout(scrollToSelected, 100);
+    return () => clearTimeout(timer);
+  }, [selectedDate.toDateString(), loading]);
 
   const updateNowPosition = () => {
     const now = new Date();
@@ -131,108 +152,114 @@ export default function AgendamentosPage() {
     } catch (e) { toast.error('Erro ao atualizar'); }
   }
 
-  // FUNÇÃO DE VALIDAÇÃO DE CONFLITO
-  const checkConflict = (data: any, currentId: number | null) => {
-    const newStart = new Date(data.date).getTime();
-    const service = services.find((s: any) => s.id === parseInt(data.serviceId));
-    if (!service) return false;
-    const newEnd = newStart + ((service as any).duration * 60000);
-
-    return appointments.some(apt => {
-      if (apt.id === currentId) return false; // Ignora o próprio agendamento na edição
-      if (apt.status === 'cancelado') return false; // Ignora cancelados
-      if (apt.professional !== data.professional) return false; // Profissionais diferentes podem ter o mesmo horário
-
-      const aptStart = new Date(apt.date).getTime();
-      const aptEnd = aptStart + (apt.service.duration * 60000);
-
-      // Verifica sobreposição de horários
-      return (newStart < aptEnd && newEnd > aptStart);
-    });
+  const changeMonth = (offset: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() + offset);
+    newDate.setDate(1);
+    setSelectedDate(newDate);
+    isInitialLoad.current = true;
   };
 
   async function saveAppointment(data: any, statusOverride?: string) {
     const isEdit = editingAppointment !== null;
     
-    // 1. Validação de Conflito
-    if (checkConflict(data, isEdit ? editingAppointment!.id : null)) {
-      toast.error(`Conflito: O profissional ${data.professional} já tem um agendamento neste horário!`);
+    const start = new Date(data.date).getTime();
+    const end = start + (services.find((s:any) => s.id === data.serviceId)?.duration || 30) * 60000;
+    const conflict = appointments.find(apt => {
+      if (isEdit && apt.id === editingAppointment!.id) return false;
+      if (apt.professional !== data.professional) return false;
+      const aptStart = new Date(apt.date).getTime();
+      const aptEnd = aptStart + (apt.service.duration * 60000);
+      return (start < aptEnd && end > aptStart);
+    });
+
+    if (conflict) {
+      toast.error(`Conflito: ${data.professional} já tem agendamento neste horário!`);
       return;
     }
 
     let finalStatus = statusOverride || (isEdit ? editingAppointment!.status : 'agendado');
-
-    // 2. Regra de Regressão: Se mudou data/hora de um 'confirmado', volta para 'agendado'
-    if (isEdit && editingAppointment!.status === 'confirmado' && !statusOverride) {
-      if (new Date(editingAppointment!.date).getTime() !== new Date(data.date).getTime()) {
-        finalStatus = 'agendado';
-        toast.info('Horário alterado: O status voltou para "Agendado" para nova confirmação.');
-      }
+    
+    if (isEdit && editingAppointment!.status === 'confirmado' && editingAppointment!.date !== data.date) {
+      finalStatus = 'agendado';
+      toast.info('Horário alterado: Status resetado para Agendado');
     }
-    
+
+    // CORREÇÃO DE FLUXO: Fecha o modal de edição ANTES de mostrar a confirmação
+    if (finalStatus === 'agendado' && !statusOverride) {
+      setShowFormModal(false); // Fecha o modal de edição primeiro
+      setTimeout(() => {
+        setShowStatusConfirm({ show: true, data });
+      }, 100); // Pequeno atraso para garantir que o modal sumiu
+      return;
+    }
+
     const finalData = { ...data, status: finalStatus };
-    const appointmentId = isEdit ? editingAppointment!.id : null;
-    
     try {
       const res = await fetch('/api/appointments', {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isEdit ? { ...finalData, id: appointmentId } : finalData)
+        body: JSON.stringify(isEdit ? { ...finalData, id: editingAppointment!.id } : finalData)
       });
-      
       if (res.ok) { 
         await fetchData(); 
         setShowFormModal(false); 
         setEditingAppointment(null);
         setShowStatusConfirm(null);
-        toast.success('Agendamento salvo com sucesso!'); 
+        toast.success('Salvo!'); 
       }
-    } catch (e) {
-      toast.error('Erro ao salvar agendamento');
-    }
+    } catch (e) { toast.error('Erro ao salvar'); }
   }
 
   if (loading) return <div className="flex h-screen items-center justify-center bg-white"><div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div></div>;
 
   return (
-    <div className="h-screen bg-white flex flex-col overflow-hidden">
-      
-      <header className="bg-white border-b border-gray-50 z-30 pt-4 pb-2">
-        <div className="px-5 mb-3 flex justify-between items-center">
+    <div className="flex flex-col h-full bg-white overflow-hidden">
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      <header className="bg-white border-b border-gray-100 pt-2 pb-1 flex-shrink-0">
+        <div className="px-4 flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-black text-gray-900 capitalize">
+            <span className="text-sm font-black text-gray-900 capitalize">
               {selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
             </span>
-            <div className="relative flex items-center justify-center w-10 h-10 hover:bg-gray-50 rounded-full transition-colors">
-              <CalendarIcon className="h-5 w-5 text-blue-600" />
+            <div className="relative flex items-center justify-center w-7 h-7 bg-blue-50 rounded-full">
+              <CalendarIcon className="h-3.5 w-3.5 text-blue-600" />
               <input 
                 type="date" 
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                 value={selectedDate.toISOString().split('T')[0]}
-                onChange={(e) => setSelectedDate(new Date(e.target.value + 'T00:00:00'))}
+                onChange={(e) => {
+                  setSelectedDate(new Date(e.target.value + 'T00:00:00'));
+                  isInitialLoad.current = true;
+                }}
               />
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setWeekOffset(prev => prev - 1)} className="p-2 hover:bg-gray-100 rounded-lg"><ChevronLeft className="h-5 w-5 text-gray-500"/></button>
-            <button onClick={() => setWeekOffset(prev => prev + 1)} className="p-2 hover:bg-gray-100 rounded-lg"><ChevronRight className="h-5 w-5 text-gray-500"/></button>
+          <div className="flex gap-0.5">
+            <button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded-md"><ChevronLeft className="h-4 w-4 text-gray-400"/></button>
+            <button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded-md"><ChevronRight className="h-4 w-4 text-gray-400"/></button>
           </div>
         </div>
 
-        <div className="grid grid-cols-7 px-2 gap-1.5">
+        <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar px-3 gap-2 pb-1 scroll-smooth">
           {dateStrip.map((date, i) => {
             const isSelected = date.toDateString() === selectedDate.toDateString();
             return (
               <button
                 key={i}
-                onClick={() => setSelectedDate(date)}
-                className={`flex flex-col items-center justify-center py-2.5 rounded-2xl transition-all
-                  ${isSelected ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-gray-50 text-gray-500'}`}
+                data-selected={isSelected}
+                onClick={() => setSelectedDate(new Date(date))}
+                className={`flex flex-col items-center justify-center min-w-[42px] h-14 transition-all flex-shrink-0
+                  ${isSelected ? 'bg-blue-600 text-white shadow-md rounded-b-2xl rounded-t-none' : 'bg-gray-50 text-gray-400 rounded-b-2xl rounded-t-none'}`}
               >
-                <span className={`text-[10px] font-black uppercase mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
-                  {date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').substring(0, 1)}
+                <span className={`text-[8px] font-black uppercase mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
+                  {date.toLocaleDateString('pt-BR', { weekday: 'short' }).substring(0, 1)}
                 </span>
-                <span className="text-sm font-black">{date.getDate()}</span>
+                <span className="text-xs font-black">{date.getDate()}</span>
               </button>
             );
           })}
@@ -240,16 +267,15 @@ export default function AgendamentosPage() {
       </header>
 
       <main className="flex-1 relative overflow-y-auto bg-white pb-24">
-        <div className="relative w-full" style={{ height: `${(END_HOUR - START_HOUR) * HOUR_HEIGHT}px` }}>
-          
-          <div className="absolute left-0 top-0 w-14 h-full border-r border-gray-50 z-10 bg-white/80 backdrop-blur-sm">
+        <div className="relative w-full pt-6" style={{ height: `${(END_HOUR - START_HOUR) * HOUR_HEIGHT + 40}px` }}>
+          <div className="absolute left-0 top-6 w-12 h-full border-r border-gray-50 z-10 bg-white/90 backdrop-blur-sm">
             {Array.from({ length: (END_HOUR - START_HOUR) * 2 + 1 }).map((_, i) => {
               const isHalfHour = i % 2 !== 0;
               const hour = START_HOUR + Math.floor(i / 2);
               const top = (i * HOUR_HEIGHT) / 2;
               return (
                 <div key={i} className="absolute w-full text-center" style={{ top: `${top - 8}px` }}>
-                  <span className={`font-black tracking-tighter ${isHalfHour ? 'text-[10px] text-gray-200' : 'text-[12px] text-gray-500'}`}>
+                  <span className={`font-black tracking-tighter ${isHalfHour ? 'text-[8px] text-gray-200' : 'text-[10px] text-gray-500'}`}>
                     {hour}:{isHalfHour ? '30' : '00'}
                   </span>
                 </div>
@@ -258,60 +284,58 @@ export default function AgendamentosPage() {
           </div>
 
           {Array.from({ length: (END_HOUR - START_HOUR) * 2 + 1 }).map((_, i) => (
-            <div key={i} className="absolute w-full border-t border-gray-50" style={{ top: `${(i * HOUR_HEIGHT) / 2}px` }} />
+            <div key={i} className={`absolute w-full border-t ${i % 2 === 0 ? 'border-gray-100' : 'border-gray-50 border-dashed'}`} style={{ top: `${(i * HOUR_HEIGHT) / 2 + 24}px` }} />
           ))}
 
           {nowPosition >= 0 && (
-            <div className="absolute w-full z-20 flex items-center" style={{ top: `${nowPosition}px` }}>
-              <div className="w-2.5 h-2.5 bg-red-500 rounded-full ml-12.5 border-2 border-white shadow-md" />
-              <div className="flex-1 border-t-2 border-red-500/40" />
+            <div className="absolute w-full z-20 flex items-center" style={{ top: `${nowPosition + 24}px` }}>
+              <div className="w-2 h-2 bg-red-500 rounded-full ml-11 border border-white shadow-sm" />
+              <div className="flex-1 border-t border-red-500/30" />
             </div>
           )}
 
-          <div className="absolute left-14 right-0 h-full">
+          <div className="absolute left-12 right-0 h-full pt-6">
             {filteredAppointments.map(apt => {
               const styles = getStatusStyles(apt.status);
               const layout = getAppointmentLayout(apt);
+              const isLocked = ['concluido', 'faturado'].includes(apt.status.toLowerCase());
               return (
                 <div 
                   key={apt.id}
                   onClick={() => setSelectedAppointment(apt)}
-                  className={`absolute rounded-2xl border-l-[6px] p-3 shadow-md cursor-pointer transition-all active:scale-[0.97] overflow-hidden flex flex-col
+                  className={`absolute rounded-2xl border-l-[5px] p-3 shadow-md cursor-pointer transition-all active:scale-[0.96] overflow-hidden flex flex-col
                     ${styles.bg} ${styles.border}`}
                   style={{ ...getAptStyle(apt.date, apt.service.duration), ...layout }}
                 >
                   <div className="flex justify-between items-start mb-1">
-                    <p className={`text-[10px] font-black uppercase tracking-tight ${styles.text} opacity-70`}>
+                    <p className={`text-[9px] font-black uppercase tracking-wider ${styles.text} opacity-60`}>
                       {new Date(apt.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
-                    <div className={`w-2 h-2 rounded-full ${styles.accent} shadow-sm`} />
+                    <div className={`px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase ${styles.badge}`}>
+                      {apt.status}
+                    </div>
                   </div>
-                  
-                  <h3 className={`font-black text-sm leading-tight truncate mb-0.5 ${styles.text}`}>{apt.customer.name}</h3>
-                  
-                  <p className={`text-[11px] font-black truncate flex items-center gap-1 mb-1 ${styles.text} opacity-80`}>
+                  <h3 className={`font-black text-xs leading-tight truncate mb-0.5 ${styles.text}`}>{apt.customer.name}</h3>
+                  <p className={`text-[10px] font-bold truncate flex items-center gap-1 ${styles.text} opacity-80`}>
                     <Scissors className="h-3 w-3" /> {apt.service.name}
                   </p>
-
                   {apt.notes && (
-                    <div className={`mt-1 p-1.5 rounded-lg bg-white/50 border border-black/5 flex items-start gap-1.5`}>
-                      <Info className={`h-3 w-3 mt-0.5 flex-shrink-0 ${styles.text} opacity-60`} />
-                      <p className={`text-[10px] font-bold leading-tight line-clamp-2 ${styles.text} opacity-80 italic`}>
-                        {apt.notes}
+                    <div className="mt-1 p-1.5 bg-black/5 rounded-lg border border-black/5">
+                      <p className={`text-[9px] font-bold italic leading-tight ${styles.text} opacity-80 line-clamp-2`}>
+                        "{apt.notes}"
                       </p>
                     </div>
                   )}
-                  
                   <div className="mt-auto pt-2 border-t border-black/5 flex justify-between items-center">
-                    <div className="flex items-center gap-1 overflow-hidden">
-                      <User className={`h-3 w-3 flex-shrink-0 ${styles.text} opacity-60`} />
-                      <span className={`text-[10px] font-black truncate ${styles.text} opacity-70`}>{apt.professional?.split(' ')[0]}</span>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-5 h-5 rounded-full ${styles.accent} flex items-center justify-center text-[8px] text-white font-black`}>
+                        {apt.professional?.[0]}
+                      </div>
+                      <span className={`text-[9px] font-black ${styles.text} opacity-70`}>{apt.professional?.split(' ')[0]}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[11px] font-black ${styles.text}`}>R${apt.service.price}</span>
-                      <span className={`text-[10px] font-bold opacity-50 ${styles.text}`}>{apt.service.duration}m</span>
-                    </div>
+                    <span className={`text-[10px] font-black ${styles.text}`}>R${apt.service.price}</span>
                   </div>
+                  {isLocked && <div className="absolute top-1 right-1 opacity-20"><Lock className="h-3 w-3" /></div>}
                 </div>
               );
             })}
@@ -319,20 +343,14 @@ export default function AgendamentosPage() {
         </div>
       </main>
 
-      <button 
-        onClick={() => { setEditingAppointment(null); setShowFormModal(true); }}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-50"
-      >
-        <Plus className="h-8 w-8" />
+      <button onClick={() => { setEditingAppointment(null); setShowFormModal(true); }} className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50">
+        <Plus className="h-7 w-7" />
       </button>
 
-      {/* BOTTOM SHEET DETALHES */}
       {selectedAppointment && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-end justify-center p-0 animate-in fade-in" onClick={() => setSelectedAppointment(null)}>
-          <div className="w-full max-w-md bg-white rounded-t-[40px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-8" />
-            
-            {/* CABEÇALHO DO SHEET */}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-end justify-center p-0" onClick={() => setSelectedAppointment(null)}>
+          <div className="w-full max-w-md bg-white rounded-t-[32px] p-8 pb-10 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-1 bg-gray-100 rounded-full mx-auto mb-8" />
             <div className="flex items-center gap-5 mb-8">
               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl border-2 ${getStatusStyles(selectedAppointment.status).badge}`}>
                 {selectedAppointment.customer.name[0]}
@@ -342,24 +360,12 @@ export default function AgendamentosPage() {
                 <p className="text-base font-bold text-blue-600">{selectedAppointment.service.name}</p>
               </div>
             </div>
-
-            {/* NOTAS */}
-            {selectedAppointment.notes && (
-              <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <p className="text-xs font-black text-gray-400 uppercase mb-2 flex items-center gap-2">
-                  <MessageSquare className="h-3 w-3" /> Observação
-                </p>
-                <p className="text-sm font-bold text-gray-700 leading-relaxed italic">"{selectedAppointment.notes}"</p>
-              </div>
-            )}
-
-            {/* AÇÕES DINÂMICAS COM REGRAS DE NEGÓCIO */}
             <div className="space-y-4">
               {selectedAppointment.status === 'agendado' && (
-                <button onClick={() => handleStatusUpdate(selectedAppointment.id, 'confirmado')} className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-200 active:scale-95 transition-transform">Confirmar Agendamento</button>
+                <button onClick={() => handleStatusUpdate(selectedAppointment.id, 'confirmado')} className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg active:scale-95 transition-all">Confirmar Agora</button>
               )}
               {selectedAppointment.status === 'confirmado' && (
-                <button onClick={() => handleStatusUpdate(selectedAppointment.id, 'concluido')} className="w-full py-5 bg-sky-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-sky-200 active:scale-95 transition-transform">Finalizar Serviço</button>
+                <button onClick={() => handleStatusUpdate(selectedAppointment.id, 'concluido')} className="w-full py-5 bg-sky-600 text-white rounded-2xl font-black text-lg active:scale-95 transition-all">Finalizar Serviço</button>
               )}
               {selectedAppointment.status === 'concluido' && (
                 <button onClick={() => {
@@ -369,67 +375,33 @@ export default function AgendamentosPage() {
                     professional: selectedAppointment.professional || ''
                   }));
                   window.location.href = '/admin/pdv';
-                }} className="w-full py-5 bg-violet-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-violet-200 active:scale-95 transition-transform">Faturar no PDV</button>
+                }} className="w-full py-5 bg-violet-600 text-white rounded-2xl font-black text-lg active:scale-95 transition-all">Faturar no PDV</button>
               )}
-
-              {/* REGRAS DE EDIÇÃO/EXCLUSÃO */}
               <div className="grid grid-cols-2 gap-4">
-                {['agendado', 'confirmado'].includes(selectedAppointment.status) ? (
-                  <button 
-                    onClick={() => { setEditingAppointment(selectedAppointment); setShowFormModal(true); setSelectedAppointment(null); }} 
-                    className="py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                  >
-                    <Pencil className="h-5 w-5"/> Editar
-                  </button>
+                {!['concluido', 'faturado'].includes(selectedAppointment.status.toLowerCase()) ? (
+                  <button onClick={() => { setEditingAppointment(selectedAppointment); setShowFormModal(true); setSelectedAppointment(null); }} className="py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"><Pencil className="h-5 w-5"/> Editar</button>
                 ) : (
-                  <div className="py-4 bg-gray-50 text-gray-400 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-60">
-                    <Lock className="h-5 w-5"/> Bloqueado
-                  </div>
+                  <div className="py-4 bg-gray-50 text-gray-400 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-not-allowed"><Lock className="h-5 w-5"/> Bloqueado</div>
                 )}
-                
-                <button 
-                  onClick={() => { if(confirm('Deseja realmente excluir este agendamento?')) { fetch(`/api/appointments?id=${selectedAppointment.id}`, { method: 'DELETE' }).then(() => { fetchData(); setSelectedAppointment(null); }); } }} 
-                  className="py-4 bg-red-50 text-red-600 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                >
-                  <Trash2 className="h-5 w-5"/> Excluir
-                </button>
+                <button onClick={() => { if(confirm('Excluir?')) { fetch(`/api/appointments?id=${selectedAppointment.id}`, { method: 'DELETE' }).then(() => { fetchData(); setSelectedAppointment(null); }); } }} className="py-4 bg-red-50 text-red-600 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"><Trash2 className="h-5 w-5"/> Excluir</button>
               </div>
-
-              {/* AVISO DE BLOQUEIO */}
-              {['concluido', 'faturado'].includes(selectedAppointment.status) && (
-                <p className="text-[10px] text-center font-bold text-gray-400 uppercase tracking-widest mt-2">
-                  Serviços finalizados não podem ser editados
-                </p>
-              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL DE CONFIRMAÇÃO DE STATUS */}
+      {/* CONFIRMAÇÃO DE STATUS: Z-INDEX MÁXIMO E FLUXO CORRIGIDO */}
       {showStatusConfirm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-lg z-[100] flex items-center justify-center p-6 animate-in fade-in">
-          <div className="w-full max-w-sm bg-white rounded-[40px] p-10 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
-              <AlertCircle className="h-10 w-10 text-amber-600" />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[300] flex items-center justify-center p-6">
+          <div className="bg-white rounded-[32px] p-8 w-full max-w-sm shadow-2xl text-center">
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="h-8 w-8 text-blue-600" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 text-center mb-3">Confirmar Agora?</h3>
-            <p className="text-base font-bold text-gray-500 text-center mb-10 leading-relaxed">
-              Deseja já mudar o status para <span className="text-emerald-600 font-black">Confirmado</span> ou manter como Agendado?
-            </p>
-            <div className="space-y-4">
-              <button 
-                onClick={() => saveAppointment(showStatusConfirm.data, 'confirmado')}
-                className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-100 active:scale-95 transition-transform"
-              >
-                Salvar e Confirmar
-              </button>
-              <button 
-                onClick={() => saveAppointment(showStatusConfirm.data)}
-                className="w-full py-5 bg-gray-100 text-gray-700 rounded-2xl font-black text-lg active:scale-95 transition-transform"
-              >
-                Apenas Salvar
-              </button>
+            <h3 className="text-xl font-black text-gray-900 mb-2">Confirmar Agendamento?</h3>
+            <p className="text-gray-500 font-bold text-sm mb-8">Deseja salvar e já mudar o status para Confirmado ou manter apenas como Agendado?</p>
+            <div className="space-y-3">
+              <button onClick={() => saveAppointment(showStatusConfirm.data, 'confirmado')} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-base active:scale-95 transition-all">Salvar e Confirmar</button>
+              <button onClick={() => saveAppointment(showStatusConfirm.data, 'agendado')} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-base active:scale-95 transition-all">Manter como Agendado</button>
             </div>
           </div>
         </div>
@@ -443,14 +415,7 @@ export default function AgendamentosPage() {
             serviceId: editingAppointment.serviceId, date: editingAppointment.date,
             professional: editingAppointment.professional || '', notes: editingAppointment.notes || ''
           } : undefined}
-          onSave={async (data) => {
-            if (editingAppointment && editingAppointment.status === 'agendado') {
-              setShowFormModal(false);
-              setShowStatusConfirm({ show: true, data });
-            } else {
-              saveAppointment(data);
-            }
-          }}
+          onSave={async (data) => saveAppointment(data)}
           onClose={() => { setShowFormModal(false); setEditingAppointment(null); }}
         />
       )}
