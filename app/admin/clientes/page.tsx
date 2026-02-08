@@ -40,9 +40,21 @@ export default function ClientesPage() {
     try {
       const response = await fetch('/api/customers');
       const data = await response.json();
-      setCustomers(data);
+      if (!response.ok) {
+        toast.error(data?.error || 'Erro ao buscar clientes');
+        setCustomers([]);
+        return;
+      }
+      if (Array.isArray(data)) {
+        setCustomers(data);
+      } else {
+        console.error('Resposta inesperada ao buscar clientes:', data);
+        setCustomers([]);
+      }
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
+      toast.error('Erro ao buscar clientes');
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
@@ -222,9 +234,24 @@ export default function ClientesPage() {
             Novo Cliente
           </Button>
         </div>
+        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+          <div className="text-sm text-gray-700">
+            Total de clientes: <span className="font-semibold text-gray-900">{customers.length}</span>
+          </div>
+          <div className="text-sm text-gray-700">
+            Aniversariantes do mês: <span className="font-semibold text-gray-900">{
+              customers.filter((c) => {
+                if (!c.birthday) return false;
+                const birthday = new Date(c.birthday);
+                const currentMonth = new Date().getMonth();
+                return birthday.getMonth() === currentMonth;
+              }).length
+            }</span>
+          </div>
+        </div>
 
-        {/* Busca */}
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
+      {/* Busca */}
+      <div className="bg-white rounded-lg border border-gray-200 p-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -238,14 +265,99 @@ export default function ClientesPage() {
       </div>
 
       {/* Lista de Clientes */}
+      {/* ...existing code... */}
+      {/* ...existing code... */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              {/* ...existing code... */}
         {filteredCustomers.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="min-w-full divide-y divide-gray-200">
+          <>
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredCustomers.map((customer) => (
+                <div key={customer.id} className="p-4 space-y-3">
+                  <Link
+                    href={`/admin/clientes/${customer.id}`}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      {customer.photo ? (
+                        <Image
+                          src={customer.photo}
+                          alt={customer.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <Users className="h-5 w-5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate">
+                        {customer.name}
+                      </div>
+                      {customer.notes && (
+                        <div className="text-xs text-gray-500 truncate">
+                          {customer.notes}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                    <div>
+                      <span className="text-xs text-gray-400">Telefone</span>
+                      <div className="font-medium text-gray-700">
+                        {formatPhone(customer.phone)}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">Email</span>
+                      <div className="font-medium text-gray-700 break-words">
+                        {customer.email || '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">Aniversário</span>
+                      <div className="font-medium text-gray-700">
+                        {customer.birthday ? formatDate(customer.birthday) : '-'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-2">
+                    <Link
+                      href={`/admin/clientes/${customer.id}`}
+                      className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="Ver Detalhes"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                    <Button
+                      onClick={() => handleEdit(customer.id)}
+                      variant="edit"
+                      size="sm"
+                      icon={Pencil}
+                      title="Editar Cliente"
+                    />
+                    <Button
+                      onClick={() => handleDelete(customer.id, customer.name)}
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
+                      title="Excluir Cliente"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block table-responsive">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -340,39 +452,9 @@ export default function ClientesPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
-      </div>
-
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Total de Clientes</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">
-            {customers.length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">
-            Aniversariantes do Mês
-          </p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">
-            {
-              customers.filter((c) => {
-                if (!c.birthday) return false;
-                const birthday = new Date(c.birthday);
-                const currentMonth = new Date().getMonth();
-                return birthday.getMonth() === currentMonth;
-              }).length
-            }
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Com Email</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">
-            {customers.filter((c) => c.email).length}
-          </p>
-        </div>
       </div>
 
       {/* Modal de Criar/Editar Cliente */}

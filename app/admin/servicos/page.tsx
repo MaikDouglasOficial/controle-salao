@@ -125,37 +125,22 @@ export default function ServicosPage() {
           Novo Serviço
         </Button>
       </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Total de Serviços</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Preço Médio</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length > 0
-                ? formatCurrency(
-                    services.reduce((acc, s) => acc + s.price, 0) / services.length
-                  )
-                : 'R$ 0,00'}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase font-medium">Duração Média</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">
-              {services.length > 0
-                ? Math.round(
-                    services.reduce((acc, s) => acc + s.duration, 0) / services.length
-                  )
-                : 0}{' '}
-              min
-            </p>
-          </div>
+      {/* Summary Bar */}
+      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+        <div className="text-sm text-gray-700">
+          Total de serviços: <span className="font-semibold text-gray-900">{services.length}</span>
         </div>
-
+        <div className="text-sm text-gray-700">
+          Preço médio: <span className="font-semibold text-gray-900">{services.length > 0 ? formatCurrency(services.reduce((acc, s) => acc + s.price, 0) / services.length) : 'R$ 0,00'}</span>
+        </div>
+        <div className="text-sm text-gray-700">
+          Duração média: <span className="font-semibold text-gray-900">{services.length > 0 ? Math.round(services.reduce((acc, s) => acc + s.duration, 0) / services.length) : 0} min</span>
+        </div>
+      </div>
+      {/* Busca */}
+      {/* ...existing code... */}
         {/* Lista de Serviços */}
+                {/* ...existing code... */}
         {services.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <Scissors className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -163,7 +148,53 @@ export default function ServicosPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="table-responsive">
+            <div className="md:hidden divide-y divide-gray-200">
+              {services.map((service) => (
+                <div key={service.id} className="p-4 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Scissors className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate">
+                        {service.name}
+                      </div>
+                      {service.description && (
+                        <div className="text-xs text-gray-500 truncate">
+                          {service.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 text-sm">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      {service.duration} min
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {formatCurrency(service.price)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-2">
+                    <Button
+                      onClick={() => handleEdit(service.id)}
+                      variant="edit"
+                      size="sm"
+                      icon={Pencil}
+                    />
+                    <Button
+                      onClick={() => handleDelete(service.id)}
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block table-responsive">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>

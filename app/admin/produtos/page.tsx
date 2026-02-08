@@ -106,7 +106,16 @@ export default function ProdutosPage() {
           Novo Produto
         </Button>
       </div>
+      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+        <div className="text-sm text-gray-700">
+          Total de produtos: <span className="font-semibold text-gray-900">{products.length}</span>
+        </div>
+        <div className="text-sm text-gray-700">
+          Estoque total: <span className="font-semibold text-gray-900">{products.reduce((acc, p) => acc + p.stock, 0)}</span>
+        </div>
+      </div>
 
+        {/* ...existing code... */}
         <div className="bg-white rounded-lg border border-gray-200 p-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -119,9 +128,67 @@ export default function ProdutosPage() {
             />
           </div>
         </div>
-
+        {/* ...existing code... */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="table-responsive">
+                  {/* ...existing code... */}
+          <div className="md:hidden divide-y divide-gray-200">
+            {filteredProducts.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-gray-500">Nenhum produto encontrado</div>
+            ) : (
+              filteredProducts.map((product) => (
+                <div key={product.id} className="p-4 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      {product.photo ? (
+                        <Image
+                          src={product.photo}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <Package className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate">{product.name}</div>
+                      {product.description && (
+                        <div className="text-xs text-gray-500 truncate">{product.description}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <div>
+                      <span className="text-xs text-gray-400">SKU</span>
+                      <div className="font-medium text-gray-700">{product.sku || '-'}</div>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">Preço</span>
+                      <div className="font-semibold text-gray-900">{formatCurrency(product.price)}</div>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-xs text-gray-400">Estoque</span>
+                      <div>
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ${product.stock > 10 ? 'bg-green-600' : product.stock > 0 ? 'bg-yellow-500' : 'bg-red-600'}`}>
+                          {product.stock} unid.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-2">
+                    <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
+                    <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden md:block table-responsive">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

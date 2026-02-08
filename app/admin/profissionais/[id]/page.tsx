@@ -271,7 +271,33 @@ export default function ProfessionalProfilePage() {
           <Calendar className="h-4 w-4" />
           Serviços realizados
         </div>
-        <div className="table-responsive touch-pan-y">
+        <div className="md:hidden divide-y divide-gray-200">
+          {filteredServices.length === 0 ? (
+            <div className="px-4 py-6 text-center text-sm text-gray-500">
+              Nenhum serviço encontrado
+            </div>
+          ) : (
+            filteredServices.map((item, index) => (
+              <div key={`${item.saleId}-${index}`} className="p-4 space-y-2">
+                <div className="text-sm text-gray-600">{formatDate(item.date)}</div>
+                <div className="text-sm font-semibold text-gray-900">
+                  {item.customerName}
+                </div>
+                <div className="text-sm text-gray-600">{item.serviceName}</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">
+                    {formatCurrency(item.price * item.quantity)}
+                  </span>
+                  <span className="text-sm font-semibold text-green-600">
+                    {formatCurrency(item.commission)}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block table-responsive touch-pan-y">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>

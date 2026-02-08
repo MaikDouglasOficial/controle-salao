@@ -206,6 +206,17 @@ export default function DespesasPage() {
             Nova Despesa
           </Button>
         </div>
+        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+          <div className="text-sm text-gray-700">
+            Total de despesas: <span className="font-semibold text-gray-900">{filteredExpenses.length}</span>
+          </div>
+          <div className="text-sm text-gray-700">
+            Valor total: <span className="font-semibold text-gray-900">{formatCurrency(totalExpenses)}</span>
+          </div>
+          <div className="text-sm text-gray-700">
+            Média por despesa: <span className="font-semibold text-gray-900">{filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}</span>
+          </div>
+        </div>
       {/* Filtros */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -355,49 +366,13 @@ export default function DespesasPage() {
         )}
       </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Total de Despesas</p>
-              <p className="text-2xl font-semibold text-gray-900">{formatCurrency(totalExpenses)}</p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <TrendingDown className="h-5 w-5 text-gray-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Total de Registros</p>
-              <p className="text-2xl font-semibold text-gray-900">{filteredExpenses.length}</p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-red-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Média por Despesa</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
-              </p>
-            </div>
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-gray-600" />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ...existing code... */}
 
       {/* Lista de Despesas */}
+      {/* ...existing code... */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    {/* ...existing code... */}
+              {/* ...existing code... */}
         {filteredExpenses.length === 0 ? (
           <div className="text-center py-12">
             <DollarSign className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -408,8 +383,59 @@ export default function DespesasPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+          <>
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredExpenses.map((expense) => (
+                <div key={expense.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">{formatDate(expense.date)}</div>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(
+                        expense.category
+                      )}`}
+                    >
+                      {expense.category}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      {expense.description}
+                    </div>
+                    {expense.notes && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {expense.notes}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-red-600">
+                      {formatCurrency(expense.amount)}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={() => handleEdit(expense)}
+                        variant="edit"
+                        size="sm"
+                        icon={Pencil}
+                        title="Editar despesa"
+                      />
+                      <Button
+                        onClick={() => handleDelete(expense.id)}
+                        variant="danger"
+                        size="sm"
+                        icon={Trash2}
+                        title="Excluir despesa"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -485,6 +511,7 @@ export default function DespesasPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

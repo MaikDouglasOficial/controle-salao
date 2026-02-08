@@ -131,6 +131,17 @@ export default function ProfessionalsPage() {
             Novo Profissional
           </Button>
         </div>
+        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+          <div className="text-sm text-gray-700">
+            Total de profissionais: <span className="font-semibold text-gray-900">{professionals.length}</span>
+          </div>
+          <div className="text-sm text-gray-700">
+            Ativos: <span className="font-semibold text-gray-900">{professionals.filter((p) => p.active).length}</span>
+          </div>
+          <div className="text-sm text-gray-700">
+            Inativos: <span className="font-semibold text-gray-900">{professionals.filter((p) => !p.active).length}</span>
+          </div>
+        </div>
       {/* Aviso de Erro da API */}
       {apiError && (
         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">
@@ -158,6 +169,7 @@ export default function ProfessionalsPage() {
         </div>
       )}
 
+      {/* ...existing code... */}
       {/* Filtros */}
       <div className="bg-white rounded-xl shadow-lg p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,10 +220,96 @@ export default function ProfessionalsPage() {
           </div>
         </div>
       </div>
-
+      {/* ...existing code... */}
       {/* Lista de Profissionais */}
+            {/* ...existing code... */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="table-responsive">
+        <div className="md:hidden divide-y divide-gray-200">
+          {filteredProfessionals.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-gray-500">
+              Nenhum profissional encontrado
+            </div>
+          ) : (
+            filteredProfessionals.map((professional) => (
+              <div key={professional.id} className="p-4 space-y-3">
+                <div className="flex items-center space-x-3">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                    {professional.photo ? (
+                      <Image
+                        src={professional.photo}
+                        alt={professional.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <Users className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-gray-900 truncate">
+                      {professional.name}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {professional.specialty || '-'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                  <div>
+                    <span className="text-xs text-gray-400">Telefone</span>
+                    <div className="font-medium text-gray-700">{professional.phone || '-'}</div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">Email</span>
+                    <div className="font-medium text-gray-700 break-words">{professional.email || '-'}</div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">Status</span>
+                    <div>
+                      {professional.active ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          <UserCheck size={12} />
+                          Ativo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                          <UserX size={12} />
+                          Inativo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end space-x-2">
+                  <Button
+                    onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
+                    variant="secondary"
+                    size="sm"
+                    icon={BarChart3}
+                  />
+                  <Button
+                    onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
+                    variant="edit"
+                    size="sm"
+                    icon={Pencil}
+                  />
+                  <Button
+                    onClick={() => handleDeleteProfessional(professional)}
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block table-responsive">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
