@@ -495,14 +495,7 @@ export default function PDVPage() {
     <div className="page-container space-y-8 animate-fade-in">
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              PDV - Ponto de Venda
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Sistema de vendas
-            </p>
-          </div>
+          {/* Removido título e subtítulo para visual minimalista */}
         </div>
 
       {/* Busca */}

@@ -116,14 +116,7 @@ export default function ProfessionalsPage() {
     <div className="page-container space-y-6">
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Profissionais
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie sua equipe
-            </p>
-          </div>
+          {/* Removido título e subtítulo para visual minimalista */}
               {/* Botão flutuante de novo profissional */}
                 <button
                   onClick={() => { setEditingProfessional(null); setShowModal(true); }}
@@ -135,7 +128,7 @@ export default function ProfessionalsPage() {
                   </svg>
                 </button>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+        <div className="bg-white rounded-lg border border-gray-200 px-3 py-1 space-y-1 my-1">
           <div className="text-sm text-gray-700">
             Total de profissionais: <span className="font-semibold text-gray-900">{professionals.length}</span>
           </div>

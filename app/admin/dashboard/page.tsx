@@ -212,16 +212,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="page-container space-y-6">
-        {/* Header Minimalista */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Dashboard
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Visão geral do negócio
-          </p>
-        </div>
+    <div className="page-container space-y-6 mt-6">
+        {/* Header removido para visual minimalista */}
 
         {/* Cards de Estatísticas Minimalistas */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
@@ -279,8 +271,7 @@ export default function DashboardPage() {
           {/* Gráfico de Receita vs Despesa */}
           <Card className="bg-white border border-gray-200">
             <CardHeader 
-              title="Receita vs Despesa" 
-              subtitle="Últimos 6 meses"
+              /* Removido título e subtítulo para visual minimalista */
               className="pb-4"
             />
             <CardBody className="pt-3">
@@ -317,8 +308,7 @@ export default function DashboardPage() {
           {/* Resumo Financeiro Minimalista */}
           <Card className="bg-white border border-gray-200">
             <CardHeader 
-              title="Resumo Financeiro" 
-              subtitle="Visão consolidada"
+              /* Removido título e subtítulo para visual minimalista */
               className="pb-4"
             />
             <CardBody className="pt-0">
@@ -377,8 +367,7 @@ export default function DashboardPage() {
         {/* Próximos Agendamentos */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            title="Próximos Agendamentos"
-            subtitle={`${proximosAgendamentos.length} agendamento${proximosAgendamentos.length !== 1 ? 's' : ''}`}
+            /* Removido título e subtítulo para visual minimalista */
             className="border-b border-gray-200"
           >
             <Button
@@ -395,7 +384,7 @@ export default function DashboardPage() {
           {proximosAgendamentos.length === 0 ? (
             <EmptyState
               icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              title="Nenhum agendamento próximo"
+              /* Removido título para visual minimalista */
               description="Crie um novo agendamento para começar"
               action={
                 <Button
@@ -476,8 +465,7 @@ export default function DashboardPage() {
         {/* Aniversariantes do Mês */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            title="Aniversariantes do Mês"
-            subtitle={`${aniversariantes.length} cliente${aniversariantes.length !== 1 ? 's' : ''}`}
+            /* Removido título e subtítulo para visual minimalista */
             className="border-b border-gray-200"
           />
         
@@ -485,7 +473,7 @@ export default function DashboardPage() {
           {aniversariantes.length === 0 ? (
             <EmptyState
               icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              title="Nenhum aniversariante este mês"
+              /* Removido título para visual minimalista */
               description="Não há clientes fazendo aniversário este mês"
             />
           ) : (
@@ -563,8 +551,7 @@ export default function DashboardPage() {
         {/* Vendas Recentes */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            title="Vendas Recentes"
-            subtitle={`${vendasRecentes.length} venda${vendasRecentes.length !== 1 ? 's' : ''}`}
+            /* Removido título e subtítulo para visual minimalista */
             className="border-b border-gray-200"
           >
             <Button
@@ -581,7 +568,7 @@ export default function DashboardPage() {
           {vendasRecentes.length === 0 ? (
             <EmptyState
               icon={<ShoppingBag className="h-8 w-8 text-gray-400" />}
-              title="Nenhuma venda registrada"
+              /* Removido título para visual minimalista */
               description="Realize uma venda no PDV para começar"
               action={
                 <Button

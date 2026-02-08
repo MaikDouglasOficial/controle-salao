@@ -306,20 +306,17 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="page-container space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <Link
-            href="/admin/clientes"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalhes do Cliente</h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Histórico completo e informações</p>
-          </div>
-        </div>
+    <div className="page-container space-y-0.5 sm:space-y-1">
+      {/* Header centralizado com seta */}
+      <div className="relative flex items-center justify-center h-10 mb-0">
+        <Link
+          href="/admin/clientes"
+          className="absolute left-0 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          style={{ zIndex: 2 }}
+        >
+          <ArrowLeft className="h-8 w-8 text-gray-600" />
+        </Link>
+      </div>
 
       {/* Informações do Cliente */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">

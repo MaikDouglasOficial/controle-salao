@@ -200,12 +200,13 @@ export default function VendasPage() {
         {/* Header Minimalista */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Vendas
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Histórico de vendas
-            </p>
+              {/* Removido título e subtítulo para visual minimalista */}
+              {/* <h1 className="text-2xl font-semibold text-gray-900">
+                Vendas
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Histórico de vendas
+              </p> */}
           </div>
         </div>
 

@@ -33,7 +33,7 @@ export default function AgendamentosPage() {
   const [showStatusConfirm, setShowStatusConfirm] = useState<{show: boolean, data: any} | null>(null);
   
   const [customers, setCustomers] = useState([]);
-  const [services, setServices] = useState([]);
+  const [services, setServices] = useState<{id: number; name: string; duration: number; price: number;}[]>([]);
   const [professionals, setProfessionals] = useState([]);
 
   const [nowPosition, setNowPosition] = useState(0);
@@ -166,7 +166,9 @@ export default function AgendamentosPage() {
     const isEdit = editingAppointment !== null;
     
     const start = new Date(data.date).getTime();
-    const end = start + (services.find((s:any) => s.id === data.serviceId)?.duration || 30) * 60000;
+    const foundService = services.find((s: any) => s.id === Number(data.serviceId));
+    const duration = foundService && typeof foundService.duration === 'number' ? foundService.duration : 30;
+    const end = start + duration * 60000;
     const conflict = appointments.find(apt => {
       if (isEdit && apt.id === editingAppointment!.id) return false;
       if (apt.professional !== data.professional) return false;
@@ -317,7 +319,7 @@ export default function AgendamentosPage() {
                       {apt.status}
                     </div>
                   </div>
-                  <h3 className={`font-black text-xs leading-tight truncate mb-0.5 ${styles.text}`}>{apt.customer.name}</h3>
+                  {/* Removido título para visual minimalista */}
                   <p className={`text-[10px] font-bold truncate flex items-center gap-1 ${styles.text} opacity-80`}>
                     <Scissors className="h-3 w-3" /> {apt.service.name}
                   </p>
@@ -358,8 +360,19 @@ export default function AgendamentosPage() {
                 {selectedAppointment.customer.name[0]}
               </div>
               <div>
-                <h2 className="text-xl font-black text-gray-900 leading-tight">{selectedAppointment.customer.name}</h2>
+                {/* Removido título para visual minimalista */}
                 <p className="text-base font-bold text-blue-600">{selectedAppointment.service.name}</p>
+                  {/* Start/End time display */}
+                  <div className="mt-2 text-sm text-gray-500">
+                    {(() => {
+                      const startDate = new Date(selectedAppointment.date);
+                      const startHour = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                      const duration = selectedAppointment.service.duration || 0;
+                      const endDate = new Date(startDate.getTime() + duration * 60000);
+                      const endHour = endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                      return `Horário: ${startHour} - ${endHour}`;
+                    })()}
+                  </div>
               </div>
             </div>
             <div className="space-y-4">

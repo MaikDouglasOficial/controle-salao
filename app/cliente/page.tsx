@@ -31,8 +31,8 @@ export default function ClientePage() {
   return (
     <div className="max-w-lg mx-auto py-12 px-4 sm:px-8 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-1">Perfil do Cliente</h1>
-        <div className="modal-subtitle">Gerencie seus dados pessoais</div>
+        {/* Removido título para visual minimalista */}
+        {/* Removido subtítulo para visual minimalista */}
       </div>
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <div className="mb-2"><span className="font-semibold text-gray-700">Nome:</span> {cliente.nome}</div>

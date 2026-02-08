@@ -92,24 +92,17 @@ export default function ProdutosPage() {
   return (
     <div className="page-container space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Produtos
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-          </p>
-        </div>
+        {/* Removido título e subtítulo para visual minimalista */}
       </div>
-            {/* Botão flutuante de novo produto */}
-            <button
-              onClick={() => setShowNewModal(true)}
-              className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
-              aria-label="Novo Produto"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+      <button
+        onClick={() => setShowNewModal(true)}
+        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
+        aria-label="Novo Produto"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
       <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
         <div className="text-sm text-gray-700">
           Total de produtos: <span className="font-semibold text-gray-900">{products.length}</span>

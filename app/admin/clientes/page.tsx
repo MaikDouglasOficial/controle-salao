@@ -213,32 +213,26 @@ export default function ClientesPage() {
 
   return (
     <div className="page-container space-y-6">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Clientes
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Gerencie seus clientes
-            </p>
-          </div>
-        </div>
-              {/* Botão flutuante de novo cliente */}
-              <button
-                onClick={() => {
-                  setEditingCustomer(null);
-                  setForm({ nome: '', email: '', telefone: '', aniversario: '', observacoes: '' });
-                  setShowModal(true);
-                }}
-                className="fixed bottom-8 right-8 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-50"
-                aria-label="Novo Cliente"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
+
+
+
+      {/* Botão flutuante de novo cliente */}
+      <button
+        onClick={() => {
+          setEditingCustomer(null);
+          setForm({ nome: '', email: '', telefone: '', aniversario: '', observacoes: '' });
+          setShowModal(true);
+        }}
+        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
+        aria-label="Novo Cliente"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+
+      {/* Card de resumo */}
+      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 mt-6">
           <div className="text-sm text-gray-700">
             Total de clientes: <span className="font-semibold text-gray-900">{customers.length}</span>
           </div>
@@ -256,23 +250,20 @@ export default function ClientesPage() {
 
       {/* Busca */}
       <div className="bg-white rounded-lg border border-gray-200 p-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por nome ou telefone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nome ou telefone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-11 pl-10 pr-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
         </div>
-      </div>
 
       {/* Lista de Clientes */}
-      {/* ...existing code... */}
-      {/* ...existing code... */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              {/* ...existing code... */}
         {filteredCustomers.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
