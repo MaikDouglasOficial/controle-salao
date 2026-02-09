@@ -271,7 +271,7 @@ export default function DashboardPage() {
           {/* Gráfico de Receita vs Despesa */}
           <Card className="bg-white border border-gray-200">
             <CardHeader 
-              /* Removido título e subtítulo para visual minimalista */
+              title=""
               className="pb-4"
             />
             <CardBody className="pt-3">
@@ -308,7 +308,7 @@ export default function DashboardPage() {
           {/* Resumo Financeiro Minimalista */}
           <Card className="bg-white border border-gray-200">
             <CardHeader 
-              /* Removido título e subtítulo para visual minimalista */
+              title=""
               className="pb-4"
             />
             <CardBody className="pt-0">
@@ -367,7 +367,7 @@ export default function DashboardPage() {
         {/* Próximos Agendamentos */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
+            title=""
             className="border-b border-gray-200"
           >
             <Button
@@ -383,8 +383,8 @@ export default function DashboardPage() {
         <CardBody>
           {proximosAgendamentos.length === 0 ? (
             <EmptyState
+              title=""
               icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
               description="Crie um novo agendamento para começar"
               action={
                 <Button
@@ -465,15 +465,15 @@ export default function DashboardPage() {
         {/* Aniversariantes do Mês */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
+            title=""
             className="border-b border-gray-200"
           />
         
         <CardBody>
           {aniversariantes.length === 0 ? (
             <EmptyState
+              title=""
               icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
               description="Não há clientes fazendo aniversário este mês"
             />
           ) : (
@@ -551,7 +551,7 @@ export default function DashboardPage() {
         {/* Vendas Recentes */}
         <Card className="bg-white border border-gray-200">
           <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
+            title=""
             className="border-b border-gray-200"
           >
             <Button
@@ -567,8 +567,8 @@ export default function DashboardPage() {
         <CardBody>
           {vendasRecentes.length === 0 ? (
             <EmptyState
+              title=""
               icon={<ShoppingBag className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
               description="Realize uma venda no PDV para começar"
               action={
                 <Button

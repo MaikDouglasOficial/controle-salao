@@ -493,10 +493,8 @@ export default function PDVPage() {
 
   return (
     <div className="page-container space-y-8 animate-fade-in">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Removido título e subtítulo para visual minimalista */}
-        </div>
+        {/* Header Minimalista removido para padronização */}
+        <div className="h-4 mb-2" />
 
       {/* Busca */}
       <div className="bg-white rounded-lg border border-gray-200 p-3">
@@ -512,19 +510,17 @@ export default function PDVPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Área de Produtos e Serviços - Ocupa 2 de 3 colunas */}
         <div className="lg:col-span-2 space-y-6">
 
             {/* Produtos e Serviços em Linha */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Produtos */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                  <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-2">
-                    <Package className="h-5 w-5 text-white" />
-                  </div>
+                <h2 className="text-xs text-gray-500 font-semibold mb-1 flex items-center">
+                  <Package className="h-5 w-5 text-gray-400 mr-2" />
                   Produtos
                 </h2>
                 <span className="text-sm text-gray-500 font-medium">{filteredProducts.length} itens</span>
@@ -586,14 +582,12 @@ export default function PDVPage() {
             </div>
 
             {/* Serviços */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                  <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-2">
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+                <h2 className="text-xs text-gray-500 font-semibold mb-1 flex items-center">
+                  <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   Serviços
                 </h2>
                 <span className="text-sm text-gray-500 font-medium">{filteredServices.length} itens</span>
@@ -645,9 +639,9 @@ export default function PDVPage() {
 
           {/* Carrinho - Estilo Tabela - Ocupa 1 de 3 colunas */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg sticky top-4 overflow-hidden">
+            <div className="bg-white rounded-lg border border-gray-200 sticky top-4 overflow-hidden">
               {/* Header do Carrinho */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between">
+              <div className="bg-gray-100 px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <ShoppingCart className="h-6 w-6 text-white" />
                   <h2 className="text-lg font-bold text-white">Carrinho ({cart.length})</h2>
@@ -852,7 +846,7 @@ export default function PDVPage() {
 
                       <button
                         onClick={() => setShowCheckoutModal(true)}
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg font-bold text-base"
+                        className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg font-bold text-base"
                       >
                         🛒 FINALIZAR VENDA
                       </button>
@@ -872,8 +866,8 @@ export default function PDVPage() {
             setShowAddItemModal(false);
             setItemToAdd(null);
           }}
-          title="Adicionar ao Carrinho"
-          subtitle={itemToAdd.name}
+          title=""
+          subtitle=""
           size="md"
           footer={
             <>
@@ -975,8 +969,8 @@ export default function PDVPage() {
         <Modal
           isOpen={showCheckoutModal}
           onClose={() => setShowCheckoutModal(false)}
-          title="Finalizar Venda"
-          subtitle="Selecione o cliente e configure os detalhes da venda"
+          title=""
+          subtitle=""
           size="lg"
           footer={
             <>
@@ -1217,8 +1211,8 @@ export default function PDVPage() {
             setShowCustomerNotFoundModal(false);
             setCustomerSearchTerm('');
           }}
-          title="Cliente Não Encontrado"
-          subtitle="O cliente não foi localizado no sistema"
+          title=""
+          subtitle=""
           size="md"
           footer={
             <div className="modal-actions flex flex-row gap-3 justify-end">
@@ -1268,8 +1262,8 @@ export default function PDVPage() {
             setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
             setPhotoPreview(null);
           }}
-          title="Cadastrar Novo Cliente"
-          subtitle="Preencha os dados para cadastrar um novo cliente"
+          title=""
+          subtitle=""
           size="md"
           footer={
             <div className="modal-actions flex flex-row gap-3 justify-end">

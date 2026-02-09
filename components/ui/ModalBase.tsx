@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,13 +12,18 @@ interface ModalProps {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
+  size?: ModalSize;
   footer?: React.ReactNode;
 }
 
 /**
- * Modal profissional com design moderno e responsivo.
- * Tamanhos otimizados para diferentes tipos de conteúdo.
+ * ModalBase
+ * ------------------------------------------------------
+ * Modal profissional, acessível e responsivo
+ * - Backdrop com blur cobrindo 100% da viewport
+ * - Compatível com iOS (notch / safe-area)
+ * - Fecha ao clicar fora ou pressionar ESC
+ * - Scroll do body bloqueado
  */
 export const ModalBase: React.FC<ModalProps> = ({
   isOpen,
@@ -26,99 +34,140 @@ export const ModalBase: React.FC<ModalProps> = ({
   size = 'lg',
   footer,
 }) => {
-  // Bloquear scroll do body quando modal abrir e prevenir overflow lateral
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); return () => setMounted(false); }, []);
+  /* Bloqueia scroll do body */
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.classList.add('overflow-x-hidden', 'modal-no-scroll-x');
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
-    }
+    if (!isOpen) return;
+
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('overflow-x-hidden');
+
     return () => {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('overflow-x-hidden', 'modal-no-scroll-x');
+      document.body.style.overflow = '';
+      document.body.classList.remove('overflow-x-hidden');
     };
   }, [isOpen]);
 
-  // Fechar no ESC
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
+  /* Fecha ao pressionar ESC */
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
       }
-    };
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  const sizeClasses: Record<string, string> = {
-    sm: 'max-w-sm',      // 384px - Confirmações, alertas
-    md: 'max-w-md',      // 448px - Formulários simples
-    lg: 'max-w-lg',      // 512px - Formulários médios
-    xl: 'max-w-xl',      // 576px - Formulários completos
-    '2xl': 'max-w-2xl',  // 672px - Formulários extensos
-    '3xl': 'max-w-3xl',  // 768px - Formulários muito extensos
-    full: 'max-w-7xl',   // ~1280px - Visualizações amplas
+  // Corrige erro de tipagem do React Portal: só renderiza se document.body existir
+  const portalTarget = typeof window !== 'undefined' ? document.body : undefined;
+  if (!portalTarget) return null;
+
+  const sizeClasses: Record<ModalSize, string> = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    full: 'max-w-7xl',
   };
 
-  return (
-    <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-sm overflow-x-hidden overflow-y-hidden overscroll-contain touch-none p-3 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+var(--app-header-offset,56px)+1.5rem)] pb-[calc(env(safe-area-inset-bottom,0px)+var(--app-header-offset,56px)+1.5rem)]"
-      tabIndex={-1}
-      aria-modal="true"
-      role="dialog"
-      onClick={onClose}
-    >
+  return createPortal(
+    <>
+      {/* 🔥 Backdrop – cobre 100% da tela (inclusive topo/notch) */}
       <div
-        className={`bg-white shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full ${sizeClasses[size]} max-w-[calc(100vw-1.5rem)] max-h-[calc(100svh-(var(--app-header-offset,56px)+var(--app-header-offset,56px)+3rem))] sm:max-h-[90vh] flex flex-col rounded-2xl overflow-hidden border border-gray-100`}
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-sm"
+        style={{ pointerEvents: 'auto' }}
+        onClick={onClose}
+      />
+
+      {/* Wrapper do modal */}
+      <div
+        className="
+          fixed inset-0 z-[10000]
+          flex items-center justify-center
+          p-3 sm:p-4
+          pt-[calc(env(safe-area-inset-top)+1rem)]
+          pb-[calc(env(safe-area-inset-bottom)+1rem)]
+          overflow-hidden
+        "
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={subtitle ? 'modal-subtitle' : undefined}
       >
-        {/* Header */}
-        {(title || typeof onClose !== 'undefined') && (
-          <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
-            <div className="flex flex-col items-start flex-1 pr-2 overflow-hidden">
-              {title && (
-                <h2 className="text-xl font-bold text-gray-900 leading-tight truncate w-full">
-                  {title}
-                </h2>
-              )}
-              {subtitle && (
-                <p className="text-sm text-gray-600 mt-1 truncate w-full">
-                  {subtitle}
-                </p>
-              )}
-            </div>
-            {onClose && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`
+            relative w-full
+            ${sizeClasses[size]}
+            max-w-[calc(100vw-1.5rem)]
+            max-h-[90svh]
+            bg-white
+            rounded-2xl
+            shadow-[0_20px_50px_rgba(0,0,0,0.25)]
+            border border-gray-100
+            flex flex-col
+            overflow-hidden
+          `}
+        >
+          {/* Header */}
+          {(title || subtitle) && (
+            <header className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div className="flex-1 overflow-hidden">
+                {title && (
+                  <h2
+                    id="modal-title"
+                    className="text-xl font-semibold text-gray-900 truncate"
+                  >
+                    {title}
+                  </h2>
+                )}
+                {subtitle && (
+                  <p
+                    id="modal-subtitle"
+                    className="mt-1 text-sm text-gray-600 truncate"
+                  >
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+
               <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-200/80 transition-colors rounded-lg text-gray-600 hover:text-gray-900 flex-shrink-0"
-                aria-label="Fechar modal"
                 type="button"
+                onClick={onClose}
+                aria-label="Fechar modal"
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition"
               >
-                <X className="h-5 w-5" />
+                <X className="w-5 h-5" />
               </button>
-            )}
-          </div>
-        )}
+            </header>
+          )}
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y px-6 py-6 bg-white">
-          <div className="w-full break-words modal-content-safe pb-8">
+          {/* Body */}
+          <main className="flex-1 overflow-y-auto px-6 py-6">
             {children}
-          </div>
-        </div>
+          </main>
 
-        {/* Footer */}
-        {footer && (
-          <div className="flex-shrink-0 px-6 py-4 bg-gray-50/80 border-t border-gray-200 flex flex-row gap-3 justify-end items-center [&>button]:min-w-[120px]">
-            {footer}
-          </div>
-        )}
+          {/* Footer */}
+          {footer && (
+            <footer className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+              {footer}
+            </footer>
+          )}
+        </div>
       </div>
-    </div>
+    </>,
+    portalTarget
   );
 };
