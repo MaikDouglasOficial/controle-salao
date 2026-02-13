@@ -118,17 +118,19 @@ export default function ProfessionalProfilePage() {
   }
 
   return (
-
-    <div className="page-container space-y-1 sm:space-y-2">
-      {/* Header centralizado com seta */}
-      <div className="relative flex items-center justify-center h-10 mb-0">
+    <div className="page-container space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex items-center space-x-2 sm:space-x-4">
         <Link
           href="/admin/profissionais"
-          className="absolute left-0 top-[60%] -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          style={{ zIndex: 2 }}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-8 w-8 text-gray-600" />
+          <ArrowLeft className="h-5 w-5 text-gray-600" />
         </Link>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Perfil do Profissional</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Desempenho e comissões</p>
+        </div>
       </div>
 
       {/* Informações do Profissional */}
