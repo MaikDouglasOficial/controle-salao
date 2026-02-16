@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface Expense {
   id: number;
@@ -19,6 +20,7 @@ interface Expense {
 
 export default function DespesasPage() {
   const { success, error, confirm } = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,13 +199,17 @@ export default function DespesasPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="page-container space-y-6">
+    <div className="page-container space-y-6 mt-6">
+      <div className="page-header">
+        <h1 className="page-title">Despesas</h1>
+        <p className="page-subtitle">Controle de gastos</p>
+      </div>
       {/* Botão flutuante de nova despesa */}
       <button
         onClick={() => setShowCreateModal(true)}
@@ -215,45 +221,53 @@ export default function DespesasPage() {
         </svg>
       </button>
 
-      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
-        <div className="text-sm text-gray-700">
-          Total de despesas: <span className="font-semibold text-gray-900">{filteredExpenses.length}</span>
+      {/* Resumo em cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{filteredExpenses.length}</p>
         </div>
-        <div className="text-sm text-gray-700">
-          Valor total: <span className="font-semibold text-gray-900">{formatCurrency(totalExpenses)}</span>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Valor total</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600">{formatCurrency(totalExpenses)}</p>
         </div>
-        <div className="text-sm text-gray-700">
-          Média por despesa: <span className="font-semibold text-gray-900">{filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}</span>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Média por despesa</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-600">
+            {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
+          </p>
         </div>
       </div>
 
-      {/* Barra de Busca */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por descrição ou categoria..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
-          />
+      <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por descrição ou categoria..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={scrollToTopOnFocus}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+            />
+          </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <h3 className="text-sm font-medium text-gray-700">Filtros</h3>
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-stone-500" />
+            <h3 className="text-sm font-semibold text-gray-700">Filtros</h3>
           </div>
           {(selectedMonth || selectedYear || selectedCategory || startDate || endDate || searchTerm) && (
             <button
               onClick={clearFilters}
-              className="flex items-center space-x-1 px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded-md transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
               <span>Limpar</span>
             </button>
           )}
@@ -274,7 +288,7 @@ export default function DespesasPage() {
                   setSelectedYear('');
                 }
               }}
-              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm"
             />
           </div>
 
@@ -292,7 +306,7 @@ export default function DespesasPage() {
                   setSelectedYear('');
                 }
               }}
-              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm"
             />
           </div>
 
@@ -310,7 +324,7 @@ export default function DespesasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os meses</option>
               <option value="1">Janeiro</option>
@@ -342,7 +356,7 @@ export default function DespesasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Todos os anos</option>
               {years.map((year) => (
@@ -360,7 +374,7 @@ export default function DespesasPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm"
             >
               <option value="">Todas as categorias</option>
               <option value="PRODUTOS">Produtos</option>
@@ -374,47 +388,45 @@ export default function DespesasPage() {
       </div>
 
       {/* Lista de Despesas */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Mobile View (Cards) */}
-        <div className="md:hidden divide-y divide-gray-200">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="md:hidden divide-y divide-gray-100">
           {filteredExpenses.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-gray-500">Nenhuma despesa encontrada</div>
+            <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">Nenhuma despesa encontrada</div>
           ) : (
             filteredExpenses.map((expense) => (
-              <div key={expense.id} className="p-4 space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-gray-400" />
+              <div key={expense.id} className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-12 w-12 rounded-xl bg-stone-100 flex-shrink-0 flex items-center justify-center">
+                    <DollarSign className="h-6 w-6 text-stone-500" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">{expense.description}</div>
-                    <div className="text-xs text-gray-500">{formatDate(expense.date)}</div>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-semibold text-gray-900">{expense.description}</span>
+                    <p className="text-sm text-gray-500 mt-0.5">{formatDate(expense.date)}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                  <div>
-                    <span className="text-xs text-gray-400">Valor</span>
-                    <div className="font-semibold text-gray-900">{formatCurrency(expense.amount)}</div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-400">Categoria</span>
-                    <div>
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(expense.category)}`}>
+                <div className="space-y-1.5 text-sm">
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">Valor</span>
+                    <span className="ml-2 font-medium text-gray-900">{formatCurrency(expense.amount)}</span>
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">Categoria</span>
+                    <span className="ml-2">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
                         {expense.category}
                       </span>
-                    </div>
-                  </div>
+                    </span>
+                  </p>
                   {expense.notes && (
-                    <div className="col-span-2">
-                      <span className="text-xs text-gray-400">Notas</span>
-                      <div className="text-sm text-gray-700">{expense.notes}</div>
-                    </div>
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Notas</span>
+                      <span className="ml-2 text-gray-900">{expense.notes}</span>
+                    </p>
                   )}
                 </div>
 
-                {/* Edit/Delete buttons below info for mobile */}
-                <div className="flex items-center justify-start space-x-2 pt-2">
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                   <Button onClick={() => handleEdit(expense)} variant="edit" size="sm" icon={Pencil} />
                   <Button onClick={() => handleDelete(expense.id)} variant="danger" size="sm" icon={Trash2} />
                 </div>
@@ -423,39 +435,38 @@ export default function DespesasPage() {
           )}
         </div>
 
-        {/* Desktop View (Table) */}
-        <div className="hidden md:block table-responsive">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-stone-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {filteredExpenses.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">Nenhuma despesa encontrada</td>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-500">Nenhuma despesa encontrada</td>
                 </tr>
               ) : (
                 filteredExpenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{expense.description}</div>
-                      {expense.notes && <div className="text-xs text-gray-500">{expense.notes}</div>}
+                  <tr key={expense.id} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{expense.description}</div>
+                      {expense.notes && <div className="text-xs text-gray-500 mt-0.5">{expense.notes}</div>}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(expense.category)}`}>
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
                         {expense.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(expense.amount)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{formatDate(expense.date)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center space-x-1">
+                    <td className="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(expense.amount)}</td>
+                    <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{formatDate(expense.date)}</td>
+                    <td className="px-5 py-3.5 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <Button onClick={() => handleEdit(expense)} variant="edit" size="sm" icon={Pencil} />
                         <Button onClick={() => handleDelete(expense.id)} variant="danger" size="sm" icon={Trash2} />
                       </div>

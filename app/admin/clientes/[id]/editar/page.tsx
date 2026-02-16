@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { ModalBase } from '@/components/ui/ModalBase';
 
 interface Customer {
@@ -68,6 +69,7 @@ export default function ClienteDetalhesPage() {
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -298,19 +300,18 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="page-container space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
+    <div className="page-container space-y-6 animate-fade-in mt-6">
+      <div className="flex items-center justify-between gap-4 page-header">
+        <div>
+          <h1 className="page-title">Editar cliente</h1>
+          <p className="page-subtitle">Histórico completo e informações</p>
+        </div>
         <Link
           href="/admin/clientes"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-6 w-6 text-gray-600" />
+          <ArrowLeft className="h-6 w-6 text-stone-600" />
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Detalhes do Cliente</h1>
-          <p className="text-gray-600 mt-1">Histórico completo e informações</p>
-        </div>
       </div>
 
       {/* Informações do Cliente */}
@@ -456,6 +457,7 @@ export default function ClienteDetalhesPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={scrollToTopOnFocus}
               placeholder="Buscar..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />

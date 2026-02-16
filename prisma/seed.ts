@@ -1,3 +1,20 @@
+import * as path from 'path';
+import * as fs from 'fs';
+
+// Carregar .env da raiz do projeto
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8');
+  content.split('\n').forEach((line) => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim().replace(/^["']|["']$/g, '');
+      process.env[key] = value;
+    }
+  });
+}
+
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
@@ -230,7 +247,7 @@ async function main() {
     data: {
       customerId: cliente3.id,
       total: 215.90,
-      paymentMethod: 'cartao_credito',
+      paymentMethod: 'CARTAO_CREDITO',
       date: new Date(),
       notes: 'Cliente aproveitou promoção',
     },

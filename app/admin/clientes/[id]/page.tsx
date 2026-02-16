@@ -21,6 +21,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import CustomerGallery from '@/components/CustomerGallery';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { ModalBase } from '@/components/ui/ModalBase';
 
 interface Customer {
@@ -66,6 +67,7 @@ interface Sale {
 
 export default function ClienteDetalhesPage() {
   const { success, error } = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
@@ -306,7 +308,11 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="page-container space-y-0.5 sm:space-y-1">
+    <div className="page-container space-y-0.5 sm:space-y-1 mt-6">
+      <div className="page-header">
+        <h1 className="page-title">Cliente</h1>
+        <p className="page-subtitle">Detalhes e histórico</p>
+      </div>
       {/* Header centralizado com seta */}
       <div className="relative flex items-center justify-center h-10 mb-0">
         <Link
@@ -470,6 +476,7 @@ export default function ClienteDetalhesPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={scrollToTopOnFocus}
               placeholder="Buscar..."
               className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />

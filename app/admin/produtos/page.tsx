@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -7,6 +7,7 @@ import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface Product {
   id: number;
@@ -20,6 +21,7 @@ interface Product {
 
 export default function ProdutosPage() {
   const { success, error, confirm } = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,15 +86,16 @@ export default function ProdutosPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="page-container space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        {/* Removido título e subtítulo para visual minimalista */}
+    <div className="page-container space-y-6 mt-6">
+      <div className="page-header">
+        <h1 className="page-title">Produtos</h1>
+        <p className="page-subtitle">Estoque e catálogo de produtos</p>
       </div>
       <button
         onClick={() => setShowNewModal(true)}
@@ -103,150 +106,141 @@ export default function ProdutosPage() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </button>
-      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 my-2">
-        <div className="text-sm text-gray-700">
-          Total de produtos: <span className="font-semibold text-gray-900">{products.length}</span>
+      {/* Resumo em cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{products.length}</p>
         </div>
-        <div className="text-sm text-gray-700">
-          Estoque total: <span className="font-semibold text-gray-900">{products.reduce((acc, p) => acc + p.stock, 0)}</span>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Estoque total</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600">{products.reduce((acc, p) => acc + p.stock, 0)}</p>
         </div>
       </div>
 
-        {/* ...existing code... */}
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
+      <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar por nome ou SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
+              onFocus={scrollToTopOnFocus}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             />
           </div>
         </div>
-        {/* ...existing code... */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  {/* ...existing code... */}
-          <div className="md:hidden divide-y divide-gray-200">
-            {filteredProducts.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-gray-500">Nenhum produto encontrado</div>
-            ) : (
-              filteredProducts.map((product) => (
-                <div key={product.id} className="p-4 space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                      {product.photo ? (
-                        <Image
-                          src={product.photo}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <Package className="h-6 w-6" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-gray-900 truncate">{product.name}</div>
-                      {product.description && (
-                        <div className="text-xs text-gray-500 truncate">{product.description}</div>
-                      )}
-                    </div>
-                  </div>
+      </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                    <div>
-                      <span className="text-xs text-gray-400">SKU</span>
-                      <div className="font-medium text-gray-700">{product.sku || '-'}</div>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-400">Preço</span>
-                      <div className="font-semibold text-gray-900">{formatCurrency(product.price)}</div>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-xs text-gray-400">Estoque</span>
-                      <div>
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ${product.stock > 10 ? 'bg-green-600' : product.stock > 0 ? 'bg-yellow-500' : 'bg-red-600'}`}>
-                          {product.stock} unid.
-                        </span>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="md:hidden divide-y divide-gray-100">
+          {filteredProducts.length === 0 ? (
+            <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">Nenhum produto encontrado</div>
+          ) : (
+            filteredProducts.map((product) => (
+              <div key={product.id} className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                    {product.photo ? (
+                      <Image src={product.photo} alt={product.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone-400">
+                        <Package className="h-6 w-6" />
                       </div>
-                    </div>
+                    )}
                   </div>
-
-                  {/* Edit/Delete buttons below info for mobile */}
-                  <div className="flex items-center justify-start space-x-2 pt-2">
-                    <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
-                    <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
+                  <div className="min-w-0 flex-1">
+                    <span className="font-semibold text-gray-900">{product.name}</span>
+                    {product.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{product.description}</p>}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
 
-          <div className="hidden md:block table-responsive">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produto</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preço</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estoque</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">Nenhum produto encontrado</td>
-                  </tr>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            {product.photo ? (
-                              <Image
-                                src={product.photo}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <Package className="h-6 w-6" />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                            {product.description && <div className="text-xs text-gray-500">{product.description}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.sku || '-'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(product.price)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ${product.stock > 10 ? 'bg-green-600' : product.stock > 0 ? 'bg-yellow-500' : 'bg-red-600'}`}>
-                          {product.stock} unid.
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center space-x-1">
-                          <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
-                          <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                <div className="space-y-1.5 text-sm">
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">SKU</span>
+                    <span className="ml-2 text-gray-900">{product.sku || '–'}</span>
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">Preço</span>
+                    <span className="ml-2 font-medium text-gray-900">{formatCurrency(product.price)}</span>
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">Estoque</span>
+                    <span className="ml-2">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-50 text-green-700 border border-green-200' : product.stock > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                        {product.stock} unid.
+                      </span>
+                    </span>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                  <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
+                  <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
+                </div>
+              </div>
+            ))
+          )}
         </div>
+
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-stone-50">
+              <tr>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
+                <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-500">Nenhum produto encontrado</td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                          {product.photo ? (
+                            <Image src={product.photo} alt={product.name} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-stone-400">
+                              <Package className="h-5 w-5" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{product.name}</div>
+                          {product.description && <div className="text-xs text-gray-500">{product.description}</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{product.sku || '–'}</td>
+                    <td className="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(product.price)}</td>
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-50 text-green-700 border border-green-200' : product.stock > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                        {product.stock} unid.
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
+                        <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {showEditModal && editingProduct && (
         <ProdutoEditarModal

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 import { Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
@@ -22,6 +23,7 @@ interface Customer {
 
 export default function ClientesPage() {
   const toast = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,15 +208,17 @@ export default function ClientesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="page-container space-y-6">
-
-
+    <div className="page-container space-y-6 mt-6">
+      <div className="page-header">
+        <h1 className="page-title">Clientes</h1>
+        <p className="page-subtitle">Cadastro e histórico de clientes</p>
+      </div>
 
       {/* Botão flutuante de novo cliente */}
       <button
@@ -231,53 +235,57 @@ export default function ClientesPage() {
         </svg>
       </button>
 
-      {/* Card de resumo */}
-      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 space-y-1 mt-6">
-          <div className="text-sm text-gray-700">
-            Total de clientes: <span className="font-semibold text-gray-900">{customers.length}</span>
-          </div>
-          <div className="text-sm text-gray-700">
-            Aniversariantes do mês: <span className="font-semibold text-gray-900">{
-              customers.filter((c) => {
-                if (!c.birthday) return false;
-                const birthday = new Date(c.birthday);
-                const currentMonth = new Date().getMonth();
-                return birthday.getMonth() === currentMonth;
-              }).length
-            }</span>
-          </div>
+      {/* Resumo em cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{customers.length}</p>
         </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Aniversariantes do mês</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600">
+            {customers.filter((c) => {
+              if (!c.birthday) return false;
+              const birthday = new Date(c.birthday);
+              return birthday.getMonth() === new Date().getMonth();
+            }).length}
+          </p>
+        </div>
+      </div>
 
-      {/* Busca */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
+      {/* Busca - sticky para manter no mesmo lugar ao rolar */}
+      <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou telefone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={scrollToTopOnFocus}
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+          />
           </div>
         </div>
+      </div>
 
       {/* Lista de Clientes */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {filteredCustomers.length === 0 ? (
-          <div className="px-4 py-8 text-center">
-            <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
+          <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">
+            Nenhum cliente encontrado
           </div>
         ) : (
           <>
-            <div className="md:hidden divide-y divide-gray-200">
+            <div className="md:hidden divide-y divide-gray-100">
               {filteredCustomers.map((customer) => (
-                <div key={customer.id} className="p-4 space-y-3">
+                <div key={customer.id} className="p-5 space-y-4">
                   <Link
                     href={`/admin/clientes/${customer.id}`}
-                    className="flex items-center space-x-3"
+                    className="flex items-start gap-3"
                   >
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
                       {customer.photo ? (
                         <Image
                           src={customer.photo}
@@ -286,45 +294,42 @@ export default function ClientesPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <Users className="h-5 w-5" />
+                        <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <Users className="h-6 w-6" />
                         </div>
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-gray-900 truncate">
-                        {customer.name}
-                      </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-gray-900">{customer.name}</span>
                       {customer.notes && (
-                        <div className="text-xs text-gray-500 truncate">
-                          {customer.notes}
-                        </div>
+                        <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{customer.notes}</p>
                       )}
                     </div>
                   </Link>
 
-                  <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
-                    <div>
-                      <span className="text-xs text-gray-400">Telefone</span>
-                      <div className="font-medium text-gray-700">
-                        {formatPhone(customer.phone)}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-400">Email</span>
-                      <div className="font-medium text-gray-700 break-words">
-                        {customer.email || '-'}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-400">Aniversário</span>
-                      <div className="font-medium text-gray-700">
-                        {customer.birthday ? formatDate(customer.birthday) : '-'}
-                      </div>
-                    </div>
+                  <div className="space-y-1.5 text-sm">
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Telefone</span>
+                      <span className="ml-2 text-gray-900">{formatPhone(customer.phone)}</span>
+                    </p>
+                    <p className="text-gray-600 break-all">
+                      <span className="text-gray-400">Email</span>
+                      <span className="ml-2 text-gray-900">{customer.email || '–'}</span>
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="text-gray-400">Aniversário</span>
+                      <span className="ml-2 text-gray-900">{customer.birthday ? formatDate(customer.birthday) : '–'}</span>
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-start space-x-2 pt-2">
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <Link
+                      href={`/admin/clientes/${customer.id}`}
+                      className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                      title="Ver Detalhes"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
                     <Button
                       onClick={() => handleEdit(customer.id)}
                       variant="edit"
@@ -339,114 +344,61 @@ export default function ClientesPage() {
                       icon={Trash2}
                       title="Excluir Cliente"
                     />
-                    <Link
-                      href={`/admin/clientes/${customer.id}`}
-                      className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors ml-2"
-                      title="Ver Detalhes"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Link>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="hidden md:block table-responsive">
-              <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nome
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Telefone
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aniversário
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCustomers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <Link 
-                        href={`/admin/clientes/${customer.id}`}
-                        className="flex items-center space-x-3 hover:text-gray-900 transition-colors"
-                      >
-                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          {customer.photo ? (
-                            <Image
-                              src={customer.photo}
-                              alt={customer.name}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <Users className="h-4 w-4" />
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {customer.name}
-                          </div>
-                          {customer.notes && (
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              {customer.notes}
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {formatPhone(customer.phone)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {customer.email || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {customer.birthday ? formatDate(customer.birthday) : '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium">
-                      <div className="flex items-center justify-center space-x-2">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-stone-50">
+                  <tr>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aniversário</th>
+                    <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {filteredCustomers.map((customer) => (
+                    <tr key={customer.id} className="hover:bg-stone-50/50 transition-colors">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         <Link
                           href={`/admin/clientes/${customer.id}`}
-                          className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                          title="Ver Detalhes"
+                          className="flex items-center gap-3 hover:text-gray-900 transition-colors"
                         >
-                          <Eye className="h-4 w-4" />
+                          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                            {customer.photo ? (
+                              <Image src={customer.photo} alt={customer.name} fill className="object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-stone-400">
+                                <Users className="h-5 w-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900">{customer.name}</div>
+                            {customer.notes && <div className="text-xs text-gray-500 mt-0.5">{customer.notes}</div>}
+                          </div>
                         </Link>
-                        <Button
-                          onClick={() => handleEdit(customer.id)}
-                          variant="edit"
-                          size="sm"
-                          icon={Pencil}
-                          title="Editar Cliente"
-                        />
-                        <Button
-                          onClick={() => handleDelete(customer.id, customer.name)}
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
-                          title="Excluir Cliente"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{formatPhone(customer.phone)}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.email || '–'}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.birthday ? formatDate(customer.birthday) : '–'}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Link href={`/admin/clientes/${customer.id}`} className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Ver Detalhes">
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <Button onClick={() => handleEdit(customer.id)} variant="edit" size="sm" icon={Pencil} title="Editar" />
+                          <Button onClick={() => handleDelete(customer.id, customer.name)} variant="danger" size="sm" icon={Trash2} title="Excluir" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </>
         )}

@@ -188,7 +188,7 @@ export default function VendasPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
@@ -196,38 +196,42 @@ export default function VendasPage() {
   const totalRevenue = filteredSales?.reduce((acc, sale) => acc + sale.total, 0) || 0;
 
   return (
-    <div className="page-container space-y-8 animate-fade-in">
-        {/* Header Minimalista */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-              {/* Removido título e subtítulo para visual minimalista */}
-              {/* <h1 className="text-2xl font-semibold text-gray-900">
-                Vendas
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Histórico de vendas
-              </p> */}
-          </div>
+    <div className="page-container space-y-6 mt-6">
+      <div className="page-header">
+        <h1 className="page-title">Vendas</h1>
+        <p className="page-subtitle">Histórico de vendas</p>
+      </div>
+
+      {/* Resumo em cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{filteredSales.length}</p>
         </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-500 uppercase tracking-wide">Receita total</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600">{formatCurrency(totalRevenue)}</p>
+        </div>
+      </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <Filter className="h-5 w-5 text-primary-600" />
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-stone-100 rounded-xl flex items-center justify-center">
+              <Filter className="h-5 w-5 text-stone-600" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Filtros</h3>
+              <h3 className="text-base font-semibold text-gray-900">Filtros</h3>
               <p className="text-sm text-gray-500">Refine sua busca</p>
             </div>
           </div>
           {(selectedPayment || startDate || endDate || selectedMonth || selectedYear) && (
             <button
               onClick={clearFilters}
-              className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium shadow-sm"
+              className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
             >
-              Limpar Filtros
+              Limpar
             </button>
           )}
         </div>
@@ -235,7 +239,7 @@ export default function VendasPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-2">
             <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-primary-600" />
+              <Calendar className="h-4 w-4 text-stone-600" />
               <span>Data Inicial</span>
             </label>
             <input
@@ -249,13 +253,13 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full h-11 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div className="space-y-2">
             <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-primary-600" />
+              <Calendar className="h-4 w-4 text-stone-600" />
               <span>Data Final</span>
             </label>
             <input
@@ -269,13 +273,13 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full h-11 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div className="space-y-2">
             <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-primary-600" />
+              <Calendar className="h-4 w-4 text-stone-600" />
               <span>Mês</span>
             </label>
             <select
@@ -288,7 +292,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">Todos</option>
               <option value="1">Janeiro</option>
@@ -308,7 +312,7 @@ export default function VendasPage() {
 
           <div className="space-y-2">
             <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 text-primary-600" />
+              <Calendar className="h-4 w-4 text-stone-600" />
               <span>Ano</span>
             </label>
             <select
@@ -321,7 +325,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">Todos</option>
               <option value="2024">2024</option>
@@ -332,13 +336,13 @@ export default function VendasPage() {
 
           <div className="space-y-2">
             <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <DollarSign className="h-4 w-4 text-primary-600" />
+              <DollarSign className="h-4 w-4 text-stone-600" />
               <span>Forma de Pagamento</span>
             </label>
             <select
               value={selectedPayment}
               onChange={(e) => setSelectedPayment(e.target.value)}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 font-medium shadow-sm hover:border-primary-300"
+              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm"
             >
               <option value="">Todas</option>
               <option value="DINHEIRO">Dinheiro</option>
@@ -350,24 +354,24 @@ export default function VendasPage() {
         </div>
 
         {(selectedPayment || startDate || endDate || selectedMonth || selectedYear) && (
-          <div className="mt-6 p-4 bg-primary-50 border-2 border-primary-200 rounded-xl">
-            <p className="text-sm font-semibold text-primary-900">
+          <div className="mt-5 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm font-medium text-amber-900">
               Mostrando {filteredSales.length} de {sales.length} vendas
               {startDate && endDate && (
-                <span className="ml-2 text-primary-700">
+                <span className="ml-2 text-amber-800">
                   • Período: {new Date(startDate).toLocaleDateString('pt-BR')} até {new Date(endDate).toLocaleDateString('pt-BR')}
                 </span>
               )}
               {selectedMonth && (
-                <span className="ml-2 text-primary-700">
+                <span className="ml-2 text-amber-800">
                   • Mês: {['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][parseInt(selectedMonth)]}
                 </span>
               )}
               {selectedYear && (
-                <span className="ml-2 text-primary-700">• Ano: {selectedYear}</span>
+                <span className="ml-2 text-amber-800">• Ano: {selectedYear}</span>
               )}
               {selectedPayment && (
-                <span className="ml-2 text-primary-700">• Pagamento: {selectedPayment}</span>
+                <span className="ml-2 text-amber-800">• Pagamento: {getPaymentMethodLabel(selectedPayment)}</span>
               )}
             </p>
           </div>
@@ -377,16 +381,16 @@ export default function VendasPage() {
       {/* Lista de Vendas */}
       <div className="space-y-4">
         {filteredSales.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Nenhuma venda encontrada</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+            <ShoppingBag className="h-16 w-16 text-stone-300 mx-auto mb-4" />
+            <p className="text-gray-500">Nenhuma venda encontrada</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {filteredSales.map((sale) => (
               <div
                 key={sale.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden"
               >
                 {/* Header com ID, Data/Hora e Valor */}
                 <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-2.5 flex items-center justify-between">
@@ -449,8 +453,8 @@ export default function VendasPage() {
                       <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Profissional</p>
                       {sale.professional ? (
                         <div className="flex items-center space-x-2">
-                          <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <User className="h-5 w-5 text-primary-600" />
+                          <div className="h-10 w-10 bg-stone-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <User className="h-5 w-5 text-stone-600" />
                           </div>
                           <p className="text-sm font-semibold text-gray-900">{sale.professional}</p>
                         </div>
@@ -499,7 +503,7 @@ export default function VendasPage() {
                       >
                         <div className="flex items-center space-x-3">
                           <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-gray-200 flex-shrink-0">
-                            <span className="text-sm font-bold text-primary-600">{item.quantity}x</span>
+                            <span className="text-sm font-bold text-amber-600">{item.quantity}x</span>
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-gray-900">

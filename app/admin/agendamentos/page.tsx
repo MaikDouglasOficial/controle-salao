@@ -224,6 +224,11 @@ export default function AgendamentosPage() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
+      <div className="page-container flex-shrink-0 pt-4 pb-2 border-b border-stone-100 bg-white page-header">
+        <h1 className="page-title">Agendamentos</h1>
+        <p className="page-subtitle">Calendário e agenda do dia</p>
+      </div>
+
       <header className="bg-white border-b border-gray-100 pt-2 pb-1 flex-shrink-0">
         <div className="px-4 flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">

@@ -213,7 +213,7 @@ export default function DashboardPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-        <div className="mb-2">
+        <div className="page-header">
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Visão geral do seu salão</p>
         </div>
@@ -542,10 +542,10 @@ export default function DashboardPage() {
               icon={ArrowRight}
               onClick={() => router.push('/admin/vendas')}
             >
-              Ver todas
+              Ver todos
             </Button>
           </CardHeader>
-        
+
         <CardBody>
           {vendasRecentes.length === 0 ? (
             <EmptyState

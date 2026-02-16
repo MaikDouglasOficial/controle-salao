@@ -8,6 +8,7 @@ import { ArrowLeft, BadgeDollarSign, Calendar, User, DollarSign, TrendingUp, Fil
 import { formatCurrency, formatDate } from '@/lib/utils';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface PerformanceService {
   saleId: number;
@@ -40,6 +41,7 @@ export default function ProfessionalProfilePage() {
   const params = useParams();
   const professionalId = params.id as string;
   const { success, error } = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [data, setData] = useState<PerformanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,19 +120,18 @@ export default function ProfessionalProfilePage() {
   }
 
   return (
-    <div className="page-container space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-2 sm:space-x-4">
+    <div className="page-container space-y-4 sm:space-y-6 mt-6">
+      <div className="flex items-center justify-between gap-4 page-header">
+        <div>
+          <h1 className="page-title">Perfil do profissional</h1>
+          <p className="page-subtitle">Desempenho e comissões</p>
+        </div>
         <Link
           href="/admin/profissionais"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+          <ArrowLeft className="h-5 w-5 text-stone-600" />
         </Link>
-        <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Perfil do Profissional</h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Desempenho e comissões</p>
-        </div>
       </div>
 
       {/* Informações do Profissional */}
@@ -227,6 +228,7 @@ export default function ProfessionalProfilePage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={scrollToTopOnFocus}
               placeholder="Buscar por cliente ou serviço..."
               className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
