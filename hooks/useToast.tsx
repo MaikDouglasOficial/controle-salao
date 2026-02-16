@@ -15,6 +15,8 @@ interface ConfirmOptions {
   confirmText?: string;
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info';
+  /** Quando true, exige digitação da senha para confirmar (ex.: exclusões) */
+  requirePassword?: boolean;
 }
 
 interface ToastContextType {

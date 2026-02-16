@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
@@ -10,6 +11,7 @@ import { Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
+import { ActionsMenu } from '@/components/ui/ActionsMenu';
 
 interface Customer {
   id: number;
@@ -23,10 +25,12 @@ interface Customer {
 
 export default function ClientesPage() {
   const toast = useToast();
+  const router = useRouter();
   const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterClient, setFilterClient] = useState<'all' | 'birthday' | 'others'>('all');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [form, setForm] = useState<any | null>(null);
@@ -175,7 +179,8 @@ export default function ClientesPage() {
       message: `Tem certeza que deseja excluir o cliente "${name}"?\n\nEsta ação não pode ser desfeita e irá remover:\n• Todos os agendamentos\n• Histórico de vendas\n• Todas as informações do cliente`,
       type: 'danger',
       confirmText: 'Excluir',
-      cancelText: 'Cancelar'
+      cancelText: 'Cancelar',
+      requirePassword: true
     });
 
     if (!confirmed) {
@@ -200,10 +205,18 @@ export default function ClientesPage() {
     }
   };
 
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
-  );
+  const filteredCustomers = customers.filter((customer) => {
+    const matchesSearch =
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone.includes(searchTerm);
+    if (!matchesSearch) return false;
+    const isBirthdayThisMonth = customer.birthday
+      ? new Date(customer.birthday).getMonth() === new Date().getMonth()
+      : false;
+    if (filterClient === 'birthday') return isBirthdayThisMonth;
+    if (filterClient === 'others') return !isBirthdayThisMonth;
+    return true;
+  });
 
   if (loading) {
     return (
@@ -253,25 +266,56 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      {/* Busca - sticky para manter no mesmo lugar ao rolar */}
+      {/* Busca e filtros - sticky */}
       <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por nome ou telefone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={scrollToTopOnFocus}
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome ou telefone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={scrollToTopOnFocus}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFilterClient('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterClient === 'all' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterClient('birthday')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterClient === 'birthday' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Aniv. mês
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterClient('others')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterClient === 'others' ? 'bg-stone-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Outros
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Lista de Clientes */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
         {filteredCustomers.length === 0 ? (
           <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">
             Nenhum cliente encontrado
@@ -280,32 +324,45 @@ export default function ClientesPage() {
           <>
             <div className="md:hidden divide-y divide-gray-100">
               {filteredCustomers.map((customer) => (
-                <div key={customer.id} className="p-5 space-y-4">
-                  <Link
-                    href={`/admin/clientes/${customer.id}`}
-                    className="flex items-start gap-3"
-                  >
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
-                      {customer.photo ? (
-                        <Image
-                          src={customer.photo}
-                          alt={customer.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-400">
-                          <Users className="h-6 w-6" />
-                        </div>
-                      )}
+                <div key={customer.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
+                  {/* Topo: avatar + nome + três pontinhos alinhados ao topo */}
+                  <div className="flex items-start gap-3">
+                    <Link
+                      href={`/admin/clientes/${customer.id}`}
+                      className="flex min-w-0 flex-1 items-start gap-3"
+                    >
+                      <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                        {customer.photo ? (
+                          <Image
+                            src={customer.photo}
+                            alt={customer.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-400">
+                            <Users className="h-6 w-6" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold text-gray-900">{customer.name}</span>
+                        {customer.notes && (
+                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{customer.notes}</p>
+                        )}
+                      </div>
+                    </Link>
+                    <div className="flex-shrink-0 pt-0.5">
+                      <ActionsMenu
+                        alignRight={true}
+                        items={[
+                          { icon: Eye, label: 'Ver informações', onClick: () => router.push(`/admin/clientes/${customer.id}`) },
+                          { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(customer.id) },
+                          { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(customer.id, customer.name), danger: true },
+                        ]}
+                      />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-gray-900">{customer.name}</span>
-                      {customer.notes && (
-                        <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{customer.notes}</p>
-                      )}
-                    </div>
-                  </Link>
+                  </div>
 
                   <div className="space-y-1.5 text-sm">
                     <p className="text-gray-600">
@@ -320,30 +377,6 @@ export default function ClientesPage() {
                       <span className="text-gray-400">Aniversário</span>
                       <span className="ml-2 text-gray-900">{customer.birthday ? formatDate(customer.birthday) : '–'}</span>
                     </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                    <Link
-                      href={`/admin/clientes/${customer.id}`}
-                      className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                      title="Ver Detalhes"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                    <Button
-                      onClick={() => handleEdit(customer.id)}
-                      variant="edit"
-                      size="sm"
-                      icon={Pencil}
-                      title="Editar Cliente"
-                    />
-                    <Button
-                      onClick={() => handleDelete(customer.id, customer.name)}
-                      variant="danger"
-                      size="sm"
-                      icon={Trash2}
-                      title="Excluir Cliente"
-                    />
                   </div>
                 </div>
               ))}
@@ -387,12 +420,14 @@ export default function ClientesPage() {
                       <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.email || '–'}</td>
                       <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.birthday ? formatDate(customer.birthday) : '–'}</td>
                       <td className="px-5 py-3.5 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Link href={`/admin/clientes/${customer.id}`} className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Ver Detalhes">
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                          <Button onClick={() => handleEdit(customer.id)} variant="edit" size="sm" icon={Pencil} title="Editar" />
-                          <Button onClick={() => handleDelete(customer.id, customer.name)} variant="danger" size="sm" icon={Trash2} title="Excluir" />
+                        <div className="flex justify-center">
+                          <ActionsMenu
+                            items={[
+                              { icon: Eye, label: 'Ver informações', onClick: () => router.push(`/admin/clientes/${customer.id}`) },
+                              { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(customer.id) },
+                              { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(customer.id, customer.name), danger: true },
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

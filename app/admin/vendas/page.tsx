@@ -139,7 +139,8 @@ export default function VendasPage() {
     const confirmed = await confirm({
       title: 'Excluir venda',
       message: 'Tem certeza que deseja excluir esta venda?',
-      type: 'danger'
+      type: 'danger',
+      requirePassword: true
     });
     
     if (!confirmed) {

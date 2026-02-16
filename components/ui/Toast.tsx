@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
-import { CheckCircle2, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, X, Info, AlertTriangle, Lock } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -62,6 +62,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info';
+  requirePassword?: boolean;
 }
 
 export function ConfirmDialog({
@@ -71,9 +72,45 @@ export function ConfirmDialog({
   onCancel,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
-  type = 'warning'
+  type = 'warning',
+  requirePassword = false
 }: ConfirmDialogProps) {
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const confirmVariant = type === 'danger' ? 'danger' : type === 'warning' ? 'outline' : 'primary';
+
+  const handleConfirm = async () => {
+    if (requirePassword) {
+      if (!password.trim()) {
+        setErrorMessage('Digite sua senha para confirmar.');
+        return;
+      }
+      setErrorMessage(null);
+      setLoading(true);
+      try {
+        const res = await fetch('/api/auth/verify-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: password.trim() }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          onConfirm();
+          onCancel();
+        } else {
+          setErrorMessage(data.error || 'Senha incorreta.');
+        }
+      } catch {
+        setErrorMessage('Erro ao verificar senha. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      onConfirm();
+      onCancel();
+    }
+  };
 
   return (
     <ModalBase
@@ -82,32 +119,56 @@ export function ConfirmDialog({
       title={title}
       size="md"
       footer={
-        <div className="modal-actions flex flex-row gap-3 w-full justify-end">
+        <div className="modal-actions flex flex-row gap-3 w-full justify-end flex-wrap">
           <Button
             onClick={onCancel}
             variant="secondary"
             size="sm"
             className="w-full sm:w-auto"
+            disabled={loading}
           >
             {cancelText}
           </Button>
           <Button
-            onClick={() => {
-              onConfirm();
-              onCancel();
-            }}
+            onClick={handleConfirm}
             variant={confirmVariant}
             size="sm"
             className="w-full sm:w-auto"
+            disabled={loading || (requirePassword && !password.trim())}
           >
-            {confirmText}
+            {loading ? 'Verificando...' : confirmText}
           </Button>
         </div>
       }
     >
-      <p className="text-sm text-gray-600 whitespace-pre-line break-words">
-        {message}
-      </p>
+      <div className="space-y-4">
+        <p className="text-sm text-gray-600 whitespace-pre-line break-words">
+          {message}
+        </p>
+        {requirePassword && (
+          <div className="space-y-2">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+              Digite sua senha para confirmar
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                id="confirm-password"
+                type="password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setErrorMessage(null); }}
+                placeholder="Sua senha"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                autoComplete="current-password"
+                disabled={loading}
+              />
+            </div>
+            {errorMessage && (
+              <p className="text-sm text-red-600">{errorMessage}</p>
+            )}
+          </div>
+        )}
+      </div>
     </ModalBase>
   );
 }

@@ -39,6 +39,7 @@ function ToastRenderer() {
           confirmText={confirmDialog.confirmText}
           cancelText={confirmDialog.cancelText}
           type={confirmDialog.type}
+          requirePassword={confirmDialog.requirePassword}
           onConfirm={confirmDialog.onConfirm}
           onCancel={closeConfirm}
         />

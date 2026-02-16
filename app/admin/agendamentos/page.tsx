@@ -403,7 +403,19 @@ export default function AgendamentosPage() {
                 ) : (
                   <div className="py-4 bg-gray-50 text-gray-400 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-not-allowed"><Lock className="h-5 w-5"/> Bloqueado</div>
                 )}
-                <button onClick={() => { if(confirm('Excluir?')) { fetch(`/api/appointments?id=${selectedAppointment.id}`, { method: 'DELETE' }).then(() => { fetchData(); setSelectedAppointment(null); }); } }} className="py-4 bg-red-50 text-red-600 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"><Trash2 className="h-5 w-5"/> Excluir</button>
+                <button onClick={async () => {
+                  const confirmed = await toast.confirm({
+                    title: 'Excluir agendamento',
+                    message: 'Tem certeza que deseja excluir este agendamento?',
+                    type: 'danger',
+                    requirePassword: true
+                  });
+                  if (confirmed) {
+                    await fetch(`/api/appointments?id=${selectedAppointment.id}`, { method: 'DELETE' });
+                    fetchData();
+                    setSelectedAppointment(null);
+                  }
+                }} className="py-4 bg-red-50 text-red-600 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"><Trash2 className="h-5 w-5"/> Excluir</button>
               </div>
             </div>
           </div>

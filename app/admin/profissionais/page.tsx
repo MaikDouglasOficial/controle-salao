@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { useRouter } from 'next/navigation';
+import { ActionsMenu } from '@/components/ui/ActionsMenu';
 
 interface Professional {
   id: number;
@@ -70,7 +71,8 @@ export default function ProfessionalsPage() {
       message: `Tem certeza que deseja excluir o profissional "${professional.name}"?`,
       type: 'danger',
       confirmText: 'Excluir',
-      cancelText: 'Cancelar'
+      cancelText: 'Cancelar',
+      requirePassword: true
     });
 
     if (!confirmed) return;
@@ -225,7 +227,7 @@ export default function ProfessionalsPage() {
       </div>
 
       {/* Lista de Profissionais */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
         <div className="md:hidden divide-y divide-gray-100">
           {filteredProfessionals.length === 0 ? (
             <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">
@@ -233,43 +235,54 @@ export default function ProfessionalsPage() {
             </div>
           ) : (
             filteredProfessionals.map((professional) => (
-              <div key={professional.id} className="p-5 space-y-4">
-                {/* Cabeçalho: foto, nome, especialidade, status */}
+              <div key={professional.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
+                {/* Topo: foto, nome, status + três pontinhos alinhados ao topo */}
                 <div className="flex items-start gap-3">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
-                    {professional.photo ? (
-                      <Image
-                        src={professional.photo}
-                        alt={professional.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400">
-                        <Users className="h-6 w-6" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-gray-900">{professional.name}</span>
-                      {professional.active ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                          <UserCheck size={10} />
-                          Ativo
-                        </span>
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                      {professional.photo ? (
+                        <Image
+                          src={professional.photo}
+                          alt={professional.name}
+                          fill
+                          className="object-cover"
+                        />
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-600 border border-stone-200">
-                          <UserX size={10} />
-                          Inativo
-                        </span>
+                        <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <Users className="h-6 w-6" />
+                        </div>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5">{professional.specialty || 'Sem especialidade'}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-gray-900">{professional.name}</span>
+                        {professional.active ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                            <UserCheck size={10} />
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-600 border border-stone-200">
+                            <UserX size={10} />
+                            Inativo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-0.5">{professional.specialty || 'Sem especialidade'}</p>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 pt-0.5">
+                    <ActionsMenu
+                      alignRight={true}
+                      items={[
+                        { icon: BarChart3, label: 'Ver informações', onClick: () => router.push(`/admin/profissionais/${professional.id}`) },
+                        { icon: Pencil, label: 'Editar informações', onClick: () => { setEditingProfessional(professional); setShowModal(true); } },
+                        { icon: Trash2, label: 'Excluir', onClick: () => handleDeleteProfessional(professional), danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
 
-                {/* Contato em linhas únicas */}
                 <div className="space-y-1.5 text-sm">
                   <p className="text-gray-600">
                     <span className="text-gray-400">Telefone</span>
@@ -279,28 +292,6 @@ export default function ProfessionalsPage() {
                     <span className="text-gray-400">Email</span>
                     <span className="ml-2 text-gray-900">{professional.email || '–'}</span>
                   </p>
-                </div>
-
-                {/* Ações */}
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                  <Button
-                    onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
-                    variant="secondary"
-                    size="sm"
-                    icon={BarChart3}
-                  />
-                  <Button
-                    onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
-                    variant="edit"
-                    size="sm"
-                    icon={Pencil}
-                  />
-                  <Button
-                    onClick={() => handleDeleteProfessional(professional)}
-                    variant="danger"
-                    size="sm"
-                    icon={Trash2}
-                  />
                 </div>
               </div>
             ))
@@ -371,24 +362,13 @@ export default function ProfessionalsPage() {
                       )}
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          onClick={() => router.push(`/admin/profissionais/${professional.id}`)}
-                          variant="secondary"
-                          size="sm"
-                          icon={BarChart3}
-                        />
-                        <Button
-                          onClick={() => { setEditingProfessional(professional); setShowModal(true); }}
-                          variant="edit"
-                          size="sm"
-                          icon={Pencil}
-                        />
-                        <Button
-                          onClick={() => handleDeleteProfessional(professional)}
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
+                      <div className="flex justify-center">
+                        <ActionsMenu
+                          items={[
+                            { icon: BarChart3, label: 'Ver informações', onClick: () => router.push(`/admin/profissionais/${professional.id}`) },
+                            { icon: Pencil, label: 'Editar informações', onClick: () => { setEditingProfessional(professional); setShowModal(true); } },
+                            { icon: Trash2, label: 'Excluir', onClick: () => handleDeleteProfessional(professional), danger: true },
+                          ]}
                         />
                       </div>
                     </td>

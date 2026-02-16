@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Camera, Trash2, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { ModalBase } from './ui/ModalBase';
+import { useToast } from '@/hooks/useToast';
 
 interface GalleryPhoto {
   id: number;
@@ -25,6 +26,7 @@ interface Toast {
 }
 
 export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: CustomerGalleryProps) {
+  const { confirm } = useToast();
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
@@ -110,6 +112,14 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
   };
 
   const handleDeletePhoto = async (photoId: number) => {
+    const confirmed = await confirm({
+      title: 'Excluir foto',
+      message: 'Tem certeza que deseja excluir esta foto da galeria?',
+      type: 'danger',
+      requirePassword: true
+    });
+    if (!confirmed) return;
+
     try {
       const response = await fetch(`/api/customers/${customerId}/gallery?photoId=${photoId}`, {
         method: 'DELETE'

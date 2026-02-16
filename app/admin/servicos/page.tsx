@@ -6,7 +6,9 @@ import { Search, Scissors, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ServiceModal from '@/components/ServiceModal';
 import { Button } from '@/components/ui/Button';
+import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
+import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface Service {
   id: number;
@@ -18,8 +20,11 @@ interface Service {
 
 export default function ServicosPage() {
   const { success, error, confirm } = useToast();
+  const scrollToTopOnFocus = useScrollToTopOnFocus();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterDuration, setFilterDuration] = useState<'all' | 'short' | 'long'>('all');
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
@@ -76,7 +81,8 @@ export default function ServicosPage() {
     const confirmed = await confirm({
       title: 'Confirmar exclusão',
       message: 'Deseja realmente excluir este serviço?',
-      type: 'danger'
+      type: 'danger',
+      requirePassword: true
     });
     if (!confirmed) return;
 
@@ -96,6 +102,16 @@ export default function ServicosPage() {
       error('Erro ao deletar serviço');
     }
   };
+
+  const filteredServices = services.filter((service) => {
+    const matchesSearch =
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!matchesSearch) return false;
+    if (filterDuration === 'short') return service.duration <= 60;
+    if (filterDuration === 'long') return service.duration > 60;
+    return true;
+  });
 
   if (loading) {
     return (
@@ -141,23 +157,85 @@ export default function ServicosPage() {
         </svg>
       </button>
 
+      {/* Busca e filtros - sticky */}
+      <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome ou descrição..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={scrollToTopOnFocus}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFilterDuration('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterDuration === 'all' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDuration('short')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterDuration === 'short' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Até 60 min
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDuration('long')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterDuration === 'long' ? 'bg-stone-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Acima 60 min
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {services.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <Scissors className="h-12 w-12 text-stone-300 mx-auto mb-4" />
           <p className="text-sm text-gray-500">Nenhum serviço cadastrado</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
           <div className="md:hidden divide-y divide-gray-100">
-            {services.map((service) => (
-              <div key={service.id} className="p-5 space-y-4">
+            {filteredServices.length === 0 ? (
+              <div className="px-5 py-10 text-center text-sm text-gray-500">Nenhum serviço encontrado</div>
+            ) : (
+              filteredServices.map((service) => (
+              <div key={service.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="h-12 w-12 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Scissors className="h-6 w-6 text-stone-600" />
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="h-12 w-12 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Scissors className="h-6 w-6 text-stone-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-gray-900">{service.name}</span>
+                      {service.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{service.description}</p>}
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-semibold text-gray-900">{service.name}</span>
-                    {service.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{service.description}</p>}
+                  <div className="flex-shrink-0 pt-0.5">
+                    <ActionsMenu
+                      alignRight={true}
+                      items={[
+                        { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(service.id) },
+                        { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(service.id), danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -175,13 +253,9 @@ export default function ServicosPage() {
                     <span className="ml-2 font-medium text-gray-900">{formatCurrency(service.price)}</span>
                   </p>
                 </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                  <Button onClick={() => handleEdit(service.id)} variant="edit" size="sm" icon={Pencil} />
-                  <Button onClick={() => handleDelete(service.id)} variant="danger" size="sm" icon={Trash2} />
-                </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
 
           <div className="hidden md:block overflow-x-auto">
@@ -195,7 +269,12 @@ export default function ServicosPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {services.map((service) => (
+                {filteredServices.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-5 py-10 text-center text-sm text-gray-500">Nenhum serviço encontrado</td>
+                  </tr>
+                ) : (
+                  filteredServices.map((service) => (
                   <tr key={service.id} className="hover:bg-stone-50/50 transition-colors">
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -215,13 +294,18 @@ export default function ServicosPage() {
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(service.price)}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button onClick={() => handleEdit(service.id)} variant="edit" size="sm" icon={Pencil} />
-                        <Button onClick={() => handleDelete(service.id)} variant="danger" size="sm" icon={Trash2} />
+                      <div className="flex justify-center">
+                        <ActionsMenu
+                          items={[
+                            { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(service.id) },
+                            { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(service.id), danger: true },
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>

@@ -286,21 +286,21 @@ export default function ClienteDetalhesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="page-container space-y-6 animate-fade-in">
-        <div className="text-center py-12">
+      <div className="page-container space-y-6 mt-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
           <p className="text-gray-600">Cliente não encontrado</p>
           <Link
             href="/admin/clientes"
-            className="mt-4 inline-block text-primary-600 hover:text-primary-700"
+            className="mt-4 inline-block text-amber-600 hover:text-amber-700 font-medium"
           >
-            Voltar para clientes
+            ← Voltar para clientes
           </Link>
         </div>
       </div>
@@ -308,24 +308,22 @@ export default function ClienteDetalhesPage() {
   }
 
   return (
-    <div className="page-container space-y-0.5 sm:space-y-1 mt-6">
-      <div className="page-header">
-        <h1 className="page-title">Cliente</h1>
-        <p className="page-subtitle">Detalhes e histórico</p>
-      </div>
-      {/* Header centralizado com seta */}
-      <div className="relative flex items-center justify-center h-10 mb-0">
+    <div className="page-container space-y-6 mt-6">
+      <div className="flex items-center gap-4">
         <Link
           href="/admin/clientes"
-          className="absolute left-0 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          style={{ zIndex: 2 }}
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
         >
-          <ArrowLeft className="h-8 w-8 text-gray-600" />
+          <ArrowLeft className="h-5 w-5 text-stone-600" />
         </Link>
+        <div>
+          <h1 className="page-title">Cliente</h1>
+          <p className="page-subtitle">Detalhes e histórico</p>
+        </div>
       </div>
 
       {/* Informações do Cliente */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
@@ -347,7 +345,7 @@ export default function ClienteDetalhesPage() {
           </div>
           <button
             onClick={handleEdit}
-            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors w-full sm:w-auto text-sm"
+            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors w-full sm:w-auto text-sm font-medium"
           >
             <Pencil className="h-4 w-4" />
             <span>Editar</span>
@@ -398,7 +396,7 @@ export default function ClienteDetalhesPage() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Total Gasto</p>
@@ -412,7 +410,7 @@ export default function ClienteDetalhesPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Agendamentos</p>
@@ -424,7 +422,7 @@ export default function ClienteDetalhesPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Concluídos</p>
@@ -436,7 +434,7 @@ export default function ClienteDetalhesPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Última Visita</p>
@@ -452,7 +450,7 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Galeria de Fotos */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <CustomerGallery
           customerId={parseInt(customerId)}
           photos={galleryPhotos}
@@ -461,7 +459,7 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Filter className="h-5 w-5 text-gray-600" />
           <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filtros</h3>
@@ -478,7 +476,7 @@ export default function ClienteDetalhesPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={scrollToTopOnFocus}
               placeholder="Buscar..."
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             />
           </div>
 
@@ -489,7 +487,7 @@ export default function ClienteDetalhesPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             >
               <option value="all">Todos</option>
               <option value="appointments">Agendamentos</option>
@@ -504,7 +502,7 @@ export default function ClienteDetalhesPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             >
               <option value="all">Todos</option>
               <option value="agendado">Agendado</option>
@@ -521,7 +519,7 @@ export default function ClienteDetalhesPage() {
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value as any)}
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             >
               <option value="all">Todo período</option>
               <option value="7days">Últimos 7 dias</option>
@@ -540,7 +538,7 @@ export default function ClienteDetalhesPage() {
               setFilterStatus('all');
               setFilterPeriod('all');
             }}
-            className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium"
+            className="mt-4 text-sm text-amber-600 hover:text-amber-700 font-medium"
           >
             Limpar filtros
           </button>
@@ -548,7 +546,7 @@ export default function ClienteDetalhesPage() {
       </div>
 
       {/* Histórico */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
           Histórico ({combinedHistory.length})
         </h3>
@@ -562,7 +560,7 @@ export default function ClienteDetalhesPage() {
             {combinedHistory.map((item, index) => (
               <div
                 key={`${item.type}-${index}`}
-                className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-primary-300 transition-colors"
+                className="border border-gray-200 rounded-xl p-3 sm:p-4 hover:border-amber-300 transition-colors"
               >
                 {item.type === 'appointment' ? (
                   // Agendamento
@@ -667,7 +665,7 @@ export default function ClienteDetalhesPage() {
                     required
                     value={editingCustomer.name}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
-                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                     placeholder="Ex: João Silva"
                   />
                 </div>
@@ -681,7 +679,7 @@ export default function ClienteDetalhesPage() {
                     required
                     value={editingCustomer.phone}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
-                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                     placeholder="(00) 00000-0000"
                   />
                 </div>
@@ -694,7 +692,7 @@ export default function ClienteDetalhesPage() {
                     type="email"
                     value={editingCustomer.email || ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value || null })}
-                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                     placeholder="joao@email.com"
                   />
                 </div>
@@ -707,7 +705,7 @@ export default function ClienteDetalhesPage() {
                     type="date"
                     value={editingCustomer.birthday ? editingCustomer.birthday.split('T')[0] : ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, birthday: e.target.value || null })}
-                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   />
                 </div>
 
@@ -719,7 +717,7 @@ export default function ClienteDetalhesPage() {
                     rows={3}
                     value={editingCustomer.notes || ''}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, notes: e.target.value || null })}
-                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                     placeholder="Ex: Cliente VIP, prefere horários pela manhã..."
                   />
                 </div>
@@ -738,7 +736,7 @@ export default function ClienteDetalhesPage() {
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm"
                 >
                   Salvar Alterações
                 </button>

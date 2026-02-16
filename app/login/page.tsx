@@ -73,41 +73,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100 px-4 py-8">
-      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-stone-200/80">
-        {/* Logo e Título */}
-        <div className="text-center">
-          <div className="mx-auto h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-stone-100 ring-1 ring-stone-200 flex items-center justify-center">
-            <Image
-              src="/logo-corte-ja.png"
-              alt="Corte-Já"
-              width={192}
-              height={192}
-              quality={100}
-              className="h-24 w-24 sm:h-28 sm:w-28 object-contain"
-              priority
-            />
-          </div>
-          <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-            Corte-Já
-          </h2>
-          <p className="mt-1 text-sm text-stone-500">
-            Gerencie seu salão de forma simples e profissional
+    <div className="min-h-[100svh] flex items-center justify-center bg-stone-50 px-4 py-12 sm:py-16">
+      <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
+        {/* Marca */}
+        <div className="pt-10 pb-8 px-8 text-center">
+          <Image
+            src="/logo-corte-ja.png"
+            alt="Corte-Já"
+            width={416}
+            height={416}
+            quality={100}
+            className="h-36 w-36 sm:h-40 sm:w-40 object-contain object-center select-none mx-auto"
+            priority
+            unoptimized
+          />
+          <p className="-mt-1.5 text-[11px] font-medium text-stone-400 tracking-widest uppercase leading-tight">
+            Sistema de Gestão
+          </p>
+          <p className="mt-2 text-[13px] text-stone-500 tracking-tight max-w-[220px] mx-auto">
+            Gerencie seu salão de forma simples
           </p>
         </div>
 
         {/* Formulário */}
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
-              {error}
-            </div>
-          )}
-
+        <form className="px-8 pb-8" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-2.5 text-[13px] text-red-600 border border-red-100">
+                {error}
+              </div>
+            )}
+
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-stone-700 mb-1.5">
-                Email
+              <label htmlFor="email" className="block text-[13px] font-medium text-stone-600 mb-1">
+                E-mail
               </label>
               <input
                 id="email"
@@ -117,13 +116,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-input"
+                className="w-full px-4 py-2.5 bg-stone-50/80 border border-stone-200 rounded-lg text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400/60 transition-colors"
                 placeholder="seu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-stone-700 mb-1.5">
+              <label htmlFor="password" className="block text-[13px] font-medium text-stone-600 mb-1">
                 Senha
               </label>
               <div className="relative">
@@ -135,13 +134,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="form-input pr-11"
+                  className="w-full px-4 py-2.5 pr-10 bg-stone-50/80 border border-stone-200 rounded-lg text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400/60 transition-colors"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-700"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded text-stone-400 hover:text-stone-600 transition-colors"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -153,15 +152,15 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3.5 text-base"
+            className="mt-5 w-full py-3 px-4 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? (
-              <>
-                <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Entrando...
-              </>
+              </span>
             ) : (
-              'Acessar Sistema'
+              'Entrar'
             )}
           </button>
 
@@ -169,29 +168,30 @@ export default function LoginPage() {
             type="button"
             onClick={handleSetupAdmin}
             disabled={setupLoading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 bg-stone-50 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="mt-2.5 w-full py-2.5 px-4 rounded-lg text-[13px] font-medium text-stone-500 bg-transparent border border-stone-200 hover:bg-stone-50 hover:border-stone-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <FlaskConical className="h-4 w-4" />
-            {setupLoading ? 'Criando usuário...' : 'Entrar com conta de demonstração'}
+            <span className="inline-flex items-center justify-center gap-2">
+              <FlaskConical className="h-4 w-4 shrink-0" />
+              {setupLoading ? 'Criando usuário...' : 'Conta de demonstração'}
+            </span>
           </button>
           {setupMessage && (
-            <p className="text-xs text-center text-stone-600">
+            <p className="mt-2 text-[12px] text-center text-stone-500">
               {setupMessage}
             </p>
           )}
 
-          <div className="text-center pt-2">
+          <div className="mt-6 pt-4 border-t border-stone-100 flex flex-col items-center gap-2">
             <a
               href="/cliente/login"
-              className="text-sm text-amber-700 hover:text-amber-800 font-medium"
+              className="text-[13px] font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
-              Área do Cliente →
+              Área do Cliente
             </a>
-          </div>
-
-          <div className="pt-3 text-center text-xs text-stone-500 flex items-center justify-center gap-2">
-            <Lock className="h-3.5 w-3.5" />
-            Seus dados estão protegidos.
+            <p className="text-[11px] text-stone-400 flex items-center gap-1.5">
+              <Lock className="h-3 w-3" />
+              Conexão segura
+            </p>
           </div>
         </form>
       </div>

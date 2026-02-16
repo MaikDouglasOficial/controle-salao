@@ -6,6 +6,7 @@ import { Search, Pencil, Trash2, Package, Camera, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
+import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
@@ -25,6 +26,7 @@ export default function ProdutosPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterStock, setFilterStock] = useState<'all' | 'in_stock' | 'out_of_stock'>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
@@ -57,7 +59,8 @@ export default function ProdutosPage() {
     const confirmed = await confirm({
       title: 'Excluir Produto',
       message: 'Deseja realmente excluir este produto?',
-      type: 'danger'
+      type: 'danger',
+      requirePassword: true
     });
     if (!confirmed) return;
 
@@ -78,10 +81,15 @@ export default function ProdutosPage() {
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!matchesSearch) return false;
+    if (filterStock === 'in_stock') return product.stock > 0;
+    if (filterStock === 'out_of_stock') return product.stock === 0;
+    return true;
+  });
 
   if (loading) {
     return (
@@ -120,40 +128,82 @@ export default function ProdutosPage() {
 
       <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou SKU..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={scrollToTopOnFocus}
-              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome ou SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={scrollToTopOnFocus}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFilterStock('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterStock === 'all' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterStock('in_stock')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterStock === 'in_stock' ? 'bg-green-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Em estoque
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterStock('out_of_stock')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterStock === 'out_of_stock' ? 'bg-red-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Sem estoque
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
         <div className="md:hidden divide-y divide-gray-100">
           {filteredProducts.length === 0 ? (
             <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">Nenhum produto encontrado</div>
           ) : (
             filteredProducts.map((product) => (
-              <div key={product.id} className="p-5 space-y-4">
+              <div key={product.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
-                    {product.photo ? (
-                      <Image src={product.photo} alt={product.name} fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400">
-                        <Package className="h-6 w-6" />
-                      </div>
-                    )}
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                      {product.photo ? (
+                        <Image src={product.photo} alt={product.name} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <Package className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-gray-900">{product.name}</span>
+                      {product.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{product.description}</p>}
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-semibold text-gray-900">{product.name}</span>
-                    {product.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{product.description}</p>}
+                  <div className="flex-shrink-0 pt-0.5">
+                    <ActionsMenu
+                      alignRight={true}
+                      items={[
+                        { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(product.id) },
+                        { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(product.id), danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -174,11 +224,6 @@ export default function ProdutosPage() {
                       </span>
                     </span>
                   </p>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                  <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
-                  <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
                 </div>
               </div>
             ))
@@ -229,9 +274,13 @@ export default function ProdutosPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button onClick={() => handleEdit(product.id)} variant="edit" size="sm" icon={Pencil} />
-                        <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm" icon={Trash2} />
+                      <div className="flex justify-center">
+                        <ActionsMenu
+                          items={[
+                            { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(product.id) },
+                            { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(product.id), danger: true },
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>

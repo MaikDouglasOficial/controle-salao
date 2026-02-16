@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, BadgeDollarSign, Calendar, User, DollarSign, TrendingUp, Filter, Pencil } from 'lucide-react';
+import { ArrowLeft, Calendar, User, DollarSign, TrendingUp, Filter, Pencil, ClipboardList } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import { useToast } from '@/hooks/useToast';
@@ -104,38 +104,44 @@ export default function ProfessionalProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="page-container">
-        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
-          Não foi possível carregar o perfil do profissional.
+      <div className="page-container space-y-6 mt-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <p className="text-gray-600">Profissional não encontrado</p>
+          <Link
+            href="/admin/profissionais"
+            className="mt-4 inline-block text-amber-600 hover:text-amber-700 font-medium"
+          >
+            ← Voltar para profissionais
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container space-y-4 sm:space-y-6 mt-6">
-      <div className="flex items-center justify-between gap-4 page-header">
-        <div>
-          <h1 className="page-title">Perfil do profissional</h1>
-          <p className="page-subtitle">Desempenho e comissões</p>
-        </div>
+    <div className="page-container space-y-6 mt-6">
+      <div className="flex items-center gap-4">
         <Link
           href="/admin/profissionais"
-          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft className="h-5 w-5 text-stone-600" />
         </Link>
+        <div>
+          <h1 className="page-title">Profissional</h1>
+          <p className="page-subtitle">Detalhes, desempenho e comissões</p>
+        </div>
       </div>
 
       {/* Informações do Profissional */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
@@ -159,7 +165,7 @@ export default function ProfessionalProfilePage() {
           </div>
           <button
             onClick={() => setShowEditModal(true)}
-            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm"
+            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors w-full sm:w-auto text-sm font-medium"
           >
             <Pencil className="h-4 w-4" />
             <span>Editar</span>
@@ -168,8 +174,22 @@ export default function ProfessionalProfilePage() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm text-gray-600">Total de atendimentos</p>
+              <div className="h-8 w-8 sm:h-10 sm:w-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              </div>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-amber-600 truncate">
+              {(data.services || []).reduce((acc, s) => acc + s.quantity, 0)}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Comissão Hoje</p>
@@ -183,7 +203,7 @@ export default function ProfessionalProfilePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Comissão do Mês</p>
@@ -197,7 +217,7 @@ export default function ProfessionalProfilePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs sm:text-sm text-gray-600">Comissão Total</p>
@@ -213,7 +233,7 @@ export default function ProfessionalProfilePage() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Filter className="h-5 w-5 text-gray-600" />
           <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filtros</h3>
@@ -230,7 +250,7 @@ export default function ProfessionalProfilePage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={scrollToTopOnFocus}
               placeholder="Buscar por cliente ou serviço..."
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             />
           </div>
 
@@ -241,7 +261,7 @@ export default function ProfessionalProfilePage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             >
               <option value="all">Todos</option>
               <option value="services">Serviços</option>
@@ -255,9 +275,9 @@ export default function ProfessionalProfilePage() {
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value as any)}
-              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             >
-              <option value="all">Todos</option>
+              <option value="all">Todo período</option>
               <option value="7days">Últimos 7 dias</option>
               <option value="30days">Últimos 30 dias</option>
               <option value="90days">Últimos 90 dias</option>
@@ -265,15 +285,28 @@ export default function ProfessionalProfilePage() {
             </select>
           </div>
         </div>
+
+        {(searchTerm || filterType !== 'all' || filterPeriod !== 'all') && (
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setFilterType('all');
+              setFilterPeriod('all');
+            }}
+            className="mt-4 text-sm text-amber-600 hover:text-amber-700 font-medium"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
 
       {/* Serviços realizados */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <Calendar className="h-4 w-4" />
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="px-4 sm:px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 text-sm font-semibold text-gray-900">
+          <Calendar className="h-4 w-4 text-gray-500" />
           Serviços realizados
         </div>
-        <div className="md:hidden divide-y divide-gray-200">
+        <div className="md:hidden divide-y divide-gray-100">
           {filteredServices.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-gray-500">
               Nenhum serviço encontrado
@@ -299,9 +332,9 @@ export default function ProfessionalProfilePage() {
           )}
         </div>
 
-        <div className="hidden md:block table-responsive touch-pan-y">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-stone-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
@@ -310,7 +343,7 @@ export default function ProfessionalProfilePage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comissão</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {filteredServices.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-6 text-center text-sm text-gray-500">
@@ -319,7 +352,7 @@ export default function ProfessionalProfilePage() {
                 </tr>
               ) : (
                 filteredServices.map((item, index) => (
-                  <tr key={`${item.saleId}-${index}`} className="hover:bg-gray-50">
+                  <tr key={`${item.saleId}-${index}`} className="hover:bg-stone-50/50 transition-colors">
                     <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.date)}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.customerName}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{item.serviceName}</td>

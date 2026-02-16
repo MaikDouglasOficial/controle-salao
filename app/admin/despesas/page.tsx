@@ -6,6 +6,7 @@ import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X, Package,
 import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
+import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
@@ -28,6 +29,7 @@ export default function DespesasPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterQuick, setFilterQuick] = useState<'all' | 'this_month' | 'older'>('all');
   
   // Filtros
   const [selectedMonth, setSelectedMonth] = useState<string>('');
@@ -42,7 +44,7 @@ export default function DespesasPage() {
 
   useEffect(() => {
     applyFilters();
-  }, [expenses, selectedMonth, selectedYear, selectedCategory, startDate, endDate, searchTerm]);
+  }, [expenses, selectedMonth, selectedYear, selectedCategory, startDate, endDate, searchTerm, filterQuick]);
 
   const fetchExpenses = async () => {
     try {
@@ -104,10 +106,26 @@ export default function DespesasPage() {
       filtered = filtered.filter(expense => expense.category === selectedCategory);
     }
 
+    // Filtro rápido: Este mês / Anteriores
+    if (filterQuick === 'this_month') {
+      const now = new Date();
+      filtered = filtered.filter(expense => {
+        const d = new Date(expense.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+    } else if (filterQuick === 'older') {
+      const now = new Date();
+      filtered = filtered.filter(expense => {
+        const d = new Date(expense.date);
+        return d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear();
+      });
+    }
+
     setFilteredExpenses(filtered);
   };
 
   const clearFilters = () => {
+    setFilterQuick('all');
     setSelectedMonth('');
     setSelectedYear('');
     setSelectedCategory('');
@@ -121,7 +139,8 @@ export default function DespesasPage() {
     const confirmed = await confirm({
       title: 'Excluir Despesa',
       message: 'Tem certeza que deseja excluir esta despesa?',
-      type: 'danger'
+      type: 'danger',
+      requirePassword: true
     });
 
     if (!confirmed) {
@@ -241,16 +260,47 @@ export default function DespesasPage() {
 
       <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por descrição ou categoria..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={scrollToTopOnFocus}
-              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por descrição ou categoria..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={scrollToTopOnFocus}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFilterQuick('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterQuick === 'all' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterQuick('this_month')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterQuick === 'this_month' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Este mês
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterQuick('older')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterQuick === 'older' ? 'bg-stone-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Anteriores
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -388,20 +438,31 @@ export default function DespesasPage() {
       </div>
 
       {/* Lista de Despesas */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
         <div className="md:hidden divide-y divide-gray-100">
           {filteredExpenses.length === 0 ? (
             <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">Nenhuma despesa encontrada</div>
           ) : (
             filteredExpenses.map((expense) => (
-              <div key={expense.id} className="p-5 space-y-4">
+              <div key={expense.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-stone-100 flex-shrink-0 flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-stone-500" />
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-stone-100 flex-shrink-0 flex items-center justify-center">
+                      <DollarSign className="h-6 w-6 text-stone-500" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-gray-900">{expense.description}</span>
+                      <p className="text-sm text-gray-500 mt-0.5">{formatDate(expense.date)}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-semibold text-gray-900">{expense.description}</span>
-                    <p className="text-sm text-gray-500 mt-0.5">{formatDate(expense.date)}</p>
+                  <div className="flex-shrink-0 pt-0.5">
+                    <ActionsMenu
+                      alignRight={true}
+                      items={[
+                        { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(expense) },
+                        { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(expense.id), danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -424,11 +485,6 @@ export default function DespesasPage() {
                       <span className="ml-2 text-gray-900">{expense.notes}</span>
                     </p>
                   )}
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                  <Button onClick={() => handleEdit(expense)} variant="edit" size="sm" icon={Pencil} />
-                  <Button onClick={() => handleDelete(expense.id)} variant="danger" size="sm" icon={Trash2} />
                 </div>
               </div>
             ))
@@ -466,9 +522,13 @@ export default function DespesasPage() {
                     <td className="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(expense.amount)}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{formatDate(expense.date)}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button onClick={() => handleEdit(expense)} variant="edit" size="sm" icon={Pencil} />
-                        <Button onClick={() => handleDelete(expense.id)} variant="danger" size="sm" icon={Trash2} />
+                      <div className="flex justify-center">
+                        <ActionsMenu
+                          items={[
+                            { icon: Pencil, label: 'Editar informações', onClick: () => handleEdit(expense) },
+                            { icon: Trash2, label: 'Excluir', onClick: () => handleDelete(expense.id), danger: true },
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>
