@@ -30,7 +30,12 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Email ou senha inválidos');
+        const isDefaultEmail = email === 'admin@salao.com';
+        setError(
+          isDefaultEmail
+            ? 'Usuário admin ainda não existe. Clique em "Entrar com conta de demonstração" para criar e depois faça login.'
+            : 'Email ou senha inválidos.'
+        );
         return;
       }
 
@@ -61,46 +66,47 @@ export default function LoginPage() {
       setEmail('admin@salao.com');
       setPassword('admin123');
     } catch (err) {
-      setSetupMessage('Erro ao criar usuário admin');
+      setSetupMessage('Erro ao conectar. Verifique se o banco de dados está rodando e o arquivo .env está configurado.');
     } finally {
       setSetupLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 px-4 py-6">
-      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-200">
+    <div className="min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100 px-4 py-8">
+      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-stone-200/80">
         {/* Logo e Título */}
         <div className="text-center">
-          <div className="mx-auto h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden bg-transparent">
+          <div className="mx-auto h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-stone-100 ring-1 ring-stone-200 flex items-center justify-center">
             <Image
               src="/logo-corte-ja.png"
               alt="Corte-Já"
-              width={96}
-              height={96}
-              className="h-20 w-20 sm:h-24 sm:w-24 object-contain"
+              width={192}
+              height={192}
+              quality={100}
+              className="h-24 w-24 sm:h-28 sm:w-28 object-contain"
               priority
             />
           </div>
-          <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900">
+          <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
             Corte-Já
           </h2>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+          <p className="mt-1 text-sm text-stone-500">
             Gerencie seu salão de forma simples e profissional
           </p>
         </div>
 
         {/* Formulário */}
-        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
               {error}
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-stone-700 mb-1.5">
                 Email
               </label>
               <input
@@ -111,13 +117,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 !text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white font-medium"
+                className="form-input"
                 placeholder="seu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-stone-700 mb-1.5">
                 Senha
               </label>
               <div className="relative">
@@ -129,13 +135,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-4 py-3 pr-11 border border-slate-300 placeholder-slate-400 !text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white font-medium"
+                  className="form-input pr-11"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-700"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -147,7 +153,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-xl text-white bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+            className="btn-primary w-full py-3.5 text-base"
           >
             {loading ? (
               <>
@@ -163,28 +169,27 @@ export default function LoginPage() {
             type="button"
             onClick={handleSetupAdmin}
             disabled={setupLoading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 bg-stone-50 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <FlaskConical className="h-4 w-4" />
             {setupLoading ? 'Criando usuário...' : 'Entrar com conta de demonstração'}
           </button>
           {setupMessage && (
-            <p className="text-xs text-center text-slate-600">
+            <p className="text-xs text-center text-stone-600">
               {setupMessage}
             </p>
           )}
 
-          {/* Link para portal do cliente */}
-          <div className="text-center pt-3">
+          <div className="text-center pt-2">
             <a
               href="/cliente/login"
-              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              className="text-sm text-amber-700 hover:text-amber-800 font-medium"
             >
               Área do Cliente →
             </a>
           </div>
 
-          <div className="pt-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+          <div className="pt-3 text-center text-xs text-stone-500 flex items-center justify-center gap-2">
             <Lock className="h-3.5 w-3.5" />
             Seus dados estão protegidos.
           </div>

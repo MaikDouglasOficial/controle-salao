@@ -1,67 +1,116 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ===== SISTEMA DE DESIGN GLOBAL ===== */
+/* ===== IDENTIDADE VISUAL — SALÃO DE BELEZA ===== */
 
 @layer base {
   :root {
-    /* Paleta Profissional de Luxo */
-    --brand-primary: #0f172a;       /* Navy Profundo */
-    --brand-accent: #3b82f6;        /* Azul Vibrante para Ação */
-    --bg-main: #f8fafc;             /* Cinza quase branco */
-    --card-bg: #ffffff;
-    /* Escala Tipográfica Pro */
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    /* Paleta profissional salão: elegante e acolhedora */
+    --brand-primary: #b45309;       /* Âmbar dourado (confiança, cuidado) */
+    --brand-primary-hover: #92400e;
+    --brand-accent: #d97706;        /* Âmbar para destaques */
+    --brand-soft: #fef3c7;         /* Fundo suave para ativo/hover */
+    --bg-main: #fafaf9;            /* Stone-50 — fundo quente e limpo */
+    --bg-card: #ffffff;
+    --border-card: #e7e5e4;        /* Stone-200 */
+    --text-main: #1c1917;          /* Stone-900 */
+    --text-muted: #78716c;         /* Stone-500 */
+    --sidebar-bg: #1c1917;         /* Stone-900 — sidebar escura */
+    --sidebar-text: #a8a29e;       /* Stone-400 */
+    --sidebar-active: rgba(251, 191, 36, 0.15);
+    --sidebar-active-text: #fbbf24;
   }
 
   body {
     @apply bg-[var(--bg-main)] text-[var(--text-main)] antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
-
-  /* Removido o estilo global de títulos para não ocupar espaço visual */
 }
 
 @layer components {
-  /* CARD ESTILO SAAS (APPLE/STRIPE) */
+  /* Cards — limpos, bordas suaves, sombra leve */
   .card {
-    @apply bg-white border border-slate-200/60 shadow-sm transition-all duration-300;
+    @apply bg-white border border-[var(--border-card)] shadow-sm transition-all duration-300;
     border-radius: 16px;
   }
   .card:hover {
-    @apply shadow-md border-slate-300/80;
-    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(28, 25, 23, 0.06);
+    border-color: #d6d3d1;
   }
 
-  /* BOTÕES DE ALTA PERFORMANCE */
+  .card-header {
+    @apply flex items-center justify-between flex-wrap gap-2 px-5 py-4;
+  }
+
+  .card-title {
+    @apply text-lg font-semibold text-[var(--text-main)];
+  }
+
+  .card-subtitle {
+    @apply text-sm text-[var(--text-muted)] mt-0.5;
+  }
+
+  .card-body {
+    @apply p-5;
+  }
+
+  .card-footer {
+    @apply px-5 py-4 border-t border-stone-100;
+  }
+
+  /* Page layout */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-header {
+    @apply mb-6;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-[var(--text-main)] tracking-tight;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-[var(--text-muted)] mt-1;
+  }
+
+  /* Botões primários — cor da marca */
   .btn-primary {
-    @apply inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white font-semibold text-sm rounded-xl shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-indigo-100 hover:shadow-lg active:scale-95 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-sm transition-all duration-200 active:scale-[0.98] focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
+    background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%);
+    box-shadow: 0 4px 14px rgba(180, 83, 9, 0.35);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-5 py-2.5 bg-white text-slate-700 font-semibold text-sm border border-slate-200 rounded-xl shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 active:scale-95;
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-white text-stone-700 font-semibold text-sm border border-stone-200 rounded-xl shadow-sm transition-all duration-200 hover:bg-stone-50 hover:border-stone-300 active:scale-[0.98];
   }
 
-  /* INPUTS QUE PARECEM PREMIUM */
+  /* Inputs — premium e legíveis */
   .form-input {
-    @apply w-full px-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm transition-all duration-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 placeholder:text-slate-400;
+    @apply w-full px-4 py-3 bg-stone-50 border border-stone-200 text-stone-900 text-sm transition-all duration-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 placeholder:text-stone-400;
   }
 
-  /* TABELAS MODERNAS (SEM LINHAS PESADAS) */
+  /* Tabelas */
   .table-responsive {
-    @apply rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm;
+    @apply rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-sm;
   }
 
   .table-responsive thead th {
-    @apply bg-slate-50/50 py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100;
+    @apply bg-stone-50/80 py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-500 border-b border-stone-100;
   }
 
   .table-responsive tbody td {
-    @apply py-4 px-6 text-sm text-slate-600 border-b border-slate-50;
+    @apply py-4 px-6 text-sm text-stone-600 border-b border-stone-50;
+  }
+
+  /* Loading spinner (cor da marca) */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-stone-200 border-t-amber-500;
   }
 }
 
@@ -191,30 +240,30 @@
 
 /* Removido tema escuro/gradiente para evitar fundo preto no overscroll */
 
-/* Scrollbar personalizada */
+/* Scrollbar — cor da marca */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f5f5f4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0284c7;
+  background: #d97706;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0369a1;
+  background: #b45309;
 }
 
 /* Garantir que inputs e selects sejam visíveis */
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  color: #1e293b !important;
+  color: #1c1917 !important;
   font-weight: 500;
   font-size: 16px;
   max-width: 100%;
@@ -239,13 +288,13 @@ textarea::placeholder {
 input:focus,
 select:focus,
 textarea:focus {
-  color: #0f172a !important;
+  color: #1c1917 !important;
 }
 
 /* ===== Agenda (react-big-calendar) ===== */
 .agenda-calendar .rbc-calendar {
-  font-family: 'Manrope', 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
-  color: #0f172a;
+  font-family: inherit;
+  color: #1c1917;
 }
 
 .agenda-calendar .agenda-toolbar {
@@ -271,7 +320,7 @@ textarea:focus {
 
 .agenda-calendar .agenda-toolbar-title {
   font-weight: 700;
-  color: #0f172a;
+  color: #1c1917;
   text-transform: capitalize;
 }
 
@@ -286,9 +335,9 @@ textarea:focus {
   height: 34px;
   padding: 0 10px;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e7e5e4;
   background: #fff;
-  color: #0f172a;
+  color: #1c1917;
   font-weight: 600;
 }
 
@@ -296,22 +345,22 @@ textarea:focus {
   height: 34px;
   padding: 0 10px;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e7e5e4;
   background: #fff;
-  color: #0f172a;
+  color: #1c1917;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .agenda-calendar .agenda-view-button:hover {
-  background: #f8fafc;
-  border-color: #d1d5db;
+  background: #fafaf9;
+  border-color: #d6d3d1;
 }
 
 .agenda-calendar .agenda-view-button.active {
-  background: #2563eb;
+  background: #b45309;
   color: #fff;
-  border-color: #2563eb;
+  border-color: #b45309;
 }
 
 .agenda-calendar .rbc-toolbar {
@@ -321,35 +370,35 @@ textarea:focus {
 
 .agenda-calendar .rbc-toolbar button {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e7e5e4;
   border-radius: 10px;
   padding: 6px 10px;
-  color: #0f172a;
+  color: #1c1917;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .agenda-calendar .rbc-toolbar button:hover {
-  background: #f8fafc;
-  border-color: #d1d5db;
+  background: #fafaf9;
+  border-color: #d6d3d1;
 }
 
 .agenda-calendar .rbc-toolbar button.rbc-active {
-  background: #2563eb;
+  background: #b45309;
   color: #fff;
-  border-color: #2563eb;
+  border-color: #b45309;
 }
 
 .agenda-calendar .rbc-header {
   padding: 8px 6px;
   font-weight: 600;
-  color: #1f2937;
-  border-bottom: 1px solid #e5e7eb;
+  color: #292524;
+  border-bottom: 1px solid #e7e5e4;
 }
 
 .agenda-calendar .rbc-time-view,
 .agenda-calendar .rbc-month-view {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e7e5e4;
   border-radius: 16px;
   overflow: hidden;
 }
@@ -372,13 +421,13 @@ textarea:focus {
 
 .agenda-calendar .rbc-time-header,
 .agenda-calendar .rbc-time-content {
-  border-color: #e5e7eb;
+  border-color: #e7e5e4;
 }
 
 .agenda-calendar .rbc-time-gutter,
 .agenda-calendar .rbc-timeslot-group,
 .agenda-calendar .rbc-day-slot {
-  border-color: #f1f5f9;
+  border-color: #f5f5f4;
 }
 
 .agenda-calendar .rbc-event {
@@ -582,12 +631,12 @@ textarea:focus {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #0284c7;
+  background: #d97706;
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #0369a1;
+  background: #b45309;
 }
 
 @layer utilities {

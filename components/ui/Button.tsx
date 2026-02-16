@@ -28,18 +28,18 @@ export function Button({
   // Base: transições suaves, outline, cursor, display
   const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none rounded-lg shadow-sm hover:shadow-md active:scale-[0.98]';
   
-  // Variantes de cor e estilo
+  // Variantes — identidade salão (âmbar/dourado como primário)
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500 border border-blue-700',
-    secondary: 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-400',
+    primary: 'bg-gradient-to-b from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 focus:ring-amber-400 border border-amber-600/80 shadow-sm hover:shadow-md',
+    secondary: 'bg-white text-stone-700 border-2 border-stone-200 hover:bg-stone-50 hover:border-stone-300 focus:ring-stone-300',
     success: 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 focus:ring-green-500 border border-green-700',
     danger: 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-red-500 border border-red-700',
-    outline: 'bg-transparent text-blue-600 border-2 border-blue-600 hover:bg-blue-50 hover:border-blue-700 focus:ring-blue-500',
-    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400 border border-transparent',
-    edit: 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:text-indigo-800 focus:ring-indigo-400',
-    orange: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 focus:ring-orange-500 border border-orange-600',
-    'blue-dark': 'bg-gradient-to-r from-blue-700 to-blue-800 text-white hover:from-blue-800 hover:to-blue-900 focus:ring-blue-700 border border-blue-800',
-    dark: 'bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-black hover:to-gray-900 focus:ring-gray-900 border border-gray-900',
+    outline: 'bg-transparent text-amber-700 border-2 border-amber-500 hover:bg-amber-50 hover:border-amber-600 focus:ring-amber-400',
+    ghost: 'bg-transparent text-stone-700 hover:bg-stone-100 focus:ring-stone-300 border border-transparent',
+    edit: 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:text-amber-900 focus:ring-amber-300',
+    orange: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500 border border-amber-600',
+    'blue-dark': 'bg-gradient-to-r from-stone-800 to-stone-900 text-white hover:from-stone-900 hover:to-stone-950 focus:ring-stone-600 border border-stone-800',
+    dark: 'bg-gradient-to-r from-stone-900 to-stone-800 text-white hover:from-stone-950 hover:to-stone-900 focus:ring-stone-700 border border-stone-900',
   };
   
   // Tamanhos com espaçamentos e tipografia consistentes (responsivos)

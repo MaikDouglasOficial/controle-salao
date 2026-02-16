@@ -17,8 +17,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-main)]">
+        <div className="loading-spinner w-10 h-10" />
       </div>
     );
   }

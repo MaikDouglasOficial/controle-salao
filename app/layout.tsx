@@ -1,9 +1,13 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Providers } from './providers';
 
-const inter = Inter({ subsets: ['latin'] });
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plus-jakarta',
+});
 
 export const metadata: Metadata = {
   title: 'Controle de Salão - Sistema de Gerenciamento',
@@ -23,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
+    <html lang="pt-BR" className={plusJakarta.variable}>
+      <body className={plusJakarta.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

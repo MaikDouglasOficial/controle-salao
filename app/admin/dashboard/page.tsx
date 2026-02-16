@@ -213,29 +213,29 @@ export default function DashboardPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-        {/* Header removido para visual minimalista */}
+        <div className="mb-2">
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Visão geral do seu salão</p>
+        </div>
 
-        {/* Cards de Estatísticas Minimalistas */}
+        {/* Cards de estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <Card 
-                key={index} 
-                className="bg-white border border-gray-200 hover:border-gray-300 transition-colors"
-              >
-                <CardBody className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card key={index} className="card">
+                <CardBody className="p-5">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500 mb-1 truncate">
+                      <p className="text-sm text-stone-500 mb-1 truncate font-medium">
                         {card.title}
                       </p>
-                      <p className="text-2xl font-semibold text-gray-900 truncate">
+                      <p className="text-2xl font-bold text-stone-900 truncate tracking-tight">
                         {card.value}
                       </p>
                     </div>
-                    <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-5 w-5 text-gray-600" />
+                    <div className="h-12 w-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-100">
+                      <Icon className="h-6 w-6 text-amber-600" strokeWidth={2} />
                     </div>
                   </div>
                 </CardBody>
@@ -244,12 +244,12 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* Alertas Minimalistas */}
+        {/* Alertas */}
         {stats && stats.produtosEstoqueBaixo > 0 && (
           <Alert 
             variant="warning" 
             title="Estoque Baixo"
-            className="bg-amber-50 border-amber-200"
+            className="bg-amber-50 border-amber-200 rounded-xl"
           >
             <div className="flex items-center space-x-2 text-sm">
               <Package className="h-4 w-4 text-amber-600" />
@@ -266,97 +266,89 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {/* Gráficos Minimalistas */}
+        {/* Gráficos */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
-          {/* Gráfico de Receita vs Despesa */}
-          <Card className="bg-white border border-gray-200">
-            <CardHeader 
-              /* Removido título e subtítulo para visual minimalista */
-              className="pb-4"
-            />
-            <CardBody className="pt-3">
+          <Card className="card">
+            <CardHeader title="Receita x Despesas" subtitle="Últimos meses" className="pb-2" />
+            <CardBody className="pt-2">
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" vertical={false} />
                   <XAxis 
                     dataKey="mes" 
-                    tick={{ fontSize: 11, fill: '#6b7280' }}
-                    axisLine={{ stroke: '#d1d5db' }}
+                    tick={{ fontSize: 11, fill: '#78716c' }}
+                    axisLine={{ stroke: '#d6d3d1' }}
                     tickLine={false}
                   />
                   <YAxis 
-                    tick={{ fontSize: 11, fill: '#6b7280' }}
-                    axisLine={{ stroke: '#d1d5db' }}
+                    tick={{ fontSize: 11, fill: '#78716c' }}
+                    axisLine={{ stroke: '#d6d3d1' }}
                     tickLine={false}
                   />
                   <Tooltip 
                     formatter={(value: number) => formatCurrency(value)}
                     contentStyle={{
                       backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                      border: '1px solid #e7e5e4',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 14px rgba(28, 25, 23, 0.08)'
                     }}
                   />
-                  <Bar dataKey="receita" fill="#10b981" name="Receita" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="despesa" fill="#ef4444" name="Despesa" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="receita" fill="#b45309" name="Receita" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="despesa" fill="#78716c" name="Despesa" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardBody>
           </Card>
 
-          {/* Resumo Financeiro Minimalista */}
-          <Card className="bg-white border border-gray-200">
-            <CardHeader 
-              /* Removido título e subtítulo para visual minimalista */
-              className="pb-4"
-            />
-            <CardBody className="pt-0">
+          <Card className="card">
+            <CardHeader title="Resumo financeiro" subtitle="Este mês" className="pb-2" />
+            <CardBody className="pt-2">
               <div className="space-y-3">
-                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <TrendingUp className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">Receita Total (Mês)</span>
+                <div className="flex justify-between items-center py-3 px-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm text-stone-700 font-medium">Receita Total (Mês)</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-stone-900">
                     {formatCurrency(stats?.lucroMes || 0)}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <AlertCircle className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">Despesas (Mês)</span>
+                <div className="flex justify-between items-center py-3 px-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-stone-500" />
+                    <span className="text-sm text-stone-700 font-medium">Despesas (Mês)</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-stone-900">
                     {formatCurrency(stats?.despesasMes || 0)}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 px-4 bg-gray-100 rounded-lg border border-gray-300">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-semibold text-gray-900">Lucro Líquido</span>
+                <div className="flex justify-between items-center py-3 px-4 bg-amber-50 rounded-xl border border-amber-200">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-semibold text-stone-900">Lucro Líquido</span>
                   </div>
-                  <span className="text-base font-semibold text-gray-900">
+                  <span className="text-base font-bold text-stone-900">
                     {formatCurrency(stats?.lucroLiquido || 0)}
                   </span>
                 </div>
 
-                <div className="pt-3 space-y-3 border-t border-gray-200">
+                <div className="pt-3 space-y-3 border-t border-stone-100">
                   <div className="flex items-center justify-between py-2">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-600">Agendamentos hoje</span>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-stone-500" />
+                      <span className="text-sm text-stone-600">Agendamentos hoje</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{stats?.agendamentosHoje || 0}</span>
+                    <span className="text-sm font-medium text-stone-900">{stats?.agendamentosHoje || 0}</span>
                   </div>
                   <div className="flex items-center justify-between py-2">
-                    <div className="flex items-center space-x-2">
-                      <Users className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-600">Total de clientes</span>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-stone-500" />
+                      <span className="text-sm text-stone-600">Total de clientes</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{stats?.clientesTotal || 0}</span>
+                    <span className="text-sm font-medium text-stone-900">{stats?.clientesTotal || 0}</span>
                   </div>
                 </div>
               </div>
@@ -365,11 +357,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Próximos Agendamentos */}
-        <Card className="bg-white border border-gray-200">
-          <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
-            className="border-b border-gray-200"
-          >
+        <Card className="card">
+          <CardHeader title="Próximos agendamentos" subtitle="Hoje e em breve" className="border-b border-stone-100">
             <Button
               variant="secondary"
               size="sm"
@@ -383,8 +372,8 @@ export default function DashboardPage() {
         <CardBody>
           {proximosAgendamentos.length === 0 ? (
             <EmptyState
-              icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
+              icon={<Calendar className="h-8 w-8 text-stone-400" />}
+              title="Nenhum agendamento"
               description="Crie um novo agendamento para começar"
               action={
                 <Button
@@ -401,12 +390,12 @@ export default function DashboardPage() {
                 <div
                   key={agendamento.id}
                   onClick={() => router.push('/admin/agendamentos')}
-                  className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors"
+                  className="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:bg-amber-50/50 cursor-pointer transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-gray-200">
+                        <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-stone-200">
                           {agendamento.customer.photo ? (
                             <Image
                               src={agendamento.customer.photo}
@@ -415,14 +404,14 @@ export default function DashboardPage() {
                               className="object-cover"
                             />
                           ) : (
-                            <User className="h-5 w-5 text-gray-500" />
+                            <User className="h-5 w-5 text-stone-500" />
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900">
+                          <h3 className="text-sm font-semibold text-stone-900">
                             {agendamento.customer.name}
                           </h3>
-                          <div className="flex items-center space-x-2 text-xs text-gray-500 mt-0.5">
+                          <div className="flex items-center space-x-2 text-xs text-stone-500 mt-0.5">
                             <Phone className="h-3 w-3" />
                             <span>{agendamento.customer.phone}</span>
                           </div>
@@ -430,18 +419,18 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 text-xs">
-                        <div className="flex items-center space-x-2 text-gray-600">
+                        <div className="flex items-center space-x-2 text-stone-600">
                           <Scissors className="h-3 w-3" />
                           <span>{agendamento.service.name} • {agendamento.service.duration}min</span>
                         </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
+                        <div className="flex items-center space-x-2 text-stone-600">
                           <Clock className="h-3 w-3" />
                           <span>
                             {new Date(agendamento.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} • {agendamento.time}
                           </span>
                         </div>
                         {agendamento.professional && (
-                          <div className="flex items-center space-x-2 text-gray-600">
+                          <div className="flex items-center space-x-2 text-stone-600">
                             <Users className="h-3 w-3" />
                             <span>{agendamento.professional}</span>
                           </div>
@@ -463,17 +452,13 @@ export default function DashboardPage() {
       </Card>
 
         {/* Aniversariantes do Mês */}
-        <Card className="bg-white border border-gray-200">
-          <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
-            className="border-b border-gray-200"
-          />
-        
-        <CardBody>
+        <Card className="card">
+          <CardHeader title="Aniversariantes do mês" subtitle="Parabenize seus clientes" className="border-b border-stone-100" />
+          <CardBody>
           {aniversariantes.length === 0 ? (
             <EmptyState
-              icon={<Calendar className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
+              icon={<Calendar className="h-8 w-8 text-stone-400" />}
+              title="Nenhum aniversariante"
               description="Não há clientes fazendo aniversário este mês"
             />
           ) : (
@@ -487,13 +472,13 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={aniversariante.id}
-                    className={`p-4 rounded-lg border transition-colors ${
-                      isToday ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                    className={`p-4 rounded-xl border transition-colors ${
+                      isToday ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200 hover:bg-stone-100'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-stone-200 flex items-center justify-center flex-shrink-0">
                           {aniversariante.photo ? (
                             <Image
                               src={aniversariante.photo}
@@ -502,15 +487,15 @@ export default function DashboardPage() {
                               className="object-cover"
                             />
                           ) : (
-                            <User className="h-5 w-5 text-gray-500" />
+                            <User className="h-5 w-5 text-stone-500" />
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900">
+                          <h3 className="text-sm font-semibold text-stone-900">
                             {aniversariante.name}
                             {isToday && <span className="ml-2 text-xs text-amber-600">(Hoje)</span>}
                           </h3>
-                          <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
+                          <div className="flex items-center space-x-4 mt-1 text-xs text-stone-500">
                             <div className="flex items-center space-x-1">
                               <Phone className="h-3 w-3" />
                               <span>{aniversariante.phone}</span>
@@ -549,11 +534,8 @@ export default function DashboardPage() {
         </Card>
 
         {/* Vendas Recentes */}
-        <Card className="bg-white border border-gray-200">
-          <CardHeader 
-            /* Removido título e subtítulo para visual minimalista */
-            className="border-b border-gray-200"
-          >
+        <Card className="card">
+          <CardHeader title="Vendas recentes" subtitle="Últimas vendas" className="border-b border-stone-100">
             <Button
               variant="secondary"
               size="sm"
@@ -567,8 +549,8 @@ export default function DashboardPage() {
         <CardBody>
           {vendasRecentes.length === 0 ? (
             <EmptyState
-              icon={<ShoppingBag className="h-8 w-8 text-gray-400" />}
-              /* Removido título para visual minimalista */
+              icon={<ShoppingBag className="h-8 w-8 text-stone-400" />}
+              title="Nenhuma venda"
               description="Realize uma venda no PDV para começar"
               action={
                 <Button
@@ -593,12 +575,12 @@ export default function DashboardPage() {
                   <div
                     key={venda.id}
                     onClick={() => router.push('/admin/vendas')}
-                    className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors"
+                    className="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:bg-amber-50/50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                          <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-gray-200">
+                          <div className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-stone-200">
                             {venda.customer?.photo ? (
                               <Image
                                 src={venda.customer.photo}
@@ -607,14 +589,14 @@ export default function DashboardPage() {
                                 className="object-cover"
                               />
                             ) : (
-                              <ShoppingBag className="h-5 w-5 text-gray-500" />
+                              <ShoppingBag className="h-5 w-5 text-stone-500" />
                             )}
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-sm font-semibold text-gray-900">
+                            <h3 className="text-sm font-semibold text-stone-900">
                               {venda.customer ? venda.customer.name : 'Cliente não informado'}
                             </h3>
-                            <div className="flex items-center space-x-3 text-xs text-gray-500 mt-0.5">
+                            <div className="flex items-center space-x-3 text-xs text-stone-500 mt-0.5">
                               {venda.customer && (
                                 <>
                                   <div className="flex items-center space-x-1">
@@ -633,22 +615,22 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 text-xs">
-                          <div className="flex items-center space-x-1 text-gray-600">
+                          <div className="flex items-center space-x-1 text-stone-600">
                             <DollarSign className="h-3 w-3" />
                             <span className="font-semibold">{formatCurrency(venda.total)}</span>
                           </div>
-                          <div className="flex items-center space-x-1 text-gray-600">
+                          <div className="flex items-center space-x-1 text-stone-600">
                             <CreditCard className="h-3 w-3" />
                             <span>{paymentMethodLabels[venda.paymentMethod] || venda.paymentMethod}</span>
                           </div>
-                          <div className="flex items-center space-x-1 text-gray-600">
+                          <div className="flex items-center space-x-1 text-stone-600">
                             <Package className="h-3 w-3" />
                             <span>{venda.items.length} item{venda.items.length !== 1 ? 's' : ''}</span>
                           </div>
                         </div>
 
                         {venda.professional && (
-                          <div className="mt-2 flex items-center space-x-1 text-xs text-gray-600">
+                          <div className="mt-2 flex items-center space-x-1 text-xs text-stone-600">
                             <Scissors className="h-3 w-3" />
                             <span>Profissional: {venda.professional}</span>
                           </div>

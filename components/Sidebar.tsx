@@ -75,75 +75,76 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Header mobile fixo */}
-      {/* Header mobile fixo */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-900 shadow-sm h-16">
+      {/* Header mobile — mesma identidade escura da sidebar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-stone-900 border-b border-stone-700/50 shadow-lg h-16">
         <div className="flex items-center justify-between px-4 py-3 h-16">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-1 rounded-lg hover:bg-gray-800 transition-colors text-white"
+            className="p-2 rounded-xl hover:bg-stone-800 transition-colors text-stone-300 hover:text-amber-400"
+            aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
           >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <div className="flex items-center space-x-4">
-            <div className="h-12 w-12 rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="h-14 w-14 rounded-xl overflow-hidden flex-shrink-0">
               <Image
                 src="/logo-corte-ja.png"
                 alt="Corte-Já"
-                width={48}
-                height={48}
-                className="h-12 w-12 object-cover"
+                width={96}
+                height={96}
+                quality={100}
+                className="h-14 w-14 object-cover"
                 priority
               />
             </div>
-            <div className="leading-tight">
-              <span className="block text-base font-semibold text-white">Corte-Já</span>
-              <span className="block text-[12px] text-gray-300">Gestão de Salão</span>
+            <div className="flex flex-col justify-center h-14 leading-tight min-w-0">
+              <span className="block text-sm font-semibold text-white">Corte-Já</span>
+              <span className="block text-[11px] text-stone-400">Gestão de Salão</span>
             </div>
           </div>
-          <div className="w-8" />
+          <div className="w-10" />
         </div>
       </div>
 
       {/* Overlay mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-stone-950/60 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
+          aria-hidden
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — escura, elegante, identidade salão */}
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white text-gray-900 transform transition-transform duration-200 ease-in-out shadow-lg border-r border-gray-200',
-          'top-[57px] lg:top-0',
+          'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-200 transform transition-transform duration-200 ease-out shadow-xl border-r border-stone-700/50',
+          'top-16 lg:top-0',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo - apenas desktop */}
-          <div className="hidden lg:block p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-white">
-                <Image
-                  src="/logo-corte-ja.png"
-                  alt="Corte-Já"
-                  width={64}
-                  height={64}
-                  className="h-16 w-16 object-cover"
-                  priority
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">Corte-Já</h1>
-                <p className="text-xs text-gray-500">Sistema de Gestão de Salão</p>
-              </div>
+          {/* Logo — desktop */}
+          <div className="hidden lg:flex items-center gap-3 p-5 border-b border-stone-700/50">
+            <div className="h-[4.25rem] w-[4.25rem] rounded-xl overflow-hidden flex-shrink-0">
+              <Image
+                src="/logo-corte-ja.png"
+                alt="Corte-Já"
+                width={128}
+                height={128}
+                quality={100}
+                className="h-[4.25rem] w-[4.25rem] object-cover"
+                priority
+              />
+            </div>
+            <div className="flex flex-col justify-center min-w-0 h-[4.25rem]">
+              <h1 className="text-lg font-bold text-white truncate">Corte-Já</h1>
+              <p className="text-xs text-stone-400">Sistema de Gestão</p>
             </div>
           </div>
 
           {/* Menu */}
-          <nav className="flex-1 p-3 pt-5 space-y-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <nav className="flex-1 p-3 pt-4 space-y-0.5 overflow-y-auto custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -154,30 +155,30 @@ export function Sidebar() {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all text-sm',
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium',
                     isActive
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-200'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                      : 'text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-transparent'
                   )}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={2} />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Usuário e Logout */}
-          <div className="p-3 border-t border-gray-200 bg-gray-50">
-            <div className="px-3 py-2 mb-2">
-              <p className="text-sm font-medium text-gray-900">{session?.user?.name || 'Admin'}</p>
-              <p className="text-xs text-gray-500">{session?.user?.email}</p>
+          {/* Usuário e Sair */}
+          <div className="p-3 border-t border-stone-700/50 bg-stone-800/50">
+            <div className="px-3 py-2 mb-2 rounded-lg bg-stone-800/80">
+              <p className="text-sm font-semibold text-white truncate">{session?.user?.name || 'Admin'}</p>
+              <p className="text-xs text-stone-400 truncate">{session?.user?.email}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all text-sm font-medium"
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-stone-400 hover:bg-red-500/10 hover:text-red-400 transition-all text-sm font-medium"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 flex-shrink-0" />
               <span>Sair</span>
             </button>
           </div>
