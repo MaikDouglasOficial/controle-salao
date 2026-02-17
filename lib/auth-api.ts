@@ -4,13 +4,28 @@ import { authOptions } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 /**
- * Exige sessão autenticada na API. Use no início de cada handler de rota admin.
- * Retorna a sessão se ok, ou uma NextResponse 401 para enviar ao cliente.
+ * Exige sessão autenticada na API. Use quando qualquer usuário logado (admin ou cliente) puder acessar.
  */
 export async function requireSession(): Promise<{ session: Session } | { error: NextResponse }> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return { error: NextResponse.json({ error: 'Não autorizado' }, { status: 401 }) };
+  }
+  return { session };
+}
+
+/**
+ * Exige sessão de admin (role === 'admin'). Use em todas as rotas da área administrativa.
+ * Impede que cliente logado acesse dados do admin.
+ */
+export async function requireAdminSession(): Promise<{ session: Session } | { error: NextResponse }> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { error: NextResponse.json({ error: 'Não autorizado' }, { status: 401 }) };
+  }
+  const role = (session.user as { role?: string }).role;
+  if (role !== 'admin') {
+    return { error: NextResponse.json({ error: 'Acesso restrito à área administrativa' }, { status: 403 }) };
   }
   return { session };
 }

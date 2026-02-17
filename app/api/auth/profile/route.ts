@@ -5,13 +5,21 @@ import { prisma } from '@/lib/prisma';
 import * as bcrypt from 'bcryptjs';
 
 /**
- * GET /api/auth/profile — retorna dados do usuário logado (sem senha)
+ * GET /api/auth/profile — retorna dados do usuário admin logado (sem senha).
+ * Clientes devem usar GET /api/cliente/me.
  */
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+    const role = (session.user as { role?: string }).role;
+    if (role === 'client') {
+      return NextResponse.json(
+        { error: 'Use /api/cliente/me para perfil da área do cliente' },
+        { status: 403 }
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -39,6 +47,13 @@ export async function PUT(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+    const role = (session.user as { role?: string }).role;
+    if (role === 'client') {
+      return NextResponse.json(
+        { error: 'Use PUT /api/cliente/me para atualizar perfil da área do cliente' },
+        { status: 403 }
+      );
     }
 
     const id = parseInt(session.user.id, 10);

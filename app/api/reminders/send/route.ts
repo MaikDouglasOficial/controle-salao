@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 import { sendAppointmentReminder, isEmailConfigured } from '@/lib/email';
 import { APPOINTMENT_STATUS } from '@/lib/constants';
 
@@ -13,7 +13,7 @@ const REMINDER_HOURS_AHEAD = 24; // enviar lembretes para agendamentos nas próx
  */
 export async function POST() {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     if (!isEmailConfigured()) {
@@ -115,7 +115,7 @@ export async function POST() {
  */
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const configured = isEmailConfigured();

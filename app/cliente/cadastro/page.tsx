@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Lock, Loader2, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Loader2, User, Phone, Eye, EyeOff, FileText } from 'lucide-react';
+
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
 
 export default function ClienteCadastroPage() {
   const router = useRouter();
@@ -12,6 +20,7 @@ export default function ClienteCadastroPage() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [cpf, setCpf] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +38,7 @@ export default function ClienteCadastroPage() {
           password,
           phone: phone.replace(/\D/g, ''),
           name: name.trim(),
+          cpf: cpf.replace(/\D/g, ''),
         }),
       });
       const data = await res.json();
@@ -86,6 +96,24 @@ export default function ClienteCadastroPage() {
                 onChange={(e) => setName(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 transition-colors"
                 placeholder="Seu nome"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="cpf" className="block text-[13px] font-medium text-slate-600 mb-1">CPF *</label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                id="cpf"
+                type="text"
+                inputMode="numeric"
+                required
+                value={cpf}
+                onChange={(e) => setCpf(formatCpf(e.target.value))}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 transition-colors"
+                placeholder="000.000.000-00"
+                maxLength={14}
               />
             </div>
           </div>

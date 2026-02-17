@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 
 // GET /api/professionals/[id] - Buscar profissional por ID
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const id = parseInt(params.id);

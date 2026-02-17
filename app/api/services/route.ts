@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/auth-api';
 
 // GET /api/services
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const services = await prisma.service.findMany({
       orderBy: {
@@ -29,10 +26,8 @@ export async function GET() {
 // POST /api/services
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const body = await request.json();
     const { name, description, duration, price, commissionType, commissionValue } = body;
@@ -70,10 +65,8 @@ export async function POST(request: NextRequest) {
 // PUT /api/services
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const body = await request.json();
     const { id, name, description, duration, price, commissionType, commissionValue } = body;
@@ -112,10 +105,8 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/services?id=123
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

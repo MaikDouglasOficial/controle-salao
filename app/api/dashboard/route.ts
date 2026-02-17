@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 import { APPOINTMENT_STATUS_COMPLETED } from '@/lib/constants';
 
 // Força a API a nunca usar cache
@@ -9,7 +9,7 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     // Usar data local sem conversão de timezone para simplificar

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const id = parseInt(params.id);

@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/auth-api';
 
 // GET /api/expenses
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const expenses = await prisma.expense.findMany({
       orderBy: {
@@ -42,10 +39,8 @@ export async function GET() {
 // POST /api/expenses
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const body = await request.json();
     console.log('Body recebido:', body);
@@ -93,10 +88,8 @@ export async function POST(request: NextRequest) {
 // PUT /api/expenses
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     const body = await request.json();
     // Aceitar tanto name/value quanto description/amount
@@ -136,10 +129,8 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/expenses
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const auth = await requireAdminSession();
+    if ('error' in auth) return auth.error;
 
     // Aceitar ID tanto da query string quanto do body
     const { searchParams } = new URL(request.url);

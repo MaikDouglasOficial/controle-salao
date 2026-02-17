@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const formData = await request.formData();

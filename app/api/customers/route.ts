@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 import { customerPostSchema, customerPutSchema } from '@/lib/schemas';
 
 // GET /api/customers?page=1&limit=50
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 // POST /api/customers - Criar novo cliente
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 // PUT /api/customers - Atualizar cliente
 export async function PUT(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/customers?id=123 - Deletar cliente
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);

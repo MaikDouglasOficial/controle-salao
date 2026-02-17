@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSession } from '@/lib/auth-api';
+import { requireAdminSession } from '@/lib/auth-api';
 import { appointmentPostSchema, appointmentPutSchema } from '@/lib/schemas';
 import { APPOINTMENT_STATUS } from '@/lib/constants';
 
 // GET /api/appointments?customerId=1&startDate=...&endDate=...&page=1&limit=50
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
 // PUT /api/appointments
 export async function PUT(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
@@ -330,7 +330,7 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/appointments?id=123
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await requireSession();
+    const auth = await requireAdminSession();
     if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
