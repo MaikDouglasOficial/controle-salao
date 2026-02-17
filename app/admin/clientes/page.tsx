@@ -9,7 +9,7 @@ import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 import { Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
-import { fetchAuth } from '@/lib/api';
+import { fetchAuth, unwrapListResponse } from '@/lib/api';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
@@ -46,6 +46,7 @@ export default function ClientesPage() {
   }, []);
 
   const fetchCustomers = async () => {
+    setLoading(true);
     try {
       const response = await fetchAuth('/api/customers');
       const data = await response.json();
@@ -54,15 +55,10 @@ export default function ClientesPage() {
         setCustomers([]);
         return;
       }
-      if (Array.isArray(data)) {
-        setCustomers(data);
-      } else {
-        console.error('Resposta inesperada ao buscar clientes:', data);
-        setCustomers([]);
-      }
+      setCustomers(unwrapListResponse(data));
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
-      toast.error('Erro ao buscar clientes');
+      toast.error('Erro ao buscar clientes. Tente novamente.');
       setCustomers([]);
     } finally {
       setLoading(false);

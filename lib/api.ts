@@ -17,3 +17,14 @@ export async function fetchAuth(
   }
   return res;
 }
+
+/**
+ * Desempacota resposta de listagem: aceita tanto array direto quanto { data, total?, page?, limit? }.
+ */
+export function unwrapListResponse<T>(json: T[] | { data: T[]; total?: number; page?: number; limit?: number }): T[] {
+  if (Array.isArray(json)) return json;
+  if (json && typeof json === 'object' && 'data' in json && Array.isArray((json as { data: T[] }).data)) {
+    return (json as { data: T[] }).data;
+  }
+  return [];
+}

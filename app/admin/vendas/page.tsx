@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, Calendar, DollarSign, User, Trash2, Filter } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
-import { fetchAuth } from '@/lib/api';
+import { fetchAuth, unwrapListResponse } from '@/lib/api';
 
 interface SalePayment {
   id: number;
@@ -56,28 +56,29 @@ export default function VendasPage() {
   const [selectedYear, setSelectedYear] = useState<string>('');
 
   const fetchSales = async () => {
+    setLoading(true);
     try {
       const response = await fetchAuth('/api/sales', {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
-          console.error('Não autorizado - redirecionando para login');
           window.location.href = '/login';
           return;
         }
-        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error || `Erro ${response.status}`);
       }
-      
+
       const data = await response.json();
-      setSales(data);
-      setFilteredSales(data);
+      const list = unwrapListResponse(data);
+      setSales(list);
+      setFilteredSales(list);
     } catch (error) {
       console.error('Erro ao buscar vendas:', error);
+      error('Erro ao carregar vendas. Tente novamente.');
       setSales([]);
       setFilteredSales([]);
     } finally {

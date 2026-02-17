@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSession } from '@/lib/auth-api';
+import { salePostSchema } from '@/lib/schemas';
 
+// GET /api/sales?customerId=1&page=1&limit=50
 export async function GET(request: NextRequest) {
   try {
     const auth = await requireSession();
@@ -9,50 +11,59 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
+    const pageStr = searchParams.get('page');
+    const limitStr = searchParams.get('limit');
 
-    const where = customerId ? { customerId: parseInt(customerId) } : {};
+    const where = customerId ? { customerId: parseInt(customerId, 10) } : {};
+    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : null;
+    const limit = limitStr ? Math.min(100, Math.max(1, parseInt(limitStr, 10))) : null;
+    const skip = page != null && limit != null ? (page - 1) * limit : undefined;
+    const take = limit ?? undefined;
 
-    const sales = await prisma.sale.findMany({
-      where,
-      include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-            service: {
-              select: {
-                id: true,
-                name: true,
-              },
+    const [sales, total] = await Promise.all([
+      prisma.sale.findMany({
+        where,
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
             },
           },
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              service: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          payments: true,
         },
-        payments: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      page != null && limit != null ? prisma.sale.count({ where }) : Promise.resolve(null),
+    ]);
 
+    if (total != null) {
+      return NextResponse.json({ data: sales, total, page: page!, limit: limit! });
+    }
     return NextResponse.json(sales);
   } catch (error) {
-    console.error('Erro ao buscar vendas:', error);
     return NextResponse.json({ error: 'Erro ao buscar vendas' }, { status: 500 });
   }
 }
-
-const PAYMENT_METHODS = ['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'];
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,74 +71,21 @@ export async function POST(request: NextRequest) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId, entradaValue, entradaMethod, payments: paymentsArray } = body;
-
-    if (!professional || professional.trim() === '') {
-      return NextResponse.json(
-        { error: 'Profissional é obrigatório' },
-        { status: 400 }
-      );
+    const parsed = salePostSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().fieldErrors;
+      const msg = Object.values(first).flat().find(Boolean) || parsed.error.message;
+      return NextResponse.json({ error: String(msg) }, { status: 400 });
     }
 
-    if (!items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'A venda deve ter pelo menos um item' },
-        { status: 400 }
-      );
-    }
-
+    const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId, entradaValue, entradaMethod, payments: paymentsArray } = parsed.data;
     const usePaymentsArray = Array.isArray(paymentsArray) && paymentsArray.length > 0;
 
-    if (usePaymentsArray) {
-      const sum = paymentsArray.reduce((acc: number, p: any) => acc + Number(p.value || 0), 0);
-      if (Math.abs(sum - total) > 0.01) {
-        return NextResponse.json(
-          { error: `A soma dos pagamentos (R$ ${sum.toFixed(2)}) deve ser igual ao total (R$ ${total.toFixed(2)})` },
-          { status: 400 }
-        );
-      }
-      for (const p of paymentsArray) {
-        if (!PAYMENT_METHODS.includes(p.paymentMethod)) {
-          return NextResponse.json({ error: 'Método de pagamento inválido em um dos itens' }, { status: 400 });
-        }
-        if (!p.value || p.value <= 0) {
-          return NextResponse.json({ error: 'Valor do pagamento deve ser maior que zero' }, { status: 400 });
-        }
-        if (p.paymentMethod === 'CARTAO_CREDITO') {
-          const n = p.installments ?? 1;
-          if (n < 1 || n > 12) {
-            return NextResponse.json({ error: 'Parcelas do cartão de crédito devem ser entre 1 e 12' }, { status: 400 });
-          }
-        }
-      }
-    } else {
-      if (!paymentMethod || !PAYMENT_METHODS.includes(paymentMethod)) {
-        return NextResponse.json(
-          { error: 'Método de pagamento inválido' },
-          { status: 400 }
-        );
-      }
-      if (paymentMethod === 'CARTAO_CREDITO') {
-        if (!installments || installments < 1 || installments > 12) {
-          return NextResponse.json(
-            { error: 'Número de parcelas inválido (1-12)' },
-            { status: 400 }
-          );
-        }
-        if (!installmentValue || installmentValue <= 0) {
-          return NextResponse.json(
-            { error: 'Valor da parcela inválido' },
-            { status: 400 }
-          );
-        }
-      }
-    }
-
-    // Criar venda e itens em uma transação
     const sale = await prisma.$transaction(async (tx) => {
-      if (appointmentId) {
+      const aptId = appointmentId ?? undefined;
+      if (aptId) {
         const appointment = await tx.appointment.findUnique({
-          where: { id: parseInt(appointmentId) },
+          where: { id: typeof aptId === 'number' ? aptId : parseInt(String(aptId), 10) },
           select: { id: true, status: true },
         });
 
@@ -150,8 +108,8 @@ export async function POST(request: NextRequest) {
       const validEntradaMethods = ['DINHEIRO', 'PIX', 'CARTAO_DEBITO'];
 
       const saleCreateData = {
-        customerId: customerId ? parseInt(String(customerId)) : null,
-        appointmentId: appointmentId ? parseInt(String(appointmentId)) : null,
+        customerId: customerId != null && customerId !== '' ? Number(customerId) : null,
+        appointmentId: aptId != null ? Number(aptId) : null,
         professional,
         paymentMethod: primaryMethod,
         total: Number(total),
@@ -218,9 +176,9 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      if (appointmentId) {
+      if (aptId) {
         await tx.appointment.update({
-          where: { id: parseInt(appointmentId) },
+          where: { id: typeof aptId === 'number' ? aptId : parseInt(String(aptId), 10) },
           data: { status: 'faturado' },
         });
       }

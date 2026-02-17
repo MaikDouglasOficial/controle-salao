@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
-import { fetchAuth } from '@/lib/api';
+import { fetchAuth, unwrapListResponse } from '@/lib/api';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
@@ -159,18 +159,41 @@ export default function AgendamentosPage() {
   };
 
   async function fetchData() {
+    setLoading(true);
     try {
-      const [c, s, p, a] = await Promise.all([
-        fetchAuth('/api/customers').then(r => r.json()),
-        fetchAuth('/api/services').then(r => r.json()),
-        fetchAuth('/api/professionals').then(r => r.json()),
-        fetchAuth('/api/appointments').then(r => r.json())
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth();
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 0, 23, 59, 59);
+      const startDate = start.toISOString();
+      const endDate = end.toISOString();
+
+      const [cRes, sRes, pRes, aRes] = await Promise.all([
+        fetchAuth('/api/customers'),
+        fetchAuth('/api/services'),
+        fetchAuth('/api/professionals'),
+        fetchAuth(`/api/appointments?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`),
       ]);
-      setCustomers(c);
+
+      if (!cRes.ok || !sRes.ok || !pRes.ok || !aRes.ok) {
+        throw new Error('Falha ao carregar dados');
+      }
+
+      const [c, s, p, aJson] = await Promise.all([cRes.json(), sRes.json(), pRes.json(), aRes.json()]);
+      const customersList = unwrapListResponse(c);
+      const appointmentsList = unwrapListResponse(aJson);
+
+      setCustomers(customersList);
       setServices(s);
-      setProfessionals(p.filter((prof: any) => prof.active).map((prof: any) => prof.name));
-      setAppointments(a);
-    } catch (e) { console.error(e); } finally { setLoading(false); }
+      setProfessionals(Array.isArray(p) ? p.filter((prof: { active?: boolean }) => prof.active).map((prof: { name: string }) => prof.name) : []);
+      setAppointments(appointmentsList);
+    } catch (e) {
+      console.error(e);
+      toast.error('Erro ao carregar agendamentos. Tente novamente.');
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const appointmentsByStatus = useMemo(() => {

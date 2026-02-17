@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   TrendingUp,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { fetchAuth } from '@/lib/api';
+import { useToast } from '@/hooks/useToast';
 import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { 
@@ -97,6 +98,9 @@ interface VendaRecente {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const toast = useToast();
+  const [error, setError] = useState(false);
+  const hasLoadedOnce = useRef(false);
   const [stats, setStats] = useState<DashboardStats>({
     lucroDia: 0,
     lucroMes: 0,
@@ -115,59 +119,41 @@ export default function DashboardPage() {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log('Dashboard Frontend - Iniciando busca de dados...');
-        
-        const [dashboardResponse, chartResponse] = await Promise.all([
-          fetchAuth('/api/dashboard', { 
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache',
-            },
-          }),
-          fetchAuth('/api/dashboard/charts', { 
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache',
-            },
-          }),
-        ]);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const [dashboardResponse, chartResponse] = await Promise.all([
+        fetchAuth('/api/dashboard', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetchAuth('/api/dashboard/charts', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+      ]);
 
-        console.log('Dashboard Frontend - Respostas recebidas:', {
-          dashboardOk: dashboardResponse.ok,
-          chartOk: chartResponse.ok
-        });
-
-        if (!dashboardResponse.ok || !chartResponse.ok) {
-          throw new Error('Falha ao buscar dados do dashboard');
-        }
-
-        const dashboardData = await dashboardResponse.json();
-        const chartData = await chartResponse.json();
-
-        console.log('Dashboard Frontend - Dados processados:', {
-          stats: dashboardData.stats,
-          proximosAgendamentos: dashboardData.proximosAgendamentos?.length || 0,
-          aniversariantes: dashboardData.aniversariantes?.length || 0,
-          chartData: chartData?.length || 0
-        });
-
-        setStats(dashboardData.stats);
-        setProximosAgendamentos(dashboardData.proximosAgendamentos || []);
-        setAniversariantes(dashboardData.aniversariantes || []);
-        setVendasRecentes(dashboardData.vendasRecentes || []);
-        setChartData(chartData);
-      } catch (error) {
-        console.error('Erro ao buscar dados do dashboard:', error);
-      } finally {
-        setLoading(false);
+      if (!dashboardResponse.ok || !chartResponse.ok) {
+        throw new Error('Falha ao buscar dados do dashboard');
       }
-    };
 
+      const dashboardData = await dashboardResponse.json();
+      const chartData = await chartResponse.json();
+
+      setStats(dashboardData.stats);
+      setProximosAgendamentos(dashboardData.proximosAgendamentos || []);
+      setAniversariantes(dashboardData.aniversariantes || []);
+      setVendasRecentes(dashboardData.vendasRecentes || []);
+      setChartData(chartData);
+      hasLoadedOnce.current = true;
+    } catch (err) {
+      console.error('Erro ao buscar dados do dashboard:', err);
+      setError(true);
+      toast.error('Erro ao carregar o dashboard. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
 
   const cards = [
     {
@@ -214,7 +200,7 @@ export default function DashboardPage() {
     },
   ];
 
-  if (loading) {
+  if (loading && !hasLoadedOnce.current && !error) {
     return (
       <PageContainer>
         <div className="flex items-center justify-center min-h-64">
@@ -230,6 +216,12 @@ export default function DashboardPage() {
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Visão geral do seu salão</p>
         </div>
+
+        {error && (
+          <Alert variant="error" title="Erro ao carregar">
+            <p className="text-sm">Não foi possível carregar os dados. Clique em Atualizar para tentar novamente.</p>
+          </Alert>
+        )}
 
         {/* Cards de estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">

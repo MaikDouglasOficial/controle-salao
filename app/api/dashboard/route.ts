@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSession } from '@/lib/auth-api';
+import { APPOINTMENT_STATUS_COMPLETED } from '@/lib/constants';
 
 // Força a API a nunca usar cache
 export const dynamic = 'force-dynamic';
@@ -101,25 +102,25 @@ export async function GET() {
       },
     });
 
-    // Contar atendimentos de hoje (agendamentos concluídos)
+    // Contar atendimentos de hoje (agendamentos concluídos ou faturados)
     const atendimentosHoje = await prisma.appointment.count({
       where: {
         date: {
           gte: hoje,
           lte: amanha,
         },
-        status: 'CONCLUIDO',
+        status: { in: APPOINTMENT_STATUS_COMPLETED },
       },
     });
 
-    // Contar atendimentos do mês (agendamentos concluídos)
+    // Contar atendimentos do mês (agendamentos concluídos ou faturados)
     const atendimentosMes = await prisma.appointment.count({
       where: {
         date: {
           gte: inicioMes,
           lte: fimMes,
         },
-        status: 'CONCLUIDO',
+        status: { in: APPOINTMENT_STATUS_COMPLETED },
       },
     });
 

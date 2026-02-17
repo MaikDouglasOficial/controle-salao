@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSession } from '@/lib/auth-api';
+import { appointmentPostSchema, appointmentPutSchema } from '@/lib/schemas';
+import { APPOINTMENT_STATUS } from '@/lib/constants';
 
-// GET /api/appointments
+// GET /api/appointments?customerId=1&startDate=...&endDate=...&page=1&limit=50
 export async function GET(request: NextRequest) {
   try {
     const auth = await requireSession();
@@ -10,33 +12,59 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
+    const startDateStr = searchParams.get('startDate');
+    const endDateStr = searchParams.get('endDate');
+    const pageStr = searchParams.get('page');
+    const limitStr = searchParams.get('limit');
 
-    const where = customerId ? { customerId: parseInt(customerId) } : {};
+    const where: Record<string, unknown> = {};
+    if (customerId) where.customerId = parseInt(customerId, 10);
 
-    const appointments = await prisma.appointment.findMany({
-      where,
-      include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
+    if (startDateStr || endDateStr) {
+      const start = startDateStr ? new Date(startDateStr) : undefined;
+      const end = endDateStr ? new Date(endDateStr) : undefined;
+      if (start || end) {
+        where.date = {};
+        if (start) (where.date as Record<string, Date>).gte = start;
+        if (end) (where.date as Record<string, Date>).lte = end;
+      }
+    }
+
+    const page = pageStr ? Math.max(1, parseInt(pageStr, 10)) : null;
+    const limit = limitStr ? Math.min(100, Math.max(1, parseInt(limitStr, 10))) : null;
+    const skip = page != null && limit != null ? (page - 1) * limit : undefined;
+    const take = limit ?? undefined;
+
+    const [appointments, total] = await Promise.all([
+      prisma.appointment.findMany({
+        where,
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+          service: {
+            select: {
+              id: true,
+              name: true,
+              duration: true,
+              price: true,
+            },
           },
         },
-        service: {
-          select: {
-            id: true,
-            name: true,
-            duration: true,
-            price: true,
-          },
-        },
-      },
-      orderBy: {
-        date: 'desc',
-      },
-    });
+        orderBy: { date: 'desc' },
+        skip,
+        take,
+      }),
+      page != null && limit != null ? prisma.appointment.count({ where }) : Promise.resolve(null),
+    ]);
 
+    if (total != null) {
+      return NextResponse.json({ data: appointments, total, page: page!, limit: limit! });
+    }
     return NextResponse.json(appointments);
   } catch (error) {
     return NextResponse.json(
@@ -53,18 +81,15 @@ export async function POST(request: NextRequest) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    console.log('Dados recebidos na API:', body);
-    
-    const { customerId, serviceId, date, status, professional, notes } = body;
-
-    if (!customerId || !serviceId || !date) {
-      console.error('Validação falhou:', { customerId, serviceId, date });
-      return NextResponse.json(
-        { error: 'Cliente, serviço e data são obrigatórios' },
-        { status: 400 }
-      );
+    const parsed = appointmentPostSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().fieldErrors;
+      const msg = Object.values(first).flat().find(Boolean) || parsed.error.message;
+      return NextResponse.json({ error: String(msg) }, { status: 400 });
     }
 
+    const { customerId, serviceId, date, status, professional, notes } = parsed.data;
+    const statusNorm = (status ?? APPOINTMENT_STATUS.AGENDADO).toLowerCase();
     const appointmentDate = new Date(date);
 
     // Não permitir agendar no passado
@@ -163,31 +188,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const appointmentData = {
-      customerId: parseInt(customerId),
-      serviceId: parseInt(serviceId),
-      date: appointmentDate,
-      status: status || 'agendado',
-      professional: professional || null,
-      notes: notes || null,
-    };
-    
-    console.log('Criando agendamento com dados:', appointmentData);
-
     const appointment = await prisma.appointment.create({
-      data: appointmentData,
+      data: {
+        customerId,
+        serviceId,
+        date: appointmentDate,
+        status: statusNorm,
+        professional: professional ?? null,
+        notes: notes ?? null,
+      },
       include: {
         customer: true,
         service: true,
       },
     });
 
-    console.log('Agendamento criado com sucesso:', appointment);
     return NextResponse.json(appointment, { status: 201 });
-  } catch (error: any) {
-    console.error('Erro ao criar agendamento:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro ao criar agendamento';
     return NextResponse.json(
-      { error: 'Erro ao criar agendamento', details: error.message },
+      { error: message },
       { status: 500 }
     );
   }
@@ -200,15 +220,15 @@ export async function PUT(request: NextRequest) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { id, customerId, serviceId, date, status, professional, notes, cancellationReason } = body;
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID do agendamento é obrigatório' },
-        { status: 400 }
-      );
+    const parsed = appointmentPutSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().fieldErrors;
+      const msg = Object.values(first).flat().find(Boolean) || parsed.error.message;
+      return NextResponse.json({ error: String(msg) }, { status: 400 });
     }
 
+    const { id, customerId, serviceId, date, status, professional, notes, cancellationReason } = parsed.data;
+    const statusNorm = status.toLowerCase();
     const appointmentDate = new Date(date);
 
     // Não permitir alterar para data/horário no passado (exceto se for a mesma data já salva)
@@ -317,16 +337,16 @@ export async function PUT(request: NextRequest) {
     }
 
     const appointment = await prisma.appointment.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: {
-        customerId: parseInt(customerId),
-        serviceId: parseInt(serviceId),
+        customerId,
+        serviceId,
         date: appointmentDate,
-        status,
-        professional: professional || null,
-        notes: notes || null,
-        ...(status === 'cancelado' && cancellationReason !== undefined
-          ? { cancellationReason: cancellationReason === '' ? null : cancellationReason }
+        status: statusNorm,
+        professional: professional ?? null,
+        notes: notes ?? null,
+        ...(statusNorm === APPOINTMENT_STATUS.CANCELADO && cancellationReason !== undefined
+          ? { cancellationReason: cancellationReason === '' || cancellationReason === null ? null : String(cancellationReason) }
           : {}),
       },
       include: {
