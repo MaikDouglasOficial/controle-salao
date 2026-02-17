@@ -44,6 +44,7 @@ export async function PUT(request: NextRequest) {
   const name = typeof body.name === 'string' ? body.name.trim() : undefined;
   const phone = typeof body.phone === 'string' ? body.phone.replace(/\D/g, '') : undefined;
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : undefined;
+  const currentPassword = typeof body.currentPassword === 'string' ? body.currentPassword : undefined;
   const newPassword = typeof body.newPassword === 'string' ? body.newPassword : undefined;
   const birthday = body.birthday !== undefined
     ? (body.birthday === '' || body.birthday == null ? null : new Date(body.birthday))
@@ -55,7 +56,7 @@ export async function PUT(request: NextRequest) {
   if (email !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Email inválido' }, { status: 400 });
   }
-  if (newPassword !== undefined && newPassword.length < 6) {
+  if (newPassword !== undefined && newPassword.length > 0 && newPassword.length < 6) {
     return NextResponse.json({ error: 'Nova senha deve ter no mínimo 6 caracteres' }, { status: 400 });
   }
 
@@ -64,6 +65,19 @@ export async function PUT(request: NextRequest) {
     include: { account: true },
   });
   if (!customer) return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 });
+
+  if (newPassword && newPassword.length >= 6) {
+    if (!currentPassword || typeof currentPassword !== 'string' || !currentPassword.trim()) {
+      return NextResponse.json({ error: 'Senha atual é obrigatória para alterar a senha' }, { status: 400 });
+    }
+    if (!customer.account) {
+      return NextResponse.json({ error: 'Conta não encontrada' }, { status: 400 });
+    }
+    const valid = await bcrypt.compare(currentPassword.trim(), customer.account.passwordHash);
+    if (!valid) {
+      return NextResponse.json({ error: 'Senha atual incorreta' }, { status: 400 });
+    }
+  }
 
   if (email && email !== customer.account?.email) {
     const existing = await prisma.customerAccount.findUnique({ where: { email } });

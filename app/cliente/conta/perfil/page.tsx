@@ -24,6 +24,7 @@ export default function ClientePerfilPage() {
     name: '',
     phone: '',
     email: '',
+    currentPassword: '',
     newPassword: '',
   });
 
@@ -36,6 +37,7 @@ export default function ClientePerfilPage() {
           name: data?.name ?? '',
           phone: data?.phone ?? '',
           email: data?.loginEmail ?? data?.email ?? '',
+          currentPassword: '',
           newPassword: '',
         });
       })
@@ -55,6 +57,7 @@ export default function ClientePerfilPage() {
           name: form.name,
           phone: form.phone.replace(/\D/g, ''),
           email: form.email || undefined,
+          currentPassword: form.currentPassword || undefined,
           newPassword: form.newPassword || undefined,
         }),
       });
@@ -65,7 +68,7 @@ export default function ClientePerfilPage() {
         return;
       }
       toast.success('Perfil atualizado!');
-      setForm((f) => ({ ...f, newPassword: '' }));
+      setForm((f) => ({ ...f, currentPassword: '', newPassword: '' }));
     } catch {
       toast.error('Erro ao salvar perfil');
     } finally {
@@ -99,8 +102,12 @@ export default function ClientePerfilPage() {
             <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="form-input" placeholder="seu@email.com" />
           </div>
           <div>
+            <label className="block text-[13px] font-medium text-stone-600 mb-1">Senha atual (obrigatória só para alterar a senha)</label>
+            <input type="password" value={form.currentPassword} onChange={(e) => setForm((f) => ({ ...f, currentPassword: e.target.value }))} className="form-input" placeholder="••••••••" autoComplete="current-password" />
+          </div>
+          <div>
             <label className="block text-[13px] font-medium text-stone-600 mb-1">Nova senha (deixe em branco para não alterar)</label>
-            <input type="password" minLength={6} value={form.newPassword} onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))} className="form-input" placeholder="••••••••" />
+            <input type="password" minLength={6} value={form.newPassword} onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))} className="form-input" placeholder="••••••••" autoComplete="new-password" />
           </div>
           <div className="flex flex-row gap-3 justify-end">
             <Button type="submit" variant="primary" disabled={saving} loading={saving}>

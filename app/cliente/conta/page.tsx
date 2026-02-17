@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Calendar, CalendarDays } from 'lucide-react';
+import { Calendar, CalendarDays, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface AppointmentItem {
@@ -86,14 +86,14 @@ export default function ClienteContaPage() {
         )}
       </div>
 
-      <div className="flex flex-row flex-wrap gap-3 justify-end">
+      <div className="flex flex-row items-center justify-end gap-3 flex-nowrap">
         <Link href="/cliente/conta/agendamentos">
-          <Button type="button" variant="secondary" size="lg">
-            Ver todos os agendamentos
+          <Button type="button" variant="secondary" icon={ListTodo}>
+            Ver todos
           </Button>
         </Link>
         <Link href="/agendar">
-          <Button type="button" variant="primary" size="lg" icon={Calendar}>
+          <Button type="button" variant="primary" icon={Calendar}>
             Novo agendamento
           </Button>
         </Link>
