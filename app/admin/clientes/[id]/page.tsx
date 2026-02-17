@@ -309,17 +309,17 @@ export default function ClienteDetalhesPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/admin/clientes"
-          className="p-2 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
-        >
-          <ArrowLeft className="h-5 w-5 text-stone-600" />
-        </Link>
-        <div>
-          <h1 className="page-title">Cliente</h1>
-          <p className="page-subtitle">Detalhes e histórico</p>
+      <div className="page-header relative">
+        <div className="absolute left-0 top-0">
+          <Link
+            href="/admin/clientes"
+            className="p-2 hover:bg-stone-100 rounded-lg transition-colors inline-flex"
+          >
+            <ArrowLeft className="h-5 w-5 text-stone-600" />
+          </Link>
         </div>
+        <h1 className="page-title">Cliente</h1>
+        <p className="page-subtitle">Detalhes e histórico</p>
       </div>
 
       {/* Informações do Cliente */}

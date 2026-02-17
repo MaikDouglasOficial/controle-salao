@@ -120,15 +120,15 @@ export default function EditarProfissionalPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="flex items-center justify-between gap-4 page-header">
-        <div>
-          <h1 className="page-title">Editar profissional</h1>
-          <p className="page-subtitle">Atualize os dados de {professional.name}</p>
+      <div className="page-header relative">
+        <div className="absolute left-0 top-0">
+          <Link href="/admin/profissionais" className="flex items-center text-amber-700 hover:text-amber-800 font-medium">
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Voltar
+          </Link>
         </div>
-        <Link href="/admin/profissionais" className="flex items-center text-amber-700 hover:text-amber-800 font-medium">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Voltar
-        </Link>
+        <h1 className="page-title">Editar profissional</h1>
+        <p className="page-subtitle">Atualize os dados de {professional.name}</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">

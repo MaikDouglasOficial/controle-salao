@@ -301,17 +301,17 @@ export default function ClienteDetalhesPage() {
 
   return (
     <div className="page-container space-y-6 animate-fade-in mt-6">
-      <div className="flex items-center justify-between gap-4 page-header">
-        <div>
-          <h1 className="page-title">Editar cliente</h1>
-          <p className="page-subtitle">Histórico completo e informações</p>
+      <div className="page-header relative">
+        <div className="absolute left-0 top-0">
+          <Link
+            href="/admin/clientes"
+            className="p-2 hover:bg-stone-100 rounded-lg transition-colors inline-flex"
+          >
+            <ArrowLeft className="h-6 w-6 text-stone-600" />
+          </Link>
         </div>
-        <Link
-          href="/admin/clientes"
-          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-stone-600" />
-        </Link>
+        <h1 className="page-title">Editar cliente</h1>
+        <p className="page-subtitle">Histórico completo e informações</p>
       </div>
 
       {/* Informações do Cliente */}
