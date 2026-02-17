@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET /api/professionals/[id] - Buscar profissional por ID
 export async function GET(
@@ -7,6 +8,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const id = parseInt(params.id);
     
     if (isNaN(id)) {

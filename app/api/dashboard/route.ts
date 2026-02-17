@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // Força a API a nunca usar cache
 export const dynamic = 'force-dynamic';
@@ -7,6 +8,9 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     // Usar data local sem conversão de timezone para simplificar
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
 interface ProdutoEditarModalProps {
@@ -52,7 +53,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetchAuth('/api/upload', {
         method: 'POST',
         body: formData,
       });

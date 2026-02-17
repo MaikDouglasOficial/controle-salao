@@ -10,6 +10,7 @@ import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import PhotoViewerModal from '@/components/PhotoViewerModal';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
+import { fetchAuth } from '@/lib/api';
 
 interface PerformanceService {
   saleId: number;
@@ -83,7 +84,7 @@ export default function ProfessionalProfilePage() {
     const load = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/professionals/${professionalId}/performance`);
+        const response = await fetchAuth(`/api/professionals/${professionalId}/performance`);
         const json = await response.json();
         if (response.ok) {
           setData(json);
@@ -381,7 +382,7 @@ export default function ProfessionalProfilePage() {
           }}
           onSave={async (updated) => {
             try {
-              const response = await fetch('/api/professionals', {
+              const response = await fetchAuth('/api/professionals', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updated),
@@ -394,7 +395,7 @@ export default function ProfessionalProfilePage() {
 
               success('Profissional atualizado com sucesso!');
               setShowEditModal(false);
-              const refreshed = await fetch(`/api/professionals/${data.professional.id}/performance`);
+              const refreshed = await fetchAuth(`/api/professionals/${data.professional.id}/performance`);
               const refreshedData = await refreshed.json();
               if (refreshed.ok) {
                 setData(refreshedData);

@@ -1,20 +1,28 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff, FlaskConical, Lock, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [expiredMessage, setExpiredMessage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
   const [setupMessage, setSetupMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('expired') === '1') {
+      setExpiredMessage(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +106,11 @@ export default function LoginPage() {
         {/* Formulário */}
         <form className="px-8 pb-8" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {expiredMessage && (
+              <div className="rounded-lg bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800 border border-amber-200">
+                Sessão expirada. Faça login novamente.
+              </div>
+            )}
             {error && (
               <div className="rounded-lg bg-red-50 px-4 py-2.5 text-[13px] text-red-600 border border-red-100">
                 {error}

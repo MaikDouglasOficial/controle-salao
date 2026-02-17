@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
@@ -53,6 +56,9 @@ const PAYMENT_METHODS = ['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'];
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId, entradaValue, entradaMethod, payments: paymentsArray } = body;
 

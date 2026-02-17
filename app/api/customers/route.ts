@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET /api/customers - Listar todos os clientes
 export async function GET() {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
 
     const customers = await prisma.customer.findMany({
       orderBy: {
@@ -24,6 +27,9 @@ export async function GET() {
 // POST /api/customers - Criar novo cliente
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { name, phone, email, cpf, birthday, notes, photo } = body;
 
@@ -68,6 +74,9 @@ export async function POST(request: NextRequest) {
 // PUT /api/customers - Atualizar cliente
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { id, name, phone, email, cpf, birthday, notes, photo } = body;
 

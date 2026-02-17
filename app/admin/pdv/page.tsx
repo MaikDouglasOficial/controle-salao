@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { ShoppingCart, Search, Plus, Minus, Trash2, User, Package, Camera, X, CreditCard, Banknote } from 'lucide-react';
 import { useVendaCompleta, type MetodoPagamento } from '@/hooks/useVendaCompleta';
 import { formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import { fetchAuth } from '@/lib/api';
 import Image from 'next/image';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
@@ -158,10 +159,10 @@ export default function PDVPage() {
   const fetchData = async () => {
     try {
       const [productsRes, servicesRes, customersRes, professionalsRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/services'),
-        fetch('/api/customers'),
-        fetch('/api/professionals'),
+        fetchAuth('/api/products'),
+        fetchAuth('/api/services'),
+        fetchAuth('/api/customers'),
+        fetchAuth('/api/professionals'),
       ]);
       
       const productsData = await productsRes.json();
@@ -317,7 +318,7 @@ export default function PDVPage() {
         saleData.appointmentId = appointmentId;
       }
 
-      const response = await fetch('/api/sales', {
+      const response = await fetchAuth('/api/sales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(saleData),
@@ -440,7 +441,7 @@ export default function PDVPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetchAuth('/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -476,7 +477,7 @@ export default function PDVPage() {
     }
 
     try {
-      const response = await fetch('/api/customers', {
+      const response = await fetchAuth('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

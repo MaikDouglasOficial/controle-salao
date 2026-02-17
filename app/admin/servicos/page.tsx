@@ -8,6 +8,7 @@ import ServiceModal from '@/components/ServiceModal';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface Service {
@@ -35,7 +36,7 @@ export default function ServicosPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      const response = await fetchAuth('/api/services');
       const data = await response.json();
       setServices(data);
     } catch (error) {
@@ -58,7 +59,7 @@ export default function ServicosPage() {
     if (!editingService) return;
 
     try {
-      const response = await fetch('/api/services', {
+      const response = await fetchAuth('/api/services', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingService),
@@ -87,7 +88,7 @@ export default function ServicosPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/services?id=${id}`, {
+      const response = await fetchAuth(`/api/services?id=${id}`, {
         method: 'DELETE',
       });
 
@@ -321,7 +322,7 @@ export default function ServicosPage() {
           }}
           onSave={async (dadosAtualizados) => {
             try {
-              const response = await fetch('/api/services', {
+              const response = await fetchAuth('/api/services', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -357,7 +358,7 @@ export default function ServicosPage() {
         <ServiceModal
           onSave={async (novoServico) => {
             try {
-              const response = await fetch('/api/services', {
+              const response = await fetchAuth('/api/services', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

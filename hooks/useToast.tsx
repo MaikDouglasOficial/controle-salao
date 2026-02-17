@@ -37,7 +37,7 @@ let toastId = 0;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [confirmDialog, setConfirmDialog] = useState<(ConfirmOptions & { onConfirm: () => void }) | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<(ConfirmOptions & { onConfirm: () => void; resolve: (value: boolean) => void }) | null>(null);
 
   const showToast = useCallback((type: ToastType, message: string) => {
     const id = toastId++;
@@ -68,30 +68,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return new Promise((resolve) => {
       setConfirmDialog({
         ...options,
+        resolve,
         onConfirm: () => {
           resolve(true);
           setConfirmDialog(null);
         }
       });
-      
-      const cleanup = () => {
-        resolve(false);
-        setConfirmDialog(null);
-      };
-      
-      const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          cleanup();
-        }
-      };
-      
-      window.addEventListener('keydown', handleEsc);
-      setTimeout(() => window.removeEventListener('keydown', handleEsc), 10000);
     });
   }, []);
 
   const closeConfirm = useCallback(() => {
-    setConfirmDialog(null);
+    setConfirmDialog((current) => {
+      if (current?.resolve) current.resolve(false);
+      return null;
+    });
   }, []);
 
   return (

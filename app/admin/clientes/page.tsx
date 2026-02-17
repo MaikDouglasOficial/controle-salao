@@ -9,6 +9,7 @@ import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 import { Search, Pencil, Trash2, Eye, Users, Camera, X } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
+import { fetchAuth } from '@/lib/api';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
@@ -46,7 +47,7 @@ export default function ClientesPage() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers');
+      const response = await fetchAuth('/api/customers');
       const data = await response.json();
       if (!response.ok) {
         toast.error(data?.error || 'Erro ao buscar clientes');
@@ -70,7 +71,7 @@ export default function ClientesPage() {
 
   const handleEdit = async (id: number) => {
     try {
-      const response = await fetch(`/api/customers/${id}`);
+      const response = await fetchAuth(`/api/customers/${id}`);
       if (response.ok) {
         const customer = await response.json();
         setEditingCustomer(customer);
@@ -112,7 +113,7 @@ export default function ClientesPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetchAuth('/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -145,7 +146,7 @@ export default function ClientesPage() {
     e.preventDefault();
     if (!form) return;
     try {
-      const response = await fetch('/api/customers', {
+      const response = await fetchAuth('/api/customers', {
         method: editingCustomer ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -190,7 +191,7 @@ export default function ClientesPage() {
     }
 
     try {
-      const response = await fetch(`/api/customers/${id}`, {
+      const response = await fetchAuth(`/api/customers/${id}`, {
         method: 'DELETE',
       });
 

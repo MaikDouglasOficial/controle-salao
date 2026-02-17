@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { requireSession } from '@/lib/auth-api';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 

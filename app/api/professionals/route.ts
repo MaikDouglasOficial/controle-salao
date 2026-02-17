@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET - Listar todos os profissionais
 export async function GET() {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const professionals = await prisma.professional.findMany({
       orderBy: { name: 'asc' },
     });
@@ -20,6 +24,9 @@ export async function GET() {
 // POST - Criar novo profissional
 export async function POST(request: Request) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { name, phone, email, specialty, active, photo, commissionPercentage } = body;
 
@@ -63,6 +70,9 @@ export async function POST(request: Request) {
 // PUT - Atualizar profissional
 export async function PUT(request: Request) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { id, name, phone, email, specialty, active, photo, commissionPercentage } = body;
 
@@ -114,6 +124,9 @@ export async function PUT(request: Request) {
 // DELETE - Deletar profissional
 export async function DELETE(request: Request) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

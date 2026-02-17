@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export function ProfileEditModal({ isOpen, onClose, onSaved }: ProfileEditModalP
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    fetch('/api/auth/profile')
+    fetchAuth('/api/auth/profile')
       .then((res) => res.json())
       .then((data) => {
         if (data.name !== undefined) setName(data.name);
@@ -57,7 +58,7 @@ export function ProfileEditModal({ isOpen, onClose, onSaved }: ProfileEditModalP
         body.currentPassword = currentPassword;
         body.newPassword = newPassword.trim();
       }
-      const res = await fetch('/api/auth/profile', {
+      const res = await fetchAuth('/api/auth/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

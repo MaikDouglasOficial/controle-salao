@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FileSpreadsheet, Download } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { fetchAuth } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 
 type ReportType = 'vendas' | 'despesas' | 'dre';
@@ -85,7 +86,7 @@ export default function RelatoriosPage() {
     setLoading(true);
     try {
       if (reportType === 'vendas' || reportType === 'dre') {
-        const res = await fetch('/api/sales');
+        const res = await fetchAuth('/api/sales');
         if (!res.ok) throw new Error('Erro ao buscar vendas');
         const sales: Sale[] = await res.json();
         const filtered = filterByDateRange(sales, startDate, endDate, s => s.date ?? s.createdAt);
@@ -97,7 +98,7 @@ export default function RelatoriosPage() {
         }));
       }
       if (reportType === 'despesas' || reportType === 'dre') {
-        const res = await fetch('/api/expenses');
+        const res = await fetchAuth('/api/expenses');
         if (!res.ok) throw new Error('Erro ao buscar despesas');
         const expenses: Expense[] = await res.json();
         const filtered = filterByDateRange(expenses, startDate, endDate, e => e.date);

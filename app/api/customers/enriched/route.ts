@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET /api/customers/enriched - Listar clientes com dados enriquecidos (último atendimento e total gasto)
 export async function GET() {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const customers = await prisma.customer.findMany({
       orderBy: {
         name: 'asc',

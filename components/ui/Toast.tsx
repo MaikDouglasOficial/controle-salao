@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ModalBase } from '@/components/ui/ModalBase';
+import { fetchAuth } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { CheckCircle2, AlertCircle, X, Info, AlertTriangle, Lock } from 'lucide-react';
 
@@ -91,7 +92,7 @@ export function ConfirmDialog({
       setErrorMessage(null);
       setLoading(true);
       try {
-        const res = await fetch('/api/auth/verify-password', {
+        const res = await fetchAuth('/api/auth/verify-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: password.trim() }),

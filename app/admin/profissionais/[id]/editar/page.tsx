@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 interface Professional {
   id: number;
@@ -41,7 +42,7 @@ export default function EditarProfissionalPage() {
 
   const fetchProfessional = async () => {
     try {
-      const response = await fetch(`/api/professionals/${params.id}`);
+      const response = await fetchAuth(`/api/professionals/${params.id}`);
       if (!response.ok) {
         throw new Error('Profissional não encontrado');
       }
@@ -76,7 +77,7 @@ export default function EditarProfissionalPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/professionals', {
+      const response = await fetchAuth('/api/professionals', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

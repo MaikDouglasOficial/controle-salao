@@ -8,6 +8,7 @@ import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
 interface Expense {
@@ -48,7 +49,7 @@ export default function DespesasPage() {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('/api/expenses');
+      const response = await fetchAuth('/api/expenses');
       const data = await response.json();
       setExpenses(data);
       setFilteredExpenses(data);
@@ -148,7 +149,7 @@ export default function DespesasPage() {
     }
 
     try {
-      const response = await fetch('/api/expenses', {
+      const response = await fetchAuth('/api/expenses', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
@@ -176,7 +177,7 @@ export default function DespesasPage() {
       const isEdit = !!expenseData.id;
       const method = isEdit ? 'PUT' : 'POST';
       
-      const response = await fetch('/api/expenses', {
+      const response = await fetchAuth('/api/expenses', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expenseData),

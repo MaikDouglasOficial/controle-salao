@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 interface ProfissionalEditarModalProps {
   profissional?: {
@@ -55,7 +56,7 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetchAuth('/api/upload', {
         method: 'POST',
         body: formData,
       });

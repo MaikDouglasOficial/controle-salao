@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, Calendar, DollarSign, User, Trash2, Filter } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 interface SalePayment {
   id: number;
@@ -56,7 +57,7 @@ export default function VendasPage() {
 
   const fetchSales = async () => {
     try {
-      const response = await fetch('/api/sales', {
+      const response = await fetchAuth('/api/sales', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +158,7 @@ export default function VendasPage() {
     }
 
     try {
-      const response = await fetch('/api/sales', {
+      const response = await fetchAuth('/api/sales', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),

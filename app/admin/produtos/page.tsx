@@ -8,6 +8,7 @@ import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
@@ -39,7 +40,7 @@ export default function ProdutosPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products');
+      const response = await fetchAuth('/api/products');
       const data = await response.json();
       setProducts(data);
     } catch (error) {
@@ -67,7 +68,7 @@ export default function ProdutosPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/products?id=${id}`, {
+      const response = await fetchAuth(`/api/products?id=${id}`, {
         method: 'DELETE',
       });
 
@@ -312,7 +313,7 @@ export default function ProdutosPage() {
           }}
           onSave={async (produtoAtualizado) => {
             try {
-              const response = await fetch('/api/products', {
+              const response = await fetchAuth('/api/products', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -348,7 +349,7 @@ export default function ProdutosPage() {
         <ProdutoEditarModal
           onSave={async (novoProduto) => {
             try {
-              const response = await fetch('/api/products', {
+              const response = await fetchAuth('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET /api/customers/[id] - Buscar cliente por ID
 export async function GET(
@@ -7,6 +8,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
 
     const customer = await prisma.customer.findUnique({
       where: {
@@ -37,6 +40,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const customerId = parseInt(params.id);
 
     // Verificar se o cliente existe

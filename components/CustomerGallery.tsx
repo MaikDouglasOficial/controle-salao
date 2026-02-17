@@ -5,6 +5,7 @@ import { Camera, Trash2, Calendar, Grid3X3, ChevronLeft, ChevronRight } from 'lu
 import { Button } from './ui/Button';
 import { ModalBase } from './ui/ModalBase';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 const PHOTOS_VISIBLE_INITIAL = 4;
 
@@ -69,7 +70,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetchAuth('/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -93,7 +94,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
     if (!photoToUpload) return;
 
     try {
-      const response = await fetch(`/api/customers/${customerId}/gallery`, {
+      const response = await fetchAuth(`/api/customers/${customerId}/gallery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -177,7 +178,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/customers/${customerId}/gallery?photoId=${photoId}`, {
+      const response = await fetchAuth(`/api/customers/${customerId}/gallery?photoId=${photoId}`, {
         method: 'DELETE'
       });
 

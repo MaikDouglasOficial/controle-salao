@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
@@ -160,10 +161,10 @@ export default function AgendamentosPage() {
   async function fetchData() {
     try {
       const [c, s, p, a] = await Promise.all([
-        fetch('/api/customers').then(r => r.json()),
-        fetch('/api/services').then(r => r.json()),
-        fetch('/api/professionals').then(r => r.json()),
-        fetch('/api/appointments').then(r => r.json())
+        fetchAuth('/api/customers').then(r => r.json()),
+        fetchAuth('/api/services').then(r => r.json()),
+        fetchAuth('/api/professionals').then(r => r.json()),
+        fetchAuth('/api/appointments').then(r => r.json())
       ]);
       setCustomers(c);
       setServices(s);
@@ -282,7 +283,7 @@ export default function AgendamentosPage() {
     try {
       const payload: Record<string, unknown> = { ...apt, status: newStatus };
       if (newStatus === 'cancelado' && cancellationReason !== undefined) payload.cancellationReason = cancellationReason;
-      const res = await fetch('/api/appointments', {
+      const res = await fetchAuth('/api/appointments', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -356,7 +357,7 @@ export default function AgendamentosPage() {
 
     const finalData = { ...data, status: finalStatus };
     try {
-      const res = await fetch('/api/appointments', {
+      const res = await fetchAuth('/api/appointments', {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isEdit ? { ...finalData, id: editingAppointment!.id } : finalData)
@@ -802,7 +803,7 @@ export default function AgendamentosPage() {
                               ...(canCancel ? [{ icon: XCircle, label: 'Cancelar agendamento', onClick: () => { setCancelReasonAppointment(apt); setCancelReasonText(''); }, danger: true }] : []),
                               { icon: Trash2, label: 'Excluir', onClick: async () => {
                                 const confirmed = await toast.confirm({ title: 'Excluir agendamento', message: 'Tem certeza?', type: 'danger', requirePassword: true });
-                                if (confirmed) { await fetch(`/api/appointments?id=${apt.id}`, { method: 'DELETE' }); fetchData(); }
+                                if (confirmed) { await fetchAuth(`/api/appointments?id=${apt.id}`, { method: 'DELETE' }); fetchData(); }
                               }, danger: true }
                             ].filter(Boolean) as { icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean }[]}
                           />
@@ -857,7 +858,7 @@ export default function AgendamentosPage() {
                 requirePassword: true
               });
               if (confirmed) {
-                await fetch(`/api/appointments?id=${apt.id}`, { method: 'DELETE' });
+                await fetchAuth(`/api/appointments?id=${apt.id}`, { method: 'DELETE' });
                 fetchData();
                 setSelectedAppointment(null);
               }

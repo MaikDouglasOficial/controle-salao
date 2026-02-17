@@ -8,6 +8,7 @@ import PhotoViewerModal from '@/components/PhotoViewerModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
+import { fetchAuth } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 
@@ -44,7 +45,7 @@ export default function ProfessionalsPage() {
 
   const fetchProfessionals = async () => {
     try {
-      const response = await fetch('/api/professionals');
+      const response = await fetchAuth('/api/professionals');
       
       if (!response.ok) {
         setApiError('A API de profissionais não está disponível. Execute a migration do banco de dados.');
@@ -80,7 +81,7 @@ export default function ProfessionalsPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/professionals?id=${professional.id}`, {
+      const response = await fetchAuth(`/api/professionals?id=${professional.id}`, {
         method: 'DELETE',
       });
 
@@ -404,7 +405,7 @@ export default function ProfessionalsPage() {
             try {
               const method = editingProfessional ? 'PUT' : 'POST';
               const url = editingProfessional ? `/api/professionals?id=${editingProfessional.id}` : '/api/professionals';
-              const response = await fetch(url, {
+              const response = await fetchAuth(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),

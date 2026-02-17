@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireSession } from '@/lib/auth-api';
 
 // GET /api/appointments
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
@@ -46,6 +49,9 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     console.log('Dados recebidos na API:', body);
     
@@ -190,6 +196,9 @@ export async function POST(request: NextRequest) {
 // PUT /api/appointments
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const body = await request.json();
     const { id, customerId, serviceId, date, status, professional, notes, cancellationReason } = body;
 
@@ -338,6 +347,9 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/appointments?id=123
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireSession();
+    if ('error' in auth) return auth.error;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

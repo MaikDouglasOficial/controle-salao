@@ -18,6 +18,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { fetchAuth } from '@/lib/api';
 import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { 
@@ -120,13 +121,13 @@ export default function DashboardPage() {
         console.log('Dashboard Frontend - Iniciando busca de dados...');
         
         const [dashboardResponse, chartResponse] = await Promise.all([
-          fetch('/api/dashboard', { 
+          fetchAuth('/api/dashboard', { 
             cache: 'no-store',
             headers: {
               'Cache-Control': 'no-cache',
             },
           }),
-          fetch('/api/dashboard/charts', { 
+          fetchAuth('/api/dashboard/charts', { 
             cache: 'no-store',
             headers: {
               'Cache-Control': 'no-cache',

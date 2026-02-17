@@ -21,6 +21,7 @@ import Image from 'next/image';
 import CustomerGallery from '@/components/CustomerGallery';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
+import { fetchAuth } from '@/lib/api';
 import { ModalBase } from '@/components/ui/ModalBase';
 import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
@@ -95,10 +96,10 @@ export default function ClienteDetalhesPage() {
     setLoading(true);
     try {
       const [customerRes, appointmentsRes, salesRes, galleryRes] = await Promise.all([
-        fetch(`/api/customers/${customerId}`),
-        fetch(`/api/appointments?customerId=${customerId}`),
-        fetch(`/api/sales?customerId=${customerId}`),
-        fetch(`/api/customers/${customerId}/gallery`),
+        fetchAuth(`/api/customers/${customerId}`),
+        fetchAuth(`/api/appointments?customerId=${customerId}`),
+        fetchAuth(`/api/sales?customerId=${customerId}`),
+        fetchAuth(`/api/customers/${customerId}/gallery`),
       ]);
 
       if (customerRes.ok) {
@@ -132,7 +133,7 @@ export default function ClienteDetalhesPage() {
     if (!editingCustomer) return;
 
     try {
-      const response = await fetch('/api/customers', {
+      const response = await fetchAuth('/api/customers', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
