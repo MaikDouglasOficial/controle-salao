@@ -28,12 +28,12 @@ interface CardHeaderProps {
 export function CardHeader({ title, subtitle, children, className = '' }: CardHeaderProps) {
   return (
     <div className={`card-header ${className}`}>
-      <div className="flex items-center justify-between gap-3 min-w-0">
+      <div className="flex items-center justify-between gap-3 min-w-0 w-full">
         <div className="min-w-0 flex-1">
           <h3 className="card-title">{title}</h3>
           {subtitle && <p className="card-subtitle">{subtitle}</p>}
         </div>
-        {children != null && <div className="flex-shrink-0 flex items-center">{children}</div>}
+        {children != null && <div className="flex-shrink-0 flex items-center ml-auto">{children}</div>}
       </div>
     </div>
   );

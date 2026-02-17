@@ -14,8 +14,7 @@ import {
   Clock,
   Filter,
   TrendingUp,
-  Award,
-  Pencil
+  Award
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -123,13 +122,6 @@ export default function ClienteDetalhesPage() {
       console.error('Erro ao buscar dados:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleEdit = () => {
-    if (customer) {
-      setEditingCustomer(customer);
-      setShowEditModal(true);
     }
   };
 
@@ -324,32 +316,23 @@ export default function ClienteDetalhesPage() {
 
       {/* Informações do Cliente */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
-              {customer.photo ? (
-                <Image
-                  src={customer.photo}
-                  alt={customer.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <User className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{customer.name}</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Cliente desde {new Date(customer.createdAt).toLocaleDateString('pt-BR')}</p>
-            </div>
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+          <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+            {customer.photo ? (
+              <Image
+                src={customer.photo}
+                alt={customer.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <User className="h-8 w-8 text-gray-400" />
+            )}
           </div>
-          <button
-            onClick={handleEdit}
-            className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors w-full sm:w-auto text-sm font-medium"
-          >
-            <Pencil className="h-4 w-4" />
-            <span>Editar</span>
-          </button>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{customer.name}</h2>
+            <p className="text-xs sm:text-sm text-gray-600">Cliente desde {new Date(customer.createdAt).toLocaleDateString('pt-BR')}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import AgendamentoModal from "@/components/AgendamentoModal";
 import { ModalBase } from '@/components/ui/ModalBase';
@@ -27,10 +28,13 @@ interface Appointment {
 
 export default function AgendamentosPage() {
   const toast = useToast();
+  const searchParams = useSearchParams();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const openedFromLink = useRef(false);
+  const openedNewModal = useRef(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [cancelReasonAppointment, setCancelReasonAppointment] = useState<Appointment | null>(null);
@@ -116,6 +120,31 @@ export default function AgendamentosPage() {
     const timer = setTimeout(scrollToSelected, 100);
     return () => clearTimeout(timer);
   }, [selectedDate.toDateString(), loading]);
+
+  // Abrir agendamento quando vier do dashboard com ?id=...
+  useEffect(() => {
+    if (loading || openedFromLink.current) return;
+    const idParam = searchParams.get('id');
+    if (!idParam) return;
+    const id = parseInt(idParam, 10);
+    if (Number.isNaN(id)) return;
+    const apt = appointments.find((a) => a.id === id);
+    if (!apt) return;
+    openedFromLink.current = true;
+    setSelectedDate(new Date(apt.date));
+    setSelectedAppointment(apt);
+    window.history.replaceState({}, '', '/admin/agendamentos');
+  }, [loading, searchParams, appointments]);
+
+  // Abrir modal de criar quando vier do dashboard com ?new=1
+  useEffect(() => {
+    if (loading || openedNewModal.current) return;
+    if (searchParams.get('new') !== '1') return;
+    openedNewModal.current = true;
+    setEditingAppointment(null);
+    setShowFormModal(true);
+    window.history.replaceState({}, '', '/admin/agendamentos');
+  }, [loading, searchParams]);
 
   const updateNowPosition = () => {
     const now = new Date();
@@ -336,6 +365,8 @@ export default function AgendamentosPage() {
         await fetchData();
         setShowFormModal(false);
         setEditingAppointment(null);
+        setSelectedDate(new Date(data.date));
+        isInitialLoad.current = true;
         toast.success('Salvo!');
         return;
       }

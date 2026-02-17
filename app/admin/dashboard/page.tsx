@@ -35,6 +35,18 @@ import {
   Button
 } from '@/components/ui';
 
+function getStatusHoverClasses(status: string): string {
+  const s = (status || '').toUpperCase();
+  const map: Record<string, string> = {
+    AGENDADO: 'hover:bg-amber-50 hover:border-amber-200',
+    CONFIRMADO: 'hover:bg-emerald-50 hover:border-emerald-200',
+    PENDENTE: 'hover:bg-yellow-50 hover:border-yellow-200',
+    CANCELADO: 'hover:bg-red-50 hover:border-red-200',
+    CONCLUIDO: 'hover:bg-blue-50 hover:border-blue-200',
+  };
+  return map[s] || 'hover:bg-stone-100 hover:border-stone-300';
+}
+
 interface DashboardStats {
   lucroDia: number;
   lucroMes: number;
@@ -378,7 +390,7 @@ export default function DashboardPage() {
               action={
                 <Button
                   variant="primary"
-                  onClick={() => router.push('/admin/agendamentos')}
+                  onClick={() => router.push('/admin/agendamentos?new=1')}
                 >
                   Criar agendamento
                 </Button>
@@ -389,8 +401,8 @@ export default function DashboardPage() {
               {proximosAgendamentos.map((agendamento) => (
                 <div
                   key={agendamento.id}
-                  onClick={() => router.push('/admin/agendamentos')}
-                  className="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:bg-amber-50/50 cursor-pointer transition-colors"
+                  onClick={() => router.push(`/admin/agendamentos?id=${agendamento.id}`)}
+                  className={`p-4 bg-stone-50 rounded-xl border border-stone-200 cursor-pointer transition-colors ${getStatusHoverClasses(agendamento.status)}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
