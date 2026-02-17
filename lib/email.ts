@@ -88,3 +88,40 @@ export async function sendAppointmentReminder(data: ReminderData): Promise<{ ok:
     return { ok: false, error: message };
   }
 }
+
+const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  resetLink: string;
+  type: 'admin' | 'client';
+}): Promise<{ ok: boolean; error?: string }> {
+  const transporter = getTransporter();
+  if (!transporter) {
+    return { ok: false, error: 'E-mail não configurado. Defina SMTP_HOST, SMTP_USER e SMTP_PASS no .env' };
+  }
+  const name = process.env.SALON_NAME || salonName;
+  const subject = `Recuperação de senha - ${name}`;
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2 style="color: #333;">Recuperação de senha</h2>
+      <p>Você solicitou a redefinição de senha no <strong>${name}</strong>.</p>
+      <p><a href="${params.resetLink}" style="display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">Redefinir senha</a></p>
+      <p style="color: #666; font-size: 14px;">Este link expira em 1 hora. Se não foi você, ignore este e-mail.</p>
+    </div>
+  `;
+  const text = `Recuperação de senha - ${name}. Acesse para redefinir: ${params.resetLink}`;
+  try {
+    await transporter.sendMail({
+      from: `"${name}" <${fromEmail}>`,
+      to: params.to,
+      subject,
+      text,
+      html,
+    });
+    return { ok: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro ao enviar e-mail';
+    return { ok: false, error: message };
+  }
+}

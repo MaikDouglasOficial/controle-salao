@@ -54,6 +54,7 @@ interface Sale {
   date: string;
   total: number;
   paymentMethod: string;
+  appointmentId?: number | null;
   items: {
     product?: {
       name: string;
@@ -222,6 +223,12 @@ export default function ClienteDetalhesPage() {
   };
 
   const { filteredAppointments, filteredSales } = getFilteredData();
+
+  // Mapa: agendamento id -> forma de pagamento (da venda vinculada)
+  const paymentByAppointmentId: Record<number, string> = {};
+  filteredSales.forEach((s) => {
+    if (s.appointmentId) paymentByAppointmentId[s.appointmentId] = s.paymentMethod;
+  });
 
   // Combinar e ordenar por data
   const combinedHistory = [
@@ -555,13 +562,18 @@ export default function ClienteDetalhesPage() {
                         <Scissors className="h-6 w-6 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center flex-wrap gap-2">
                           <h4 className="font-semibold text-gray-900">
                             {(item.data as Appointment).service.name}
                           </h4>
                           <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor((item.data as Appointment).status)}`}>
                             {formatStatus((item.data as Appointment).status)}
                           </span>
+                          {paymentByAppointmentId[(item.data as Appointment).id] && (
+                            <span className={`px-2 py-1 text-xs rounded-full ${getPaymentMethodColor(paymentByAppointmentId[(item.data as Appointment).id])}`}>
+                              {formatPaymentMethod(paymentByAppointmentId[(item.data as Appointment).id])}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                           <span className="flex items-center space-x-1">

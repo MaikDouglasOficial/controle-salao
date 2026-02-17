@@ -15,6 +15,16 @@ export const appointmentPostSchema = z.object({
   notes: optionalString.optional(),
 });
 
+/** Agendamento público (cliente): telefone + nome opcional; servidor exige nome só se cliente novo. */
+export const bookingPostSchema = z.object({
+  phone: z.string().min(1, 'Telefone é obrigatório'),
+  name: z.string().optional(),
+  serviceId: z.coerce.number().int().positive('Serviço é obrigatório'),
+  date: z.string().min(1, 'Data e horário são obrigatórios'),
+  professional: optionalString.optional(),
+  notes: optionalString.optional(),
+});
+
 export const appointmentPutSchema = z.object({
   id: z.coerce.number().int().positive('ID do agendamento é obrigatório'),
   customerId: z.coerce.number().int().positive('Cliente é obrigatório'),

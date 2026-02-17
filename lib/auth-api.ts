@@ -14,3 +14,22 @@ export async function requireSession(): Promise<{ session: Session } | { error: 
   }
   return { session };
 }
+
+/**
+ * Exige sessão de cliente (role === 'client' e customerId presente).
+ * Use nas rotas da área do cliente (/api/cliente/*).
+ */
+export async function requireClientSession(): Promise<
+  { session: Session; customerId: number } | { error: NextResponse }
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { error: NextResponse.json({ error: 'Faça login para continuar' }, { status: 401 }) };
+  }
+  const role = (session.user as { role?: string }).role;
+  const customerId = (session.user as { customerId?: number }).customerId;
+  if (role !== 'client' || customerId == null) {
+    return { error: NextResponse.json({ error: 'Acesso restrito à área do cliente' }, { status: 403 }) };
+  }
+  return { session, customerId };
+}

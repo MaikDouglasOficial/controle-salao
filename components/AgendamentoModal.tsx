@@ -111,28 +111,29 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
     setViewMonth({ year: y, month: m - 1 });
   }, [dateOnly, viewMonth.year, viewMonth.month]);
 
-  // Buscar compromissos do profissional no dia (para bloquear horários)
+  // Buscar compromissos do dia (do profissional ou todos) para bloquear horários considerando duração
   useEffect(() => {
-    if (!professional || !dateOnly) {
+    if (!dateOnly) {
       setBusyAppointments([]);
       return;
     }
     const start = new Date(dateOnly + 'T00:00:00');
     const end = new Date(dateOnly + 'T23:59:59.999');
-    fetchAuth(
-      `/api/appointments?professional=${encodeURIComponent(professional)}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
-    )
+    const url = professional
+      ? `/api/appointments?professional=${encodeURIComponent(professional)}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
+      : `/api/appointments?startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
+    fetchAuth(url)
       .then((r) => r.json())
       .then((data: { data?: unknown[] } | unknown[]) => {
-        const list = Array.isArray(data) ? data : (data?.data ?? []) as { id: number; date: string; status?: string; service?: { duration?: number } }[];
+        const list = Array.isArray(data) ? data : (data?.data ?? []) as { id: number; date: string; status?: string; professional?: string | null; service?: { duration?: number } }[];
         const nonCancelled = list.filter((a) => (a.status || '').toLowerCase() !== 'cancelado');
         const excludeId = agendamento?.id;
-        const filtered = (excludeId ? nonCancelled.filter((a) => a.id !== excludeId) : nonCancelled).map((a) => ({
+        const filtered = excludeId ? nonCancelled.filter((a) => a.id !== excludeId) : nonCancelled;
+        setBusyAppointments(filtered.map((a) => ({
           id: a.id,
           date: typeof a.date === 'string' ? a.date : new Date(a.date).toISOString(),
           service: { duration: a.service?.duration ?? 30 },
-        }));
-        setBusyAppointments(filtered);
+        })));
       })
       .catch(() => setBusyAppointments([]));
   }, [professional, dateOnly, agendamento?.id]);
@@ -168,7 +169,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
   };
 
   const isTimeUnavailable = (timeStr: string): boolean =>
-    isTimeInPast(timeStr) || (professional ? isTimeBlocked(timeStr) : false);
+    isTimeInPast(timeStr) || isTimeBlocked(timeStr);
 
   // Hoje: mostrar só horários futuros. Outros dias: mostrar todos.
   const visibleTimeOptions = useMemo(() => {
@@ -183,7 +184,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
 
   const currentTime = date.split('T')[1]?.slice(0, 5) || '09:00';
   const isCurrentTimeUnavailable =
-    !visibleTimeOptions.includes(currentTime) || (professional ? isTimeBlocked(currentTime) : false);
+    !visibleTimeOptions.includes(currentTime) || isTimeBlocked(currentTime);
 
   // Se o horário selecionado não está na lista (passou) ou está ocupado, ajustar para primeiro disponível
   useEffect(() => {

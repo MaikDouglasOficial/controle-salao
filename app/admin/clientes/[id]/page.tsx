@@ -55,6 +55,7 @@ interface Sale {
   date: string;
   total: number;
   paymentMethod: string;
+  appointmentId?: number | null;
   items: {
     product?: {
       name: string;
@@ -224,6 +225,12 @@ export default function ClienteDetalhesPage() {
   };
 
   const { filteredAppointments, filteredSales } = getFilteredData();
+
+  // Mapa: agendamento id -> forma de pagamento (da venda vinculada)
+  const paymentByAppointmentId: Record<number, string> = {};
+  filteredSales.forEach((s) => {
+    if (s.appointmentId) paymentByAppointmentId[s.appointmentId] = s.paymentMethod;
+  });
 
   // Combinar e ordenar por data
   const combinedHistory = [
@@ -560,13 +567,18 @@ export default function ClienteDetalhesPage() {
                         <Scissors className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 flex-wrap gap-2">
                           <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                             {(item.data as Appointment).service.name}
                           </h4>
                           <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor((item.data as Appointment).status)} w-fit`}>
                             {formatStatus((item.data as Appointment).status)}
                           </span>
+                          {paymentByAppointmentId[(item.data as Appointment).id] && (
+                            <span className={`px-2 py-1 text-xs rounded-full ${getPaymentMethodColor(paymentByAppointmentId[(item.data as Appointment).id])} w-fit`}>
+                              {formatPaymentMethod(paymentByAppointmentId[(item.data as Appointment).id])}
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600">
                           <span className="flex items-center space-x-1">

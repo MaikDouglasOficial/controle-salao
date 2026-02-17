@@ -7,7 +7,7 @@ import * as bcrypt from 'bcryptjs';
 /**
  * POST /api/auth/verify-password
  * Body: { password: string }
- * Verifica se a senha informada confere com a do usuário logado.
+ * Verifica se a senha informada confere com a do usuário logado (admin ou cliente).
  */
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +22,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Senha é obrigatória' }, { status: 400 });
     }
 
+    const role = (session.user as { role?: string }).role;
+    const customerId = (session.user as { customerId?: number }).customerId;
+
+    if (role === 'client' && customerId != null) {
+      const account = await prisma.customerAccount.findUnique({
+        where: { customerId },
+      });
+      if (!account) {
+        return NextResponse.json({ ok: false, error: 'Conta não encontrada' }, { status: 401 });
+      }
+      const valid = await bcrypt.compare(password.trim(), account.passwordHash);
+      if (!valid) {
+        return NextResponse.json({ ok: false, error: 'Senha incorreta' }, { status: 400 });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: parseInt(session.user.id, 10) },
     });
@@ -31,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const valid = await bcrypt.compare(password.trim(), user.password);
     if (!valid) {
-      return NextResponse.json({ ok: false, error: 'Senha incorreta' }, { status: 401 });
+      return NextResponse.json({ ok: false, error: 'Senha incorreta' }, { status: 400 });
     }
 
     return NextResponse.json({ ok: true });

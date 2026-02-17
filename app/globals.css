@@ -80,11 +80,11 @@
   }
 
   .page-title {
-    @apply text-2xl font-bold text-[var(--text-main)] tracking-tight;
+    @apply text-2xl font-bold text-[var(--text-main)] tracking-tight mb-2;
   }
 
   .page-subtitle {
-    @apply text-sm text-[var(--text-muted)] mt-1;
+    @apply text-sm text-[var(--text-muted)] mt-0;
   }
 
   /* Botões primários — cor da marca */

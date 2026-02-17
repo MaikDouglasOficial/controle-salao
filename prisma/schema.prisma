@@ -22,19 +22,41 @@ model User {
 
 // Modelo de Cliente
 model Customer {
-  id            Int           @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   name          String
-  phone         String        @unique
+  phone         String           @unique
   email         String?
-  cpf           String?       @unique
+  cpf           String?          @unique
   birthday      DateTime?
   notes         String?
-  photo         String?       // URL ou caminho da foto
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  photo         String?          // URL ou caminho da foto
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   appointments  Appointment[]
   sales         Sale[]
   gallery       CustomerGallery[]
+  account       CustomerAccount?
+}
+
+// Conta de acesso do cliente (login com email + senha)
+model CustomerAccount {
+  id           Int      @id @default(autoincrement())
+  customerId   Int      @unique
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+// Token para recuperação de senha (admin ou cliente)
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  email     String
+  token     String   @unique
+  type      String   // 'admin' | 'client'
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 // Modelo de Galeria de Fotos do Cliente
