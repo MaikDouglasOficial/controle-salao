@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3 } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
+import PhotoViewerModal from '@/components/PhotoViewerModal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
@@ -35,6 +36,7 @@ export default function ProfessionalsPage() {
   // Modal de criar/editar
   const [showModal, setShowModal] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
+  const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfessionals();
@@ -239,7 +241,11 @@ export default function ProfessionalsPage() {
                 {/* Topo: foto, nome, status + três pontinhos alinhados ao topo */}
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                    <div
+                      className={`relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 ${professional.photo ? 'cursor-pointer' : ''}`}
+                      role={professional.photo ? 'button' : undefined}
+                      onClick={professional.photo ? (e) => { e.stopPropagation(); setPhotoViewUrl(professional.photo!); } : undefined}
+                    >
                       {professional.photo ? (
                         <Image
                           src={professional.photo}
@@ -322,7 +328,11 @@ export default function ProfessionalsPage() {
                   <tr key={professional.id} className="hover:bg-stone-50/50 transition-colors">
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                        <div
+                          className={`relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 ${professional.photo ? 'cursor-pointer' : ''}`}
+                          role={professional.photo ? 'button' : undefined}
+                          onClick={professional.photo ? () => setPhotoViewUrl(professional.photo!) : undefined}
+                        >
                           {professional.photo ? (
                             <Image
                               src={professional.photo}
@@ -414,7 +424,14 @@ export default function ProfessionalsPage() {
           onClose={() => { setShowModal(false); setEditingProfessional(null); }}
         />
       )}
-
+      {photoViewUrl && (
+        <PhotoViewerModal
+          src={photoViewUrl}
+          alt="Foto do profissional"
+          isOpen
+          onClose={() => setPhotoViewUrl(null)}
+        />
+      )}
     </div>
   );
 }

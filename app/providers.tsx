@@ -21,15 +21,24 @@ function ToastRenderer() {
 
   return createPortal(
     <>
-      <div className="fixed bottom-4 right-4 z-[2147483647] flex flex-col gap-2">
-        {toasts.map(toast => (
-          <Toast
-            key={toast.id}
-            type={toast.type}
-            message={toast.message}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
+      <div
+        className="fixed z-[2147483647] flex flex-col gap-2 items-end pointer-events-none"
+        style={{
+          bottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))',
+          right: 'max(1rem, env(safe-area-inset-right, 1rem))',
+          maxWidth: 'min(28rem, calc(100vw - 2rem))',
+        }}
+      >
+        <div className="flex flex-col gap-2 items-end w-full max-w-full pointer-events-auto">
+          {toasts.map(toast => (
+            <Toast
+              key={toast.id}
+              type={toast.type}
+              message={toast.message}
+              onClose={() => removeToast(toast.id)}
+            />
+          ))}
+        </div>
       </div>
       
       {confirmDialog && (

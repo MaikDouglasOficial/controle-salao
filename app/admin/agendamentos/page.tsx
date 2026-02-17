@@ -873,15 +873,15 @@ export default function AgendamentosPage() {
             subtitle={`${startHour} - ${endHour} • ${apt.status}`}
             size="md"
             footer={
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-row gap-3 justify-end">
                 {apt.status === 'agendado' && (
-                  <Button variant="success" fullWidth onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
+                  <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
                 )}
                 {apt.status === 'confirmado' && (
-                  <Button variant="blue-dark" fullWidth onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
+                  <Button type="button" variant="blue-dark" onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
                 )}
                 {apt.status === 'concluido' && (
-                  <Button variant="primary" fullWidth onClick={() => {
+                  <Button type="button" variant="primary" onClick={() => {
                     localStorage.setItem('pdv_appointment_data', JSON.stringify({
                       appointmentId: apt.id, customerId: apt.customerId, customerName: apt.customer.name,
                       serviceId: apt.serviceId, serviceName: apt.service.name, servicePrice: apt.service.price,
@@ -947,9 +947,9 @@ export default function AgendamentosPage() {
           subtitle="O horário ficará disponível para novos agendamentos."
           size="sm"
           footer={
-            <div className="flex gap-3 w-full">
-              <Button variant="secondary" fullWidth onClick={() => { setCancelReasonAppointment(null); setCancelReasonText(''); }}>Voltar</Button>
-              <Button variant="danger" fullWidth onClick={() => handleStatusUpdate(cancelReasonAppointment.id, 'cancelado', cancelReasonText)}>Confirmar cancelamento</Button>
+            <div className="flex flex-row gap-3 justify-end">
+              <Button type="button" variant="secondary" onClick={() => { setCancelReasonAppointment(null); setCancelReasonText(''); }}>Voltar</Button>
+              <Button type="button" variant="danger" onClick={() => handleStatusUpdate(cancelReasonAppointment.id, 'cancelado', cancelReasonText)}>Confirmar cancelamento</Button>
             </div>
           }
         >

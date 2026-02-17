@@ -47,14 +47,14 @@ export default function ClientePage() {
         subtitle="Atualize seus dados pessoais"
         size="sm"
         footer={
-          <>
-            <Button variant="secondary" type="button" onClick={() => setShowModal(false)}>
+          <div className="flex flex-row gap-3 justify-end">
+            <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>
               Cancelar
             </Button>
-            <Button type="submit" form="cliente-form">
+            <Button type="submit" form="cliente-form" variant="primary">
               Salvar
             </Button>
-          </>
+          </div>
         }
       >
         <form id="cliente-form" onSubmit={handleSave} className="space-y-4">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { Camera, Trash2, Calendar, CheckCircle2, AlertCircle, Grid3X3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Camera, Trash2, Calendar, Grid3X3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/Button';
 import { ModalBase } from './ui/ModalBase';
 import { useToast } from '@/hooks/useToast';
@@ -22,13 +22,8 @@ interface CustomerGalleryProps {
   onPhotosUpdate: () => void;
 }
 
-interface Toast {
-  type: 'success' | 'error';
-  message: string;
-}
-
 export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: CustomerGalleryProps) {
-  const { confirm } = useToast();
+  const { confirm, success, error } = useToast();
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -36,7 +31,6 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
   const [description, setDescription] = useState('');
   const [serviceDate, setServiceDate] = useState('');
   const [photoToUpload, setPhotoToUpload] = useState<string | null>(null);
-  const [toast, setToast] = useState<Toast | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const photosToShow = showAll ? photos : photos.slice(0, PHOTOS_VISIBLE_INITIAL);
@@ -55,22 +49,17 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
   const [dragStartX, setDragStartX] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
 
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast('error', 'A imagem deve ter no máximo 5MB');
+      error('A imagem deve ter no máximo 5MB');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      showToast('error', 'Por favor, selecione uma imagem válida');
+      error('Por favor, selecione uma imagem válida');
       return;
     }
 
@@ -94,7 +83,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       setShowModal(true);
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      showToast('error', 'Erro ao fazer upload da imagem');
+      error('Erro ao fazer upload da imagem');
     } finally {
       setUploading(false);
     }
@@ -118,7 +107,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
         throw new Error('Erro ao salvar foto');
       }
 
-      showToast('success', 'Foto adicionada com sucesso!');
+      success('Foto adicionada com sucesso!');
       setShowModal(false);
       setPhotoToUpload(null);
       setDescription('');
@@ -126,7 +115,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
       onPhotosUpdate();
     } catch (error) {
       console.error('Erro ao salvar foto:', error);
-      showToast('error', 'Erro ao salvar foto');
+      error('Erro ao salvar foto');
     }
   };
 
@@ -196,11 +185,11 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
         throw new Error('Erro ao excluir foto');
       }
 
-      showToast('success', 'Foto excluída com sucesso!');
+      success('Foto excluída com sucesso!');
       onPhotosUpdate();
     } catch (error) {
       console.error('Erro ao excluir foto:', error);
-      showToast('error', 'Erro ao excluir foto');
+      error('Erro ao excluir foto');
     }
   };
 
@@ -225,7 +214,7 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
             icon={Camera}
             size="sm"
           >
-            {uploading ? 'Enviando...' : 'Adicionar Foto'}
+            {uploading ? 'Enviando...' : photos.length > 0 ? 'Alterar foto' : 'Adicionar Foto'}
           </Button>
         </div>
       </div>
@@ -458,22 +447,6 @@ export default function CustomerGallery({ customerId, photos, onPhotosUpdate }: 
           </div>
         )}
       </ModalBase>
-
-      {/* Toast de Notificação */}
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className={`flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
-            toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-          } text-white`}>
-            {toast.type === 'success' ? (
-              <CheckCircle2 className="h-5 w-5" />
-            ) : (
-              <AlertCircle className="h-5 w-5" />
-            )}
-            <p className="text-sm font-medium">{toast.message}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -115,7 +115,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
           <div className="flex items-center gap-4">
             <div className="relative flex-shrink-0">
               {photoPreview ? (
-                <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200">
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
                   <Image
                     src={photoPreview}
                     alt="Foto do produto"
@@ -124,7 +124,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-lg bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
                   <Camera className="h-8 w-8 text-gray-400" />
                 </div>
               )}
@@ -146,7 +146,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
                     : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                {uploading ? 'Enviando...' : 'Adicionar Foto'}
+                {uploading ? 'Enviando...' : photoPreview ? 'Alterar foto' : 'Adicionar Foto'}
               </label>
               <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
             </div>

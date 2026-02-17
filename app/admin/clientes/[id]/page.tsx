@@ -22,6 +22,7 @@ import CustomerGallery from '@/components/CustomerGallery';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { ModalBase } from '@/components/ui/ModalBase';
+import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
 interface Customer {
   id: number;
@@ -78,6 +79,7 @@ export default function ClienteDetalhesPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
 
   // Filtros
   const [filterType, setFilterType] = useState<'all' | 'appointments' | 'sales'>('all');
@@ -317,7 +319,10 @@ export default function ClienteDetalhesPage() {
       {/* Informações do Cliente */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
         <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
-          <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <div
+            className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 cursor-pointer"
+            onClick={customer.photo ? () => setPhotoViewUrl(customer.photo!) : undefined}
+          >
             {customer.photo ? (
               <Image
                 src={customer.photo}
@@ -727,6 +732,9 @@ export default function ClienteDetalhesPage() {
             </form>
         )}
       </ModalBase>
+      {photoViewUrl && (
+        <PhotoViewerModal src={photoViewUrl} alt={customer?.name ?? 'Cliente'} isOpen onClose={() => setPhotoViewUrl(null)} />
+      )}
     </div>
   );
 }

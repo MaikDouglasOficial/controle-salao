@@ -85,11 +85,11 @@ export function ProfileEditModal({ isOpen, onClose, onSaved }: ProfileEditModalP
       subtitle="Altere seu nome, e-mail ou senha"
       size="md"
       footer={
-        <div className="flex gap-3 justify-end w-full">
-          <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={saving}>
+        <div className="flex flex-row gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
             Cancelar
           </Button>
-          <Button type="submit" form="profile-edit-form" variant="primary" size="sm" disabled={saving || loading}>
+          <Button type="submit" form="profile-edit-form" variant="primary" disabled={saving || loading}>
             {saving ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>

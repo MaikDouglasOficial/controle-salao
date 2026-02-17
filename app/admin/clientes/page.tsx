@@ -12,6 +12,7 @@ import { formatPhone, formatDate } from '@/lib/utils';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
+import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
 interface Customer {
   id: number;
@@ -33,6 +34,7 @@ export default function ClientesPage() {
   const [filterClient, setFilterClient] = useState<'all' | 'birthday' | 'others'>('all');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
   const [form, setForm] = useState<any | null>(null);
   const [uploading, setUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -331,7 +333,10 @@ export default function ClientesPage() {
                       href={`/admin/clientes/${customer.id}`}
                       className="flex min-w-0 flex-1 items-start gap-3"
                     >
-                      <div className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                      <div
+                        className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                        onClick={customer.photo ? (e) => { e.preventDefault(); e.stopPropagation(); setPhotoViewUrl(customer.photo); } : undefined}
+                      >
                         {customer.photo ? (
                           <Image
                             src={customer.photo}
@@ -401,7 +406,10 @@ export default function ClientesPage() {
                           href={`/admin/clientes/${customer.id}`}
                           className="flex items-center gap-3 hover:text-gray-900 transition-colors"
                         >
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
+                          <div
+                            className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                            onClick={customer.photo ? (e) => { e.preventDefault(); e.stopPropagation(); setPhotoViewUrl(customer.photo); } : undefined}
+                          >
                             {customer.photo ? (
                               <Image src={customer.photo} alt={customer.name} fill className="object-cover" />
                             ) : (
@@ -452,15 +460,15 @@ export default function ClientesPage() {
           subtitle={editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente'}
           size="md"
           footer={
-            <div className="modal-actions flex flex-row gap-3 justify-end">
-              <Button variant="secondary" type="button" onClick={() => {
+            <div className="flex flex-row gap-3 justify-end">
+              <Button type="button" variant="secondary" onClick={() => {
                 setShowModal(false);
                 setEditingCustomer(null);
                 setForm(null);
-              }} className="w-full sm:w-auto">
+              }}>
                 Cancelar
               </Button>
-              <Button type="submit" form="cliente-form" className="w-full sm:w-auto">
+              <Button type="submit" form="cliente-form" variant="primary">
                 {editingCustomer ? 'Salvar' : 'Cadastrar'}
               </Button>
             </div>
@@ -579,6 +587,9 @@ export default function ClientesPage() {
             </div>
           </form>
         </Modal>
+      )}
+      {photoViewUrl && (
+        <PhotoViewerModal src={photoViewUrl} alt="Foto do cliente" isOpen onClose={() => setPhotoViewUrl(null)} />
       )}
     </div>
   );

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
+import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
 interface Product {
   id: number;
@@ -30,6 +31,7 @@ export default function ProdutosPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -182,7 +184,10 @@ export default function ProdutosPage() {
               <div key={product.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                    <div
+                      className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                      onClick={product.photo ? () => setPhotoViewUrl(product.photo) : undefined}
+                    >
                       {product.photo ? (
                         <Image src={product.photo} alt={product.name} fill className="object-cover" />
                       ) : (
@@ -251,7 +256,10 @@ export default function ProdutosPage() {
                   <tr key={product.id} className="hover:bg-stone-50/50 transition-colors">
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                        <div
+                          className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                          onClick={product.photo ? () => setPhotoViewUrl(product.photo) : undefined}
+                        >
                           {product.photo ? (
                             <Image src={product.photo} alt={product.name} fill className="object-cover" />
                           ) : (
@@ -364,6 +372,14 @@ export default function ProdutosPage() {
             }
           }}
           onClose={() => setShowNewModal(false)}
+        />
+      )}
+      {photoViewUrl && (
+        <PhotoViewerModal
+          src={photoViewUrl}
+          alt="Foto do produto"
+          isOpen
+          onClose={() => setPhotoViewUrl(null)}
         />
       )}
     </div>

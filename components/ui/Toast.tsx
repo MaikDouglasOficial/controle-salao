@@ -39,13 +39,14 @@ export function Toast({ type, message, onClose, duration = 3000 }: ToastProps) {
   const Icon = icons[type];
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-md">
-      <div className={`flex items-start gap-3 px-4 py-3 rounded-lg shadow-lg ${colors[type]} text-white`}>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full max-w-full min-w-0">
+      <div className={`flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg border border-white/10 ${colors[type]} text-white min-w-0`}>
         <Icon className="h-5 w-5 flex-shrink-0 mt-0.5" />
-        <p className="text-sm font-medium flex-1 whitespace-pre-line">{message}</p>
+        <p className="text-sm font-medium flex-1 min-w-0 break-words whitespace-pre-line">{message}</p>
         <button
           onClick={onClose}
-          className="flex-shrink-0 hover:bg-white/20 rounded p-0.5 transition-colors"
+          className="flex-shrink-0 hover:bg-white/20 rounded-lg p-2 -m-1 transition-colors touch-manipulation"
+          aria-label="Fechar"
         >
           <X className="h-4 w-4" />
         </button>
@@ -79,6 +80,7 @@ export function ConfirmDialog({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const confirmVariant = type === 'danger' ? 'danger' : type === 'warning' ? 'outline' : 'primary';
+  const subtitle = type === 'danger' ? 'Esta ação não pode ser desfeita.' : undefined;
 
   const handleConfirm = async () => {
     if (requirePassword) {
@@ -117,23 +119,22 @@ export function ConfirmDialog({
       isOpen
       onClose={onCancel}
       title={title}
+      subtitle={subtitle}
       size="md"
       footer={
-        <div className="modal-actions flex flex-row gap-3 w-full justify-end flex-wrap">
+        <div className="flex flex-row gap-3 justify-end">
           <Button
+            type="button"
             onClick={onCancel}
             variant="secondary"
-            size="sm"
-            className="w-full sm:w-auto"
             disabled={loading}
           >
             {cancelText}
           </Button>
           <Button
+            type="button"
             onClick={handleConfirm}
             variant={confirmVariant}
-            size="sm"
-            className="w-full sm:w-auto"
             disabled={loading || (requirePassword && !password.trim())}
           >
             {loading ? 'Verificando...' : confirmText}
@@ -142,23 +143,23 @@ export function ConfirmDialog({
       }
     >
       <div className="space-y-4">
-        <p className="text-sm text-gray-600 whitespace-pre-line break-words">
+        <p className="text-sm text-stone-600 whitespace-pre-line break-words">
           {message}
         </p>
         {requirePassword && (
           <div className="space-y-2">
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-stone-700 mb-1.5">
               Digite sua senha para confirmar
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
               <input
                 id="confirm-password"
                 type="password"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setErrorMessage(null); }}
                 placeholder="Sua senha"
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                 autoComplete="current-password"
                 disabled={loading}
               />

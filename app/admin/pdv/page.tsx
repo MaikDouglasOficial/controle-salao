@@ -581,7 +581,7 @@ export default function PDVPage() {
                       onClick={() => openAddItemModal({ type: 'product', id: product.id, name: product.name, price: product.price, stock: product.stock })}
                       className="group flex items-center gap-3 rounded-lg p-3 border border-stone-200 hover:border-amber-400 hover:bg-amber-50/50 text-left transition-colors"
                     >
-                      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
+                      <div className="relative w-11 h-11 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
                         {product.photo ? (
                           <Image src={product.photo} alt={product.name} fill className="object-cover" />
                         ) : (
@@ -817,8 +817,9 @@ export default function PDVPage() {
           subtitle={itemToAdd.name}
           size="md"
           footer={
-            <>
-              <Button 
+            <div className="flex flex-row gap-3 justify-end">
+              <Button
+                type="button"
                 variant="secondary"
                 onClick={() => {
                   setShowAddItemModal(false);
@@ -827,12 +828,10 @@ export default function PDVPage() {
               >
                 Cancelar
               </Button>
-              <Button 
-                onClick={confirmAddToCart}
-              >
+              <Button type="button" variant="primary" onClick={confirmAddToCart}>
                 Adicionar
               </Button>
-            </>
+            </div>
           }
         >
           <div className="space-y-4">
@@ -924,20 +923,19 @@ export default function PDVPage() {
           subtitle="Selecione o cliente e configure os detalhes da venda"
           size="lg"
           footer={
-            <>
-              <Button 
-                variant="secondary" 
-                onClick={() => setShowCheckoutModal(false)}
-              >
+            <div className="flex flex-row gap-3 justify-end">
+              <Button type="button" variant="secondary" onClick={() => setShowCheckoutModal(false)}>
                 Cancelar
               </Button>
-              <Button 
+              <Button
+                type="button"
+                variant="primary"
                 onClick={finalizeSale}
                 disabled={!resumo.contaFechada || pagamentos.length === 0}
               >
                 Confirmar Venda
               </Button>
-            </>
+            </div>
           }
         >
           <div className="space-y-4">
@@ -1189,9 +1187,10 @@ export default function PDVPage() {
           subtitle="O cliente não foi localizado no sistema"
           size="md"
           footer={
-            <div className="modal-actions flex flex-row gap-3 justify-end">
-              <Button 
-                variant="secondary" 
+            <div className="flex flex-row gap-3 justify-end">
+              <Button
+                type="button"
+                variant="secondary"
                 onClick={() => {
                   setShowCustomerNotFoundModal(false);
                   setCustomerSearchTerm('');
@@ -1199,7 +1198,9 @@ export default function PDVPage() {
               >
                 Cancelar
               </Button>
-              <Button 
+              <Button
+                type="button"
+                variant="primary"
                 onClick={() => {
                   setShowCustomerNotFoundModal(false);
                   setShowNewCustomerModal(true);
@@ -1240,10 +1241,10 @@ export default function PDVPage() {
           subtitle="Preencha os dados para cadastrar um novo cliente"
           size="md"
           footer={
-            <div className="modal-actions flex flex-row gap-3 justify-end">
-              <Button 
-                variant="secondary" 
-                type="button" 
+            <div className="flex flex-row gap-3 justify-end">
+              <Button
+                type="button"
+                variant="secondary"
                 onClick={() => {
                   setShowNewCustomerModal(false);
                   setNewCustomerData({ name: '', email: '', phone: '', cpf: '', birthday: '', notes: '', photo: '' });
@@ -1252,10 +1253,7 @@ export default function PDVPage() {
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
-                form="new-customer-form"
-              >
+              <Button type="submit" form="new-customer-form" variant="primary">
                 Cadastrar
               </Button>
             </div>
