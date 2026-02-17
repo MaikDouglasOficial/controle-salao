@@ -103,6 +103,13 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       return;
     }
 
+    // Não permitir data/horário no passado
+    const chosen = new Date(date);
+    if (chosen.getTime() < Date.now()) {
+      warning('Não é possível agendar para data ou horário que já passou.');
+      return;
+    }
+
     onSave({ 
       ...agendamento, 
       customerId: Number(customerId), 
@@ -270,6 +277,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Data *</label>
               <input
                 type="date"
+                min={new Date().toISOString().split('T')[0]}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={date.split('T')[0] || ''}
                 onChange={e => {

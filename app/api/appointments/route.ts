@@ -61,6 +61,14 @@ export async function POST(request: NextRequest) {
 
     const appointmentDate = new Date(date);
 
+    // Não permitir agendar no passado
+    if (appointmentDate.getTime() < Date.now()) {
+      return NextResponse.json(
+        { error: 'Não é possível agendar para data ou horário que já passou.' },
+        { status: 400 }
+      );
+    }
+
     if (professional) {
       const service = await prisma.service.findUnique({
         where: { id: parseInt(serviceId) },
@@ -113,6 +121,40 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         );
       }
+    }
+
+    // Mesmo cliente + mesmo horário: impede dois agendamentos simultâneos
+    const sameDayByCustomer = await prisma.appointment.findMany({
+      where: {
+        customerId: parseInt(customerId),
+        date: {
+          gte: new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), 0, 0, 0, 0),
+          lt: new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate() + 1, 0, 0, 0, 0),
+        },
+        status: { not: 'cancelado' },
+      },
+      include: { service: { select: { duration: true } } },
+    });
+
+    const service = await prisma.service.findUnique({
+      where: { id: parseInt(serviceId) },
+      select: { duration: true },
+    });
+    const newDuration = service?.duration ?? 30;
+    const newStart = appointmentDate.getTime();
+    const newEnd = newStart + newDuration * 60 * 1000;
+
+    const clientConflict = sameDayByCustomer.some((appt) => {
+      const dur = appt.service?.duration ?? 0;
+      const existingStart = appt.date.getTime();
+      const existingEnd = existingStart + dur * 60 * 1000;
+      return newStart < existingEnd && newEnd > existingStart;
+    });
+    if (clientConflict) {
+      return NextResponse.json(
+        { error: 'Este cliente já possui outro agendamento neste horário' },
+        { status: 409 }
+      );
     }
 
     const appointmentData = {
@@ -149,7 +191,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, customerId, serviceId, date, status, professional, notes } = body;
+    const { id, customerId, serviceId, date, status, professional, notes, cancellationReason } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -159,6 +201,21 @@ export async function PUT(request: NextRequest) {
     }
 
     const appointmentDate = new Date(date);
+
+    // Não permitir alterar para data/horário no passado (exceto se for a mesma data já salva)
+    const newTime = appointmentDate.getTime();
+    if (newTime < Date.now()) {
+      const existing = await prisma.appointment.findUnique({
+        where: { id: parseInt(id) },
+        select: { date: true },
+      });
+      if (!existing || existing.date.getTime() !== newTime) {
+        return NextResponse.json(
+          { error: 'Não é possível agendar para data ou horário que já passou.' },
+          { status: 400 }
+        );
+      }
+    }
 
     if (professional) {
       const service = await prisma.service.findUnique({
@@ -181,15 +238,13 @@ export async function PUT(request: NextRequest) {
       const sameDayAppointments = await prisma.appointment.findMany({
         where: {
           professional,
+          id: { not: parseInt(id) },
           date: {
             gte: startOfDay,
             lte: endOfDay,
           },
           status: {
             not: 'cancelado',
-          },
-          NOT: {
-            id,
           },
         },
         include: {
@@ -217,8 +272,43 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // Mesmo cliente + mesmo horário (excluindo este agendamento)
+    const serviceForDuration = await prisma.service.findUnique({
+      where: { id: parseInt(serviceId) },
+      select: { duration: true },
+    });
+    const durationMin = serviceForDuration?.duration ?? 30;
+    const startMs = appointmentDate.getTime();
+    const endMs = startMs + durationMin * 60 * 1000;
+
+    const sameDayByCustomer = await prisma.appointment.findMany({
+      where: {
+        customerId: parseInt(customerId),
+        id: { not: parseInt(id) },
+        date: {
+          gte: new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), 0, 0, 0, 0),
+          lt: new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate() + 1, 0, 0, 0, 0),
+        },
+        status: { not: 'cancelado' },
+      },
+      include: { service: { select: { duration: true } } },
+    });
+
+    const clientConflictPut = sameDayByCustomer.some((appt) => {
+      const dur = appt.service?.duration ?? 0;
+      const existingStart = appt.date.getTime();
+      const existingEnd = existingStart + dur * 60 * 1000;
+      return startMs < existingEnd && endMs > existingStart;
+    });
+    if (clientConflictPut) {
+      return NextResponse.json(
+        { error: 'Este cliente já possui outro agendamento neste horário' },
+        { status: 409 }
+      );
+    }
+
     const appointment = await prisma.appointment.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: {
         customerId: parseInt(customerId),
         serviceId: parseInt(serviceId),
@@ -226,6 +316,9 @@ export async function PUT(request: NextRequest) {
         status,
         professional: professional || null,
         notes: notes || null,
+        ...(status === 'cancelado' && cancellationReason !== undefined
+          ? { cancellationReason: cancellationReason === '' ? null : cancellationReason }
+          : {}),
       },
       include: {
         customer: true,
