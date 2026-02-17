@@ -160,43 +160,43 @@ export default function DashboardPage() {
       title: 'Lucro do Dia',
       value: formatCurrency(stats?.lucroDia || 0),
       icon: DollarSign,
-      color: 'from-green-500 to-emerald-600',
-      textColor: 'text-green-600',
+      iconBg: 'bg-emerald-50 border-emerald-100',
+      iconColor: 'text-emerald-600',
     },
     {
       title: 'Lucro do Mês',
       value: formatCurrency(stats?.lucroMes || 0),
       icon: TrendingUp,
-      color: 'from-blue-500 to-cyan-600',
-      textColor: 'text-blue-600',
+      iconBg: 'bg-blue-50 border-blue-100',
+      iconColor: 'text-blue-600',
     },
     {
       title: 'Lucro Líquido',
       value: formatCurrency(stats?.lucroLiquido || 0),
       icon: DollarSign,
-      color: 'from-blue-500 to-blue-700',
-      textColor: 'text-blue-600',
+      iconBg: 'bg-emerald-50 border-emerald-100',
+      iconColor: 'text-emerald-600',
     },
     {
       title: 'Clientes',
       value: (stats?.clientesTotal || 0).toString(),
       icon: Users,
-      color: 'from-orange-500 to-red-600',
-      textColor: 'text-orange-600',
+      iconBg: 'bg-orange-50 border-orange-100',
+      iconColor: 'text-orange-600',
     },
     {
       title: 'Atendimentos Hoje',
       value: (stats?.atendimentosHoje || 0).toString(),
       icon: Scissors,
-      color: 'from-purple-500 to-purple-600',
-      textColor: 'text-purple-600',
+      iconBg: 'bg-violet-50 border-violet-100',
+      iconColor: 'text-violet-600',
     },
     {
       title: 'Atendimentos do Mês',
       value: (stats?.atendimentosMes || 0).toString(),
       icon: Calendar,
-      color: 'from-indigo-500 to-indigo-600',
-      textColor: 'text-indigo-600',
+      iconBg: 'bg-indigo-50 border-indigo-100',
+      iconColor: 'text-indigo-600',
     },
   ];
 
@@ -227,6 +227,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
           {cards.map((card, index) => {
             const Icon = card.icon;
+            const isLucroLiquidoNegativo = card.title === 'Lucro Líquido' && (stats?.lucroLiquido ?? 0) < 0;
+            const iconBg = isLucroLiquidoNegativo ? 'bg-red-50 border-red-100' : card.iconBg;
+            const iconColor = isLucroLiquidoNegativo ? 'text-red-600' : card.iconColor;
+            const valueColor = isLucroLiquidoNegativo ? 'text-red-600' : 'text-stone-900';
             return (
               <Card key={index} className="card">
                 <CardBody className="p-5">
@@ -235,12 +239,12 @@ export default function DashboardPage() {
                       <p className="text-sm text-stone-500 mb-1 truncate font-medium">
                         {card.title}
                       </p>
-                      <p className="text-2xl font-bold text-stone-900 truncate tracking-tight">
+                      <p className={`text-2xl font-bold truncate tracking-tight tabular-nums ${valueColor}`}>
                         {card.value}
                       </p>
                     </div>
-                    <div className="h-12 w-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-100">
-                      <Icon className="h-6 w-6 text-amber-600" strokeWidth={2} />
+                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 border ${iconBg}`}>
+                      <Icon className={`h-6 w-6 ${iconColor}`} strokeWidth={2} />
                     </div>
                   </div>
                 </CardBody>
@@ -299,8 +303,8 @@ export default function DashboardPage() {
                       boxShadow: '0 4px 14px rgba(28, 25, 23, 0.08)'
                     }}
                   />
-                  <Bar dataKey="receita" fill="#b45309" name="Receita" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="despesa" fill="#78716c" name="Despesa" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="receita" fill="#d97706" name="Receita" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="despesa" fill="#57534e" name="Despesa" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardBody>
@@ -330,15 +334,20 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 px-4 bg-amber-50 rounded-xl border border-amber-200">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm font-semibold text-stone-900">Lucro Líquido</span>
-                  </div>
-                  <span className="text-base font-bold text-stone-900">
-                    {formatCurrency(stats?.lucroLiquido || 0)}
-                  </span>
-                </div>
+                {(() => {
+                  const lucroNegativo = (stats?.lucroLiquido ?? 0) < 0;
+                  return (
+                    <div className={`flex justify-between items-center py-3 px-4 rounded-xl border ${lucroNegativo ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className={`h-4 w-4 ${lucroNegativo ? 'text-red-600' : 'text-emerald-600'}`} />
+                        <span className="text-sm font-semibold text-stone-900">Lucro Líquido</span>
+                      </div>
+                      <span className={`text-base font-bold tabular-nums ${lucroNegativo ? 'text-red-600' : 'text-stone-900'}`}>
+                        {formatCurrency(stats?.lucroLiquido ?? 0)}
+                      </span>
+                    </div>
+                  );
+                })()}
 
                 <div className="pt-3 space-y-3 border-t border-stone-100">
                   <div className="flex items-center justify-between py-2">
@@ -500,17 +509,12 @@ export default function DashboardPage() {
                             {aniversariante.name}
                             {isToday && <span className="ml-2 text-xs text-amber-600">(Hoje)</span>}
                           </h3>
-                          <div className="flex items-center space-x-4 mt-1 text-xs text-stone-500">
-                            <div className="flex items-center space-x-1">
-                              <Phone className="h-3 w-3" />
-                              <span>{aniversariante.phone}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>
-                                {birthday.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                              </span>
-                            </div>
+                          <p className="text-xs text-stone-500 mt-0.5">
+                            {birthday.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                          </p>
+                          <div className="flex items-center space-x-1 mt-1 text-xs text-stone-500">
+                            <Phone className="h-3 w-3" />
+                            <span>{aniversariante.phone}</span>
                           </div>
                         </div>
                       </div>

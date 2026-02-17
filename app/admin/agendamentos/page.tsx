@@ -8,6 +8,7 @@ import AgendamentoModal from "@/components/AgendamentoModal";
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
+import { LoadingSpinner } from '@/components/ui/Layout';
 import { 
   Trash2, Pencil, User, Plus, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, MessageSquare, Scissors, Info, AlertCircle, Lock,
@@ -406,7 +407,7 @@ export default function AgendamentosPage() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

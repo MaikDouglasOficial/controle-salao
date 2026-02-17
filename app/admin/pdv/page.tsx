@@ -8,6 +8,7 @@ import { fetchAuth } from '@/lib/api';
 import Image from 'next/image';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/Layout';
 import { useToast } from '@/hooks/useToast';
 
 interface Product {
@@ -519,7 +520,7 @@ export default function PDVPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-stone-200 border-t-amber-500"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

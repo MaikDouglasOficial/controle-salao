@@ -7,6 +7,7 @@ import { formatCurrency } from '@/lib/utils';
 import ProdutoEditarModal from '@/components/ProdutoEditarModal';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
+import { LoadingSpinner } from '@/components/ui/Layout';
 import { useToast } from '@/hooks/useToast';
 import { fetchAuth } from '@/lib/api';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
@@ -97,7 +98,7 @@ export default function ProdutosPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

@@ -11,6 +11,7 @@ import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { fetchAuth } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
+import { LoadingSpinner } from '@/components/ui/Layout';
 
 interface Professional {
   id: number;
@@ -114,7 +115,7 @@ export default function ProfessionalsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

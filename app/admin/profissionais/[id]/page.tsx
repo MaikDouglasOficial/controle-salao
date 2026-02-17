@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, User, DollarSign, TrendingUp, Filter, ClipboardLis
 import { formatCurrency, formatDate } from '@/lib/utils';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import PhotoViewerModal from '@/components/PhotoViewerModal';
+import { LoadingSpinner } from '@/components/ui/Layout';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 import { fetchAuth } from '@/lib/api';
@@ -107,7 +108,7 @@ export default function ProfessionalProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

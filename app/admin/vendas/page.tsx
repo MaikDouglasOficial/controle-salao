@@ -5,6 +5,7 @@ import { ShoppingBag, Calendar, DollarSign, User, Trash2, Filter } from 'lucide-
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 import { fetchAuth, unwrapListResponse } from '@/lib/api';
+import { LoadingSpinner } from '@/components/ui/Layout';
 
 interface SalePayment {
   id: number;
@@ -200,7 +201,7 @@ export default function VendasPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -209,25 +210,25 @@ export default function VendasPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header text-center">
+      <div className="page-header">
         <h1 className="page-title">Vendas</h1>
         <p className="page-subtitle">Histórico de vendas</p>
       </div>
 
       {/* Resumo em cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-stone-500 uppercase tracking-wide font-medium">Total de vendas</p>
-          <p className="mt-1 text-2xl font-semibold text-stone-900">{filteredSales.length}</p>
+          <p className="mt-1 text-2xl font-semibold text-stone-900 tabular-nums">{filteredSales.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-stone-500 uppercase tracking-wide font-medium">Receita total</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-600">{formatCurrency(totalRevenue)}</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600 tabular-nums">{formatCurrency(totalRevenue)}</p>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="card p-5">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-stone-100 rounded-xl flex items-center justify-center">

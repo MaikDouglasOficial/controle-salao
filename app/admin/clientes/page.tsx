@@ -13,6 +13,7 @@ import { fetchAuth, unwrapListResponse } from '@/lib/api';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
+import { LoadingSpinner } from '@/components/ui/Layout';
 import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 
 interface Customer {
@@ -220,7 +221,7 @@ export default function ClientesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -249,13 +250,13 @@ export default function ClientesPage() {
 
       {/* Resumo em cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">{customers.length}</p>
+        <div className="card p-5">
+          <p className="text-sm text-stone-500 uppercase tracking-wide">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-stone-900 tabular-nums">{customers.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm text-gray-500 uppercase tracking-wide">Aniversariantes do mês</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-600">
+        <div className="card p-5">
+          <p className="text-sm text-stone-500 uppercase tracking-wide">Aniversariantes do mês</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-600 tabular-nums">
             {customers.filter((c) => {
               if (!c.birthday) return false;
               const birthday = new Date(c.birthday);
@@ -267,17 +268,17 @@ export default function ClientesPage() {
 
       {/* Busca e filtros - sticky */}
       <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="card p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
               <input
                 type="text"
                 placeholder="Buscar por nome ou telefone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={scrollToTopOnFocus}
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="form-input w-full pl-10"
               />
             </div>
             <div className="flex gap-2">
@@ -314,14 +315,14 @@ export default function ClientesPage() {
       </div>
 
       {/* Lista de Clientes */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-visible md:overflow-hidden">
+      <div className="card overflow-visible md:overflow-hidden p-0">
         {filteredCustomers.length === 0 ? (
-          <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">
+          <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-stone-500">
             Nenhum cliente encontrado
           </div>
         ) : (
           <>
-            <div className="md:hidden divide-y divide-gray-100">
+            <div className="md:hidden divide-y divide-stone-100">
               {filteredCustomers.map((customer) => (
                 <div key={customer.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                   {/* Topo: avatar + nome + três pontinhos alinhados ao topo */}
@@ -348,9 +349,9 @@ export default function ClientesPage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-gray-900">{customer.name}</span>
+                        <span className="font-semibold text-stone-900">{customer.name}</span>
                         {customer.notes && (
-                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{customer.notes}</p>
+                          <p className="text-sm text-stone-500 mt-0.5 line-clamp-1">{customer.notes}</p>
                         )}
                       </div>
                     </Link>
@@ -367,17 +368,17 @@ export default function ClientesPage() {
                   </div>
 
                   <div className="space-y-1.5 text-sm">
-                    <p className="text-gray-600">
-                      <span className="text-gray-400">Telefone</span>
-                      <span className="ml-2 text-gray-900">{formatPhone(customer.phone)}</span>
+                    <p className="text-stone-600">
+                      <span className="text-stone-400">Telefone</span>
+                      <span className="ml-2 text-stone-900">{formatPhone(customer.phone)}</span>
                     </p>
-                    <p className="text-gray-600 break-all">
-                      <span className="text-gray-400">Email</span>
-                      <span className="ml-2 text-gray-900">{customer.email || '–'}</span>
+                    <p className="text-stone-600 break-all">
+                      <span className="text-stone-400">Email</span>
+                      <span className="ml-2 text-stone-900">{customer.email || '–'}</span>
                     </p>
-                    <p className="text-gray-600">
-                      <span className="text-gray-400">Aniversário</span>
-                      <span className="ml-2 text-gray-900">{customer.birthday ? formatDate(customer.birthday) : '–'}</span>
+                    <p className="text-stone-600">
+                      <span className="text-stone-400">Aniversário</span>
+                      <span className="ml-2 text-stone-900">{customer.birthday ? formatDate(customer.birthday) : '–'}</span>
                     </p>
                   </div>
                 </div>
@@ -385,23 +386,23 @@ export default function ClientesPage() {
             </div>
 
             <div className="hidden md:block overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
+              <table className="min-w-full divide-y divide-stone-100">
                 <thead className="bg-stone-50">
                   <tr>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aniversário</th>
-                    <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Nome</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Telefone</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Email</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Aniversário</th>
+                    <th className="px-5 py-3.5 text-center text-xs font-medium text-stone-500 uppercase tracking-wider">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+                <tbody className="bg-white divide-y divide-stone-100">
                   {filteredCustomers.map((customer) => (
                     <tr key={customer.id} className="hover:bg-stone-50/50 transition-colors">
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         <Link
                           href={`/admin/clientes/${customer.id}`}
-                          className="flex items-center gap-3 hover:text-gray-900 transition-colors"
+                          className="flex items-center gap-3 hover:text-stone-900 transition-colors"
                         >
                           <div
                             className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
@@ -416,14 +417,14 @@ export default function ClientesPage() {
                             )}
                           </div>
                           <div>
-                            <div className="font-medium text-gray-900">{customer.name}</div>
-                            {customer.notes && <div className="text-xs text-gray-500 mt-0.5">{customer.notes}</div>}
+                            <div className="font-medium text-stone-900">{customer.name}</div>
+                            {customer.notes && <div className="text-xs text-stone-500 mt-0.5">{customer.notes}</div>}
                           </div>
                         </Link>
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{formatPhone(customer.phone)}</td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.email || '–'}</td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{customer.birthday ? formatDate(customer.birthday) : '–'}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{formatPhone(customer.phone)}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{customer.email || '–'}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{customer.birthday ? formatDate(customer.birthday) : '–'}</td>
                       <td className="px-5 py-3.5 whitespace-nowrap text-center">
                         <div className="flex justify-center">
                           <ActionsMenu
@@ -474,11 +475,11 @@ export default function ClientesPage() {
           <form id="cliente-form" onSubmit={handleSaveCustomer} className="space-y-4">
             {/* Upload de Foto */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Cliente</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2">Foto do Cliente</label>
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
                   {photoPreview ? (
-                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-stone-200">
                       <Image
                         src={photoPreview}
                         alt="Foto do cliente"
@@ -487,8 +488,8 @@ export default function ClientesPage() {
                       />
                     </div>
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
-                      <Camera className="h-8 w-8 text-gray-400" />
+                    <div className="w-20 h-20 rounded-full bg-stone-100 border-2 border-stone-200 flex items-center justify-center">
+                      <Camera className="h-8 w-8 text-stone-400" />
                     </div>
                   )}
                 </div>
@@ -505,22 +506,22 @@ export default function ClientesPage() {
                     htmlFor="photo-upload"
                     className={`inline-block cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       uploading
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                        : 'bg-white border border-stone-300 text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     {uploading ? 'Enviando...' : 'Adicionar Foto'}
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
+                  <p className="text-xs text-stone-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome Completo *</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">Nome Completo *</label>
                 <input
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   value={form?.nome || ''}
                   onChange={e => setForm((f: any) => ({ ...f, nome: e.target.value }))}
                   required
@@ -530,9 +531,9 @@ export default function ClientesPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">CPF</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">CPF</label>
                   <input
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                     value={form?.cpf || ''}
                     onChange={e => setForm((f: any) => ({ ...f, cpf: e.target.value }))}
                     placeholder="000.000.000-00"
@@ -540,9 +541,9 @@ export default function ClientesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Telefone</label>
                   <input
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                     value={form?.telefone || ''}
                     onChange={e => setForm((f: any) => ({ ...f, telefone: e.target.value }))}
                     placeholder="(00) 00000-0000"
@@ -551,9 +552,9 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
                 <input
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   value={form?.email || ''}
                   onChange={e => setForm((f: any) => ({ ...f, email: e.target.value }))}
                   type="email"
@@ -562,9 +563,9 @@ export default function ClientesPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Data de Nascimento</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">Data de Nascimento</label>
                 <input
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   value={form?.aniversario || ''}
                   onChange={e => setForm((f: any) => ({ ...f, aniversario: e.target.value }))}
                   type="date"
@@ -572,9 +573,9 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Observações</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">Observações</label>
                 <textarea
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   value={form?.observacoes || ''}
                   onChange={e => setForm((f: any) => ({ ...f, observacoes: e.target.value }))}
                   rows={3}
