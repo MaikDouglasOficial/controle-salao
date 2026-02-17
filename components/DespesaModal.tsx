@@ -2,6 +2,7 @@ import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { useToast } from '@/hooks/useToast';
+import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
 interface DespesaModalProps {
   despesa?: {
@@ -19,7 +20,8 @@ interface DespesaModalProps {
 export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalProps) {
   const { warning } = useToast();
   const [description, setDescription] = useState<string>(despesa?.description || '');
-  const [amount, setAmount] = useState<string>(despesa?.amount?.toString() || '');
+  const [amount, setAmount] = useState<number>(despesa?.amount ?? 0);
+  const [amountDisplay, setAmountDisplay] = useState<string | null>(null);
   const [category, setCategory] = useState<string>(despesa?.category || 'OUTROS');
   const [date, setDate] = useState<string>(
     despesa?.date ? despesa.date.split('T')[0] : new Date().toISOString().split('T')[0]
@@ -35,8 +37,7 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
       return;
     }
     
-    const amountValue = parseFloat(amount);
-    if (!amountValue || amountValue <= 0) {
+    if (!amount || amount <= 0) {
       warning('Por favor, preencha um valor válido maior que zero');
       return;
     }
@@ -44,7 +45,7 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
     onSave({
       ...despesa,
       description: description.trim(),
-      amount: amountValue,
+      amount,
       category,
       date,
       notes: notes.trim() || null,
@@ -102,13 +103,22 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
               type="text"
               inputMode="decimal"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={amount}
+              value={amountDisplay !== null ? amountDisplay : (amount === 0 ? '' : formatCurrencyInput(amount))}
+              onFocus={() => setAmountDisplay(amount === 0 ? '' : formatCurrencyInput(amount))}
               onChange={e => {
-                const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-                setAmount(value);
+                let raw = e.target.value.replace(/[^\d,]/g, '');
+                const parts = raw.split(',');
+                if (parts.length > 2) raw = parts[0] + ',' + parts.slice(1).join('');
+                setAmountDisplay(raw);
+                setAmount(Math.max(0, parseCurrencyInput(raw)));
+              }}
+              onBlur={(e) => {
+                const v = Math.max(0, parseCurrencyInput(e.target.value));
+                setAmount(v);
+                setAmountDisplay(null);
               }}
               required
-              placeholder="0.00"
+              placeholder="0,00"
             />
           </div>
         </div>

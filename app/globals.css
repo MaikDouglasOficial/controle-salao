@@ -59,6 +59,17 @@
     @apply px-5 py-4 border-t border-stone-100;
   }
 
+  /* Input número sem setinhas (digitação manual) */
+  .input-number-no-spinner::-webkit-outer-spin-button,
+  .input-number-no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .input-number-no-spinner {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
   /* Page layout */
   .page-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;

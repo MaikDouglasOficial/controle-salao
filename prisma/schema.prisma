@@ -113,15 +113,30 @@ model Sale {
   appointmentId   Int?       // ID do agendamento vinculado a esta venda
   professional    String?    // nome do profissional que realizou o atendimento
   total           Float
-  paymentMethod   String     // 'DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'
-  installments    Int?       // número de parcelas (apenas para cartão de crédito)
-  installmentValue Float?    // valor de cada parcela (apenas para cartão de crédito)
+  paymentMethod   String     // método principal (compatibilidade)
+  installments    Int?       // parcelas principal (compatibilidade)
+  installmentValue Float?    // valor parcela principal (compatibilidade)
+  entradaValue    Float?     // compatibilidade
+  entradaMethod   String?    // compatibilidade
   date            DateTime   @default(now())
   notes           String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   customer        Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
   items           SaleItem[]
+  payments        SalePayment[] // formas de pagamento (múltiplas)
+}
+
+// Cada forma de pagamento da venda (entrada + restante, 2 cartões, etc.)
+model SalePayment {
+  id               Int     @id @default(autoincrement())
+  saleId           Int
+  paymentMethod    String  // DINHEIRO, PIX, CARTAO_DEBITO, CARTAO_CREDITO
+  value            Float
+  installments     Int?    // 1 = à vista (crédito)
+  installmentValue Float?
+  createdAt        DateTime @default(now())
+  sale             Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
 }
 
 // Modelo de Item de Venda

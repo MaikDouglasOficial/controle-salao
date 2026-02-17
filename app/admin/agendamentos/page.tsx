@@ -363,7 +363,7 @@ export default function AgendamentosPage() {
       <style dangerouslySetInnerHTML={{ __html: scrollbarHideCss }} />
       <div className="flex flex-col h-full bg-white overflow-hidden">
 
-      <div className="page-container flex-shrink-0 pt-4 pb-2 border-b border-stone-100 bg-white">
+      <div className="page-container flex-shrink-0 pt-4 pb-2 border-b border-stone-100 bg-white text-center">
         <h1 className="text-xl font-semibold text-stone-900">Agendamentos</h1>
         <p className="text-sm text-stone-500 mt-0.5">Calendário e agenda</p>
       </div>

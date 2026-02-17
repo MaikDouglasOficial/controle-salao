@@ -1,6 +1,7 @@
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
+import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
 interface ServiceModalProps {
   service?: {
@@ -18,7 +19,8 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
   const [name, setName] = useState<string>(service?.name || '');
   const [description, setDescription] = useState<string>(service?.description || '');
   const [duration, setDuration] = useState<string>(service?.duration?.toString() || '');
-  const [price, setPrice] = useState<string>(service?.price?.toString() || '');
+  const [price, setPrice] = useState<number>(service?.price ?? 0);
+  const [priceDisplay, setPriceDisplay] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,7 +29,7 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       name, 
       description, 
       duration: parseInt(duration) || 0, 
-      price: parseFloat(price) || 0 
+      price 
     });
   }
 
@@ -63,13 +65,22 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
               type="text"
               inputMode="decimal"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              value={price}
+              value={priceDisplay !== null ? priceDisplay : (price === 0 ? '' : formatCurrencyInput(price))}
+              onFocus={() => setPriceDisplay(price === 0 ? '' : formatCurrencyInput(price))}
               onChange={e => {
-                const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-                setPrice(value);
+                let raw = e.target.value.replace(/[^\d,]/g, '');
+                const parts = raw.split(',');
+                if (parts.length > 2) raw = parts[0] + ',' + parts.slice(1).join('');
+                setPriceDisplay(raw);
+                setPrice(Math.max(0, parseCurrencyInput(raw)));
+              }}
+              onBlur={(e) => {
+                const v = Math.max(0, parseCurrencyInput(e.target.value));
+                setPrice(v);
+                setPriceDisplay(null);
               }}
               required
-              placeholder="0.00"
+              placeholder="0,00"
             />
           </div>
           <div>

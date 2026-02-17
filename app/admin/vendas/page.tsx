@@ -5,6 +5,14 @@ import { ShoppingBag, Calendar, DollarSign, User, Trash2, Filter } from 'lucide-
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 
+interface SalePayment {
+  id: number;
+  paymentMethod: string;
+  value: number;
+  installments: number | null;
+  installmentValue: number | null;
+}
+
 interface Sale {
   id: number;
   customerId: number | null;
@@ -32,6 +40,7 @@ interface Sale {
       name: string;
     } | null;
   }[];
+  payments?: SalePayment[];
 }
 
 export default function VendasPage() {
@@ -173,7 +182,7 @@ export default function VendasPage() {
       CARTAO_DEBITO: 'bg-purple-100 text-purple-700',
       PIX: 'bg-cyan-100 text-cyan-700',
     };
-    return colors[method] || 'bg-gray-100 text-gray-700';
+    return colors[method] || 'bg-stone-100 text-stone-700';
   };
 
   const getPaymentMethodLabel = (method: string) => {
@@ -198,33 +207,33 @@ export default function VendasPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header">
+      <div className="page-header text-center">
         <h1 className="page-title">Vendas</h1>
         <p className="page-subtitle">Histórico de vendas</p>
       </div>
 
       {/* Resumo em cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm text-gray-500 uppercase tracking-wide">Total</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">{filteredSales.length}</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <p className="text-sm text-stone-500 uppercase tracking-wide font-medium">Total de vendas</p>
+          <p className="mt-1 text-2xl font-semibold text-stone-900">{filteredSales.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm text-gray-500 uppercase tracking-wide">Receita total</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <p className="text-sm text-stone-500 uppercase tracking-wide font-medium">Receita total</p>
           <p className="mt-1 text-2xl font-semibold text-amber-600">{formatCurrency(totalRevenue)}</p>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-stone-100 rounded-xl flex items-center justify-center">
               <Filter className="h-5 w-5 text-stone-600" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">Filtros</h3>
-              <p className="text-sm text-gray-500">Refine sua busca</p>
+              <h3 className="text-base font-semibold text-stone-900">Filtros</h3>
+              <p className="text-sm text-stone-500">Refine sua busca</p>
             </div>
           </div>
           {(selectedPayment || startDate || endDate || selectedMonth || selectedYear) && (
@@ -239,7 +248,7 @@ export default function VendasPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-stone-700">
               <Calendar className="h-4 w-4 text-stone-600" />
               <span>Data Inicial</span>
             </label>
@@ -254,12 +263,12 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full h-11 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-stone-200 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-stone-700">
               <Calendar className="h-4 w-4 text-stone-600" />
               <span>Data Final</span>
             </label>
@@ -274,12 +283,12 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(selectedMonth || selectedYear)}
-              className="w-full h-11 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-stone-200 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-stone-700">
               <Calendar className="h-4 w-4 text-stone-600" />
               <span>Mês</span>
             </label>
@@ -293,7 +302,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-stone-200 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">Todos</option>
               <option value="1">Janeiro</option>
@@ -312,7 +321,7 @@ export default function VendasPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-stone-700">
               <Calendar className="h-4 w-4 text-stone-600" />
               <span>Ano</span>
             </label>
@@ -326,7 +335,7 @@ export default function VendasPage() {
                 }
               }}
               disabled={!!(startDate || endDate)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-stone-200 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 text-sm disabled:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">Todos</option>
               <option value="2024">2024</option>
@@ -336,14 +345,14 @@ export default function VendasPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-stone-700">
               <DollarSign className="h-4 w-4 text-stone-600" />
               <span>Forma de Pagamento</span>
             </label>
             <select
               value={selectedPayment}
               onChange={(e) => setSelectedPayment(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm"
+              className="w-full h-11 px-4 py-2.5 bg-white border border-stone-200 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 text-sm"
             >
               <option value="">Todas</option>
               <option value="DINHEIRO">Dinheiro</option>
@@ -382,142 +391,108 @@ export default function VendasPage() {
       {/* Lista de Vendas */}
       <div className="space-y-4">
         {filteredSales.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <div className="bg-white rounded-xl border border-stone-200 p-12 text-center shadow-sm">
             <ShoppingBag className="h-16 w-16 text-stone-300 mx-auto mb-4" />
-            <p className="text-gray-500">Nenhuma venda encontrada</p>
+            <p className="text-stone-500 font-medium">Nenhuma venda encontrada</p>
+            <p className="text-sm text-stone-400 mt-1">Ajuste os filtros ou registre uma nova venda no PDV.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredSales.map((sale) => (
               <div
                 key={sale.id}
-                className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+                className="bg-white rounded-lg border border-stone-200 overflow-hidden"
               >
-                {/* Header com ID, Data/Hora e Valor */}
-                <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                      <ShoppingBag className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold text-lg">Venda #{sale.id}</h3>
-                      <p className="text-white/90 text-sm flex items-center">
-                        <Calendar className="h-3.5 w-3.5 mr-1.5" />
-                        {new Date(sale.createdAt).toLocaleDateString('pt-BR', { 
-                          day: '2-digit', 
-                          month: 'short', 
-                          year: 'numeric' 
-                        })} às {new Date(sale.createdAt).toLocaleTimeString('pt-BR', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
+                {/* Cabeçalho: ID, data e valor em uma linha */}
+                <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-2 border-b border-stone-100">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-sm font-semibold text-stone-900">#{sale.id}</span>
+                    <span className="text-stone-400">·</span>
+                    <span className="text-sm text-stone-500">
+                      {new Date(sale.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {' às '}
+                      {new Date(sale.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-white">
-                      {formatCurrency(sale.total)}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-semibold text-stone-900">{formatCurrency(sale.total)}</span>
                     <button
                       onClick={() => handleDeleteSale(sale.id)}
-                      className="mt-1 p-1.5 text-red-100 hover:text-white hover:bg-red-600/30 rounded-lg transition-all"
-                      title="Deletar venda"
+                      className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="Excluir venda"
                     >
-                      <Trash2 className="h-4 w-4 text-red-200" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                {/* Informações Principais */}
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Cliente */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Cliente</p>
-                      {sale.customer ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <User className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">{sale.customer.name}</p>
-                            <p className="text-xs text-gray-500">{sale.customer.phone}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400 italic">Venda sem cliente</p>
-                      )}
+                {/* Cliente, profissional e pagamento em linhas compactas */}
+                <div className="px-4 py-3 space-y-2 border-b border-stone-100 text-sm">
+                  {sale.customer && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-stone-500">Cliente</span>
+                      <span className="text-stone-900 font-medium truncate">{sale.customer.name}</span>
                     </div>
-
-                    {/* Profissional */}
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Profissional</p>
-                      {sale.professional ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="h-10 w-10 bg-stone-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <User className="h-5 w-5 text-stone-600" />
-                          </div>
-                          <p className="text-sm font-semibold text-gray-900">{sale.professional}</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400 italic">Não informado</p>
-                      )}
+                  )}
+                  {sale.professional && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-stone-500">Profissional</span>
+                      <span className="text-stone-900 truncate">{sale.professional}</span>
                     </div>
+                  )}
+                  {/* Detalhamento completo do pagamento */}
+                  <div className="space-y-1.5">
+                    <span className="text-stone-500 block">Pagamento</span>
+                    {sale.payments && sale.payments.length > 0 ? (
+                      <ul className="space-y-1">
+                        {sale.payments.map((p) => (
+                          <li key={p.id} className="flex justify-between items-center gap-2 text-sm">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPaymentMethodBadge(p.paymentMethod)}`}>
+                              {getPaymentMethodLabel(p.paymentMethod)}
+                              {p.paymentMethod === 'CARTAO_CREDITO' && p.installments != null && p.installments > 1 && (
+                                <span className="ml-1">{p.installments}×</span>
+                              )}
+                            </span>
+                            <span className="font-medium text-stone-900">
+                              {formatCurrency(p.value)}
+                              {p.paymentMethod === 'CARTAO_CREDITO' && p.installments != null && p.installments > 1 && p.installmentValue != null && (
+                                <span className="text-stone-500 font-normal text-xs ml-1">
+                                  ({formatCurrency(p.installmentValue)}/parcela)
+                                </span>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPaymentMethodBadge(sale.paymentMethod)}`}>
+                            {getPaymentMethodLabel(sale.paymentMethod)}
+                          </span>
+                          <span className="font-medium text-stone-900">{formatCurrency(sale.total)}</span>
+                        </div>
+                        {sale.paymentMethod === 'CARTAO_CREDITO' && sale.installments != null && sale.installments > 1 && (
+                          <div className="text-stone-500 text-xs">
+                            {sale.installments}× de {formatCurrency(sale.installmentValue || 0)}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
 
-                {/* Forma de Pagamento */}
-                <div className="px-6 py-3 bg-white border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700">Forma de Pagamento:</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${getPaymentMethodBadge(
-                          sale.paymentMethod
-                        )}`}
-                      >
-                        {getPaymentMethodLabel(sale.paymentMethod)}
-                      </span>
-                      {sale.paymentMethod === 'CARTAO_CREDITO' && sale.installments && sale.installments > 1 && (
-                        <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold">
-                          {sale.installments}x de {formatCurrency(sale.installmentValue || 0)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Itens da Venda */}
-                <div className="px-6 py-4">
-                  <p className="text-xs text-gray-500 uppercase font-semibold mb-3 flex items-center">
-                    <ShoppingBag className="h-4 w-4 mr-1.5" />
-                    Produtos e Serviços Consumidos
-                  </p>
-                  <div className="space-y-2">
+                {/* Itens: lista simples */}
+                <div className="px-4 py-3">
+                  <div className="space-y-1.5">
                     {sale.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-gray-200 flex-shrink-0">
-                            <span className="text-sm font-bold text-amber-600">{item.quantity}x</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {item.product?.name || item.service?.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatCurrency(item.price)} cada
-                            </p>
-                          </div>
-                        </div>
-                        <p className="text-sm font-bold text-gray-900">
+                      <div key={item.id} className="flex justify-between items-baseline gap-2 text-sm">
+                        <span className="text-stone-700 truncate">
+                          {item.quantity}× {item.product?.name || item.service?.name}
+                        </span>
+                        <span className="text-stone-900 font-medium whitespace-nowrap">
                           {formatCurrency(item.price * item.quantity)}
-                        </p>
+                        </span>
                       </div>
                     ))}
                   </div>

@@ -19,6 +19,27 @@ export function formatCurrency(value: number): string {
 }
 
 /**
+ * Formata número para exibição em input de valor (sempre 2 decimais: 250,00)
+ */
+export function formatCurrencyInput(value: number): string {
+  if (value === 0) return '';
+  const n = Number(value);
+  if (Number.isNaN(n)) return '';
+  return n.toFixed(2).replace('.', ',');
+}
+
+/**
+ * Converte string digitada (250 ou 250,00 ou 250,5) em número
+ */
+export function parseCurrencyInput(input: string): number {
+  if (!input || typeof input !== 'string') return 0;
+  const cleaned = input.replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(cleaned);
+  if (Number.isNaN(n)) return 0;
+  return Math.round(n * 100) / 100;
+}
+
+/**
  * Formata data para formato brasileiro
  */
 export function formatDate(date: Date | string): string {

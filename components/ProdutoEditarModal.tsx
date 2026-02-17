@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
 interface ProdutoEditarModalProps {
   produto?: {
@@ -23,7 +24,8 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
   const { error } = useToast();
   const [nome, setNome] = useState<string>(produto?.nome || '');
   const [sku, setSku] = useState<string>(produto?.sku || '');
-  const [preco, setPreco] = useState<string>(produto?.preco?.toString() || '');
+  const [preco, setPreco] = useState<number>(produto?.preco ?? 0);
+  const [precoDisplay, setPrecoDisplay] = useState<string | null>(null);
   const [estoque, setEstoque] = useState<string>(produto?.estoque?.toString() || '');
   const [descricao, setDescricao] = useState<string>(produto?.descricao || '');
   const [photo, setPhoto] = useState<string>(produto?.photo || '');
@@ -85,7 +87,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
       ...produto, 
       nome, 
       sku, 
-      preco: parseFloat(preco) || 0, 
+      preco, 
       estoque: parseInt(estoque) || 0, 
       descricao, 
       photo 
@@ -196,13 +198,22 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
               type="text"
               inputMode="decimal"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={preco}
+              value={precoDisplay !== null ? precoDisplay : (preco === 0 ? '' : formatCurrencyInput(preco))}
+              onFocus={() => setPrecoDisplay(preco === 0 ? '' : formatCurrencyInput(preco))}
               onChange={e => {
-                const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-                setPreco(value);
+                let raw = e.target.value.replace(/[^\d,]/g, '');
+                const parts = raw.split(',');
+                if (parts.length > 2) raw = parts[0] + ',' + parts.slice(1).join('');
+                setPrecoDisplay(raw);
+                setPreco(Math.max(0, parseCurrencyInput(raw)));
+              }}
+              onBlur={(e) => {
+                const v = Math.max(0, parseCurrencyInput(e.target.value));
+                setPreco(v);
+                setPrecoDisplay(null);
               }}
               required
-              placeholder="0.00"
+              placeholder="0,00"
             />
           </div>
 

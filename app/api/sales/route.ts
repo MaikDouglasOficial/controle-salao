@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        payments: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -48,18 +49,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+const PAYMENT_METHODS = ['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'];
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId } = body;
-
-    // Validações
-    if (!paymentMethod || !['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX'].includes(paymentMethod)) {
-      return NextResponse.json(
-        { error: 'Método de pagamento inválido' },
-        { status: 400 }
-      );
-    }
+    const { customerId, professional, paymentMethod, total, items, installments, installmentValue, appointmentId, entradaValue, entradaMethod, payments: paymentsArray } = body;
 
     if (!professional || professional.trim() === '') {
       return NextResponse.json(
@@ -75,19 +70,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar parcelamento para cartão de crédito
-    if (paymentMethod === 'CARTAO_CREDITO') {
-      if (!installments || installments < 1 || installments > 12) {
+    const usePaymentsArray = Array.isArray(paymentsArray) && paymentsArray.length > 0;
+
+    if (usePaymentsArray) {
+      const sum = paymentsArray.reduce((acc: number, p: any) => acc + Number(p.value || 0), 0);
+      if (Math.abs(sum - total) > 0.01) {
         return NextResponse.json(
-          { error: 'Número de parcelas inválido (1-12)' },
+          { error: `A soma dos pagamentos (R$ ${sum.toFixed(2)}) deve ser igual ao total (R$ ${total.toFixed(2)})` },
           { status: 400 }
         );
       }
-      if (!installmentValue || installmentValue <= 0) {
+      for (const p of paymentsArray) {
+        if (!PAYMENT_METHODS.includes(p.paymentMethod)) {
+          return NextResponse.json({ error: 'Método de pagamento inválido em um dos itens' }, { status: 400 });
+        }
+        if (!p.value || p.value <= 0) {
+          return NextResponse.json({ error: 'Valor do pagamento deve ser maior que zero' }, { status: 400 });
+        }
+        if (p.paymentMethod === 'CARTAO_CREDITO') {
+          const n = p.installments ?? 1;
+          if (n < 1 || n > 12) {
+            return NextResponse.json({ error: 'Parcelas do cartão de crédito devem ser entre 1 e 12' }, { status: 400 });
+          }
+        }
+      }
+    } else {
+      if (!paymentMethod || !PAYMENT_METHODS.includes(paymentMethod)) {
         return NextResponse.json(
-          { error: 'Valor da parcela inválido' },
+          { error: 'Método de pagamento inválido' },
           { status: 400 }
         );
+      }
+      if (paymentMethod === 'CARTAO_CREDITO') {
+        if (!installments || installments < 1 || installments > 12) {
+          return NextResponse.json(
+            { error: 'Número de parcelas inválido (1-12)' },
+            { status: 400 }
+          );
+        }
+        if (!installmentValue || installmentValue <= 0) {
+          return NextResponse.json(
+            { error: 'Valor da parcela inválido' },
+            { status: 400 }
+          );
+        }
       }
     }
 
@@ -112,18 +138,40 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Criar a venda
+      const firstPayment = usePaymentsArray ? paymentsArray[0] : { paymentMethod, installments, installmentValue };
+      const primaryMethod = firstPayment.paymentMethod;
+      const hasEntrada = !usePaymentsArray && entradaValue != null && Number(entradaValue) > 0;
+      const validEntradaMethods = ['DINHEIRO', 'PIX', 'CARTAO_DEBITO'];
+
+      const saleCreateData = {
+        customerId: customerId ? parseInt(String(customerId)) : null,
+        appointmentId: appointmentId ? parseInt(String(appointmentId)) : null,
+        professional,
+        paymentMethod: primaryMethod,
+        total: Number(total),
+        installments: primaryMethod === 'CARTAO_CREDITO' ? (firstPayment.installments ?? 1) : null,
+        installmentValue: primaryMethod === 'CARTAO_CREDITO' ? (firstPayment.installmentValue ?? total / (firstPayment.installments || 1)) : null,
+        entradaValue: !usePaymentsArray && hasEntrada ? Number(entradaValue) : null,
+        entradaMethod: !usePaymentsArray && hasEntrada && validEntradaMethods.includes(entradaMethod) ? entradaMethod : null,
+      };
+
       const newSale = await tx.sale.create({
-        data: {
-          customerId: customerId || null,
-          appointmentId: appointmentId ? parseInt(appointmentId) : null,
-          professional,
-          paymentMethod,
-          total,
-          installments: paymentMethod === 'CARTAO_CREDITO' ? installments : null,
-          installmentValue: paymentMethod === 'CARTAO_CREDITO' ? installmentValue : null,
-        } as any,
+        data: saleCreateData,
       });
+
+      if (usePaymentsArray) {
+        for (const p of paymentsArray) {
+          await tx.salePayment.create({
+            data: {
+              saleId: newSale.id,
+              paymentMethod: p.paymentMethod,
+              value: Number(p.value),
+              installments: p.paymentMethod === 'CARTAO_CREDITO' ? (p.installments ?? 1) : null,
+              installmentValue: p.paymentMethod === 'CARTAO_CREDITO' ? (Number(p.value) / (p.installments || 1)) : null,
+            },
+          });
+        }
+      }
 
       // Criar os itens da venda
       for (const item of items) {
