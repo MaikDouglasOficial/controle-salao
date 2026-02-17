@@ -64,29 +64,33 @@ model Professional {
 
 // Modelo de Produto
 model Product {
-  id          Int        @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float
-  stock       Int        @default(0)
-  sku         String?    @unique
-  photo       String?    // URL ou caminho da foto
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  saleItems   SaleItem[]
+  id               Int        @id @default(autoincrement())
+  name             String
+  description      String?
+  price            Float
+  stock            Int        @default(0)
+  sku              String?    @unique
+  photo            String?    // URL ou caminho da foto
+  commissionType   String?    @default("PERCENT") // 'PERCENT' ou 'FIXED'
+  commissionValue  Float      @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  saleItems        SaleItem[]
 }
 
 // Modelo de Serviço
 model Service {
-  id           Int           @id @default(autoincrement())
-  name         String
-  description  String?
-  duration     Int           // duração em minutos
-  price        Float
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  appointments Appointment[]
-  saleItems    SaleItem[]
+  id               Int           @id @default(autoincrement())
+  name             String
+  description      String?
+  duration         Int           // duração em minutos
+  price            Float
+  commissionType   String?       @default("PERCENT") // 'PERCENT' ou 'FIXED'
+  commissionValue  Float         @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  appointments     Appointment[]
+  saleItems        SaleItem[]
 }
 
 // Modelo de Agendamento
@@ -99,6 +103,7 @@ model Appointment {
   professional     String?
   notes            String?
   cancellationReason String?         // motivo ao cancelar
+  reminderSentAt   DateTime?         // quando o lembrete (email/sms) foi enviado
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   customer         Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -141,16 +146,17 @@ model SalePayment {
 
 // Modelo de Item de Venda
 model SaleItem {
-  id        Int      @id @default(autoincrement())
-  saleId    Int
-  productId Int?
-  serviceId Int?
-  quantity  Int      @default(1)
-  price     Float
-  createdAt DateTime @default(now())
-  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  id              Int      @id @default(autoincrement())
+  saleId          Int
+  productId       Int?
+  serviceId       Int?
+  quantity        Int      @default(1)
+  price           Float
+  commissionAmount Float   @default(0) // valor da comissão no momento da venda (snapshot)
+  createdAt       DateTime @default(now())
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  service         Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 }
 
 // Modelo de Log de Notificações

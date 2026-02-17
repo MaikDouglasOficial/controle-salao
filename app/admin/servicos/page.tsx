@@ -18,6 +18,8 @@ interface Service {
   description: string | null;
   duration: number;
   price: number;
+  commissionType?: string | null;
+  commissionValue?: number | null;
 }
 
 export default function ServicosPage() {
@@ -331,7 +333,9 @@ export default function ServicosPage() {
                   name: dadosAtualizados.name,
                   description: dadosAtualizados.description,
                   duration: dadosAtualizados.duration,
-                  price: dadosAtualizados.price
+                  price: dadosAtualizados.price,
+                  commissionType: dadosAtualizados.commissionType ?? 'PERCENT',
+                  commissionValue: dadosAtualizados.commissionValue ?? 0
                 })
               });
               if (response.ok) {
@@ -366,7 +370,9 @@ export default function ServicosPage() {
                   name: novoServico.name,
                   description: novoServico.description,
                   duration: novoServico.duration,
-                  price: novoServico.price
+                  price: novoServico.price,
+                  commissionType: novoServico.commissionType ?? 'PERCENT',
+                  commissionValue: novoServico.commissionValue ?? 0
                 })
               });
               if (response.ok) {

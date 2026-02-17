@@ -30,7 +30,6 @@ interface PerformanceResponse {
     specialty: string | null;
     photo: string | null;
     active: boolean;
-    commissionPercentage: number;
   };
   summary: {
     today: number;
@@ -166,7 +165,7 @@ export default function ProfessionalProfilePage() {
           <div className="min-w-0">
             <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{data.professional.name}</h2>
             <p className="text-xs sm:text-sm text-gray-600">
-              {data.professional.specialty || 'Profissional'} • Comissão {data.professional.commissionPercentage}%
+              {data.professional.specialty || 'Profissional'}
             </p>
           </div>
         </div>
@@ -379,7 +378,6 @@ export default function ProfessionalProfilePage() {
             email: '',
             active: data.professional.active,
             photo: data.professional.photo || '',
-            commissionPercentage: data.professional.commissionPercentage,
           }}
           onSave={async (updated) => {
             try {

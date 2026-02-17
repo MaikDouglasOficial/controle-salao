@@ -535,7 +535,7 @@ export default function PDVPage() {
 
   return (
     <div className="page-container space-y-6 animate-fade-in mt-6">
-      <div className="page-header text-center">
+      <div className="page-header">
         <h1 className="page-title">PDV</h1>
         <p className="page-subtitle">Ponto de venda</p>
       </div>

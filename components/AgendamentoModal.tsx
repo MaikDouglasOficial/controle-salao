@@ -1,9 +1,10 @@
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
-import { useState, useEffect, useRef } from 'react';
-import { Search, X, User } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Search, X, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 
 interface Customer {
   id: number;
@@ -24,7 +25,7 @@ interface AgendamentoModalProps {
     professional?: string;
   };
   customers: Customer[];
-  services: { id: number; name: string }[];
+  services: { id: number; name: string; duration?: number }[];
   professionals: string[];
   onSave: (agendamento: any) => void;
   onClose: () => void;
@@ -37,12 +38,159 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [serviceId, setServiceId] = useState<number | ''>(agendamento?.serviceId || '');
-  const [date, setDate] = useState<string>(agendamento?.date || '');
+  const [date, setDate] = useState<string>(() => {
+    const initial = agendamento?.date || '';
+    if (!initial) return '';
+    const d = new Date(initial);
+    if (d.getTime() < Date.now()) {
+      const t = new Date();
+      const todayStr = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+      const nowMin = t.getHours() * 60 + t.getMinutes();
+      for (let h = 8; h <= 20; h++) {
+        if (h * 60 > nowMin) return `${todayStr}T${String(h).padStart(2, '0')}:00`;
+        if (h < 20 && (h * 60 + 30) > nowMin) return `${todayStr}T${String(h).padStart(2, '0')}:30`;
+      }
+      return `${todayStr}T20:00`;
+    }
+    return initial;
+  });
   const [status, setStatus] = useState<string>(agendamento?.status || 'agendado');
   const [notes, setNotes] = useState<string>(agendamento?.notes || '');
   const [professional, setProfessional] = useState<string>(agendamento?.professional || '');
-  
+  const [busyAppointments, setBusyAppointments] = useState<{ id: number; date: string; service: { duration: number } }[]>([]);
+  const [viewMonth, setViewMonth] = useState(() => {
+    const d = agendamento?.date ? new Date(agendamento.date) : new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+
   const customerSearchRef = useRef<HTMLDivElement>(null);
+
+  const todayLocal = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const dateOnly = date.split('T')[0];
+  const selectedService = services.find(s => s.id === Number(serviceId));
+  const durationMinutes = selectedService?.duration ?? 30;
+
+  const todayStart = useMemo(() => {
+    const t = new Date();
+    t.setHours(0, 0, 0, 0);
+    return t.getTime();
+  }, []);
+
+  const calendarGrid = useMemo(() => {
+    const { year, month } = viewMonth;
+    const first = new Date(year, month, 1);
+    const startWeekday = first.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells: { day: number | null }[] = [];
+    for (let i = 0; i < startWeekday; i++) cells.push({ day: null });
+    for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d });
+    const total = Math.ceil(cells.length / 7) * 7;
+    while (cells.length < total) cells.push({ day: null });
+    const rows: { day: number | null }[][] = [];
+    for (let r = 0; r < cells.length / 7; r++) rows.push(cells.slice(r * 7, (r + 1) * 7));
+    return { rows, year, month };
+  }, [viewMonth]);
+
+  const isDayPast = (year: number, month: number, day: number) =>
+    new Date(year, month, day).getTime() < todayStart;
+
+  const selectDay = (year: number, month: number, day: number) => {
+    const timePart = date.split('T')[1] || '09:00';
+    const d = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    setDate(`${d}T${timePart}`);
+  };
+
+  useEffect(() => {
+    if (!dateOnly) return;
+    const [y, m] = dateOnly.split('-').map(Number);
+    if (viewMonth.year === y && viewMonth.month === m - 1) return;
+    setViewMonth({ year: y, month: m - 1 });
+  }, [dateOnly, viewMonth.year, viewMonth.month]);
+
+  // Buscar compromissos do profissional no dia (para bloquear horários)
+  useEffect(() => {
+    if (!professional || !dateOnly) {
+      setBusyAppointments([]);
+      return;
+    }
+    const start = new Date(dateOnly + 'T00:00:00');
+    const end = new Date(dateOnly + 'T23:59:59.999');
+    fetchAuth(
+      `/api/appointments?professional=${encodeURIComponent(professional)}&startDate=${start.toISOString()}&endDate=${end.toISOString()}`
+    )
+      .then((r) => r.json())
+      .then((data: { data?: unknown[] } | unknown[]) => {
+        const list = Array.isArray(data) ? data : (data?.data ?? []) as { id: number; date: string; status?: string; service?: { duration?: number } }[];
+        const nonCancelled = list.filter((a) => (a.status || '').toLowerCase() !== 'cancelado');
+        const excludeId = agendamento?.id;
+        const filtered = (excludeId ? nonCancelled.filter((a) => a.id !== excludeId) : nonCancelled).map((a) => ({
+          id: a.id,
+          date: typeof a.date === 'string' ? a.date : new Date(a.date).toISOString(),
+          service: { duration: a.service?.duration ?? 30 },
+        }));
+        setBusyAppointments(filtered);
+      })
+      .catch(() => setBusyAppointments([]));
+  }, [professional, dateOnly, agendamento?.id]);
+
+  // Horários disponíveis (30 em 30 min)
+  const timeOptions = useMemo(() => {
+    const opts: string[] = [];
+    for (let h = 8; h <= 20; h++) {
+      opts.push(`${String(h).padStart(2, '0')}:00`);
+      if (h < 20) opts.push(`${String(h).padStart(2, '0')}:30`);
+    }
+    return opts;
+  }, []);
+
+  const isTimeBlocked = (timeStr: string): boolean => {
+    if (busyAppointments.length === 0) return false;
+    const slotStart = new Date(dateOnly + 'T' + timeStr + ':00').getTime();
+    const slotEnd = slotStart + durationMinutes * 60 * 1000;
+    return busyAppointments.some((appt) => {
+      const apptStart = new Date(appt.date).getTime();
+      const apptEnd = apptStart + (appt.service?.duration ?? 30) * 60 * 1000;
+      return slotStart < apptEnd && slotEnd > apptStart;
+    });
+  };
+
+  const isTimeInPast = (timeStr: string): boolean => {
+    if (dateOnly !== todayLocal) return false;
+    const [h, m] = timeStr.split(':').map(Number);
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const slotMinutes = h * 60 + m;
+    return slotMinutes <= nowMinutes;
+  };
+
+  const isTimeUnavailable = (timeStr: string): boolean =>
+    isTimeInPast(timeStr) || (professional ? isTimeBlocked(timeStr) : false);
+
+  // Hoje: mostrar só horários futuros. Outros dias: mostrar todos.
+  const visibleTimeOptions = useMemo(() => {
+    if (dateOnly !== todayLocal) return timeOptions;
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return timeOptions.filter((t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m > nowMinutes;
+    });
+  }, [dateOnly, todayLocal, timeOptions]);
+
+  const currentTime = date.split('T')[1]?.slice(0, 5) || '09:00';
+  const isCurrentTimeUnavailable =
+    !visibleTimeOptions.includes(currentTime) || (professional ? isTimeBlocked(currentTime) : false);
+
+  // Se o horário selecionado não está na lista (passou) ou está ocupado, ajustar para primeiro disponível
+  useEffect(() => {
+    if (!dateOnly || !isCurrentTimeUnavailable) return;
+    const firstAvailable = visibleTimeOptions.find((t) => !isTimeBlocked(t));
+    if (firstAvailable) setDate(`${dateOnly}T${firstAvailable}`);
+  }, [dateOnly, isCurrentTimeUnavailable, visibleTimeOptions, professional, busyAppointments, durationMinutes]);
 
   // Carregar cliente selecionado ao editar
   useEffect(() => {
@@ -54,6 +202,19 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
       }
     }
   }, [agendamento, customers]);
+
+  // Garantir que a data nunca fique no passado (ex.: edição com data passada ou mudança de fuso)
+  useEffect(() => {
+    if (!dateOnly || dateOnly >= todayLocal) return;
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const first = timeOptions.find((t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m > nowMinutes;
+    });
+    const firstAvailable = first || timeOptions[timeOptions.length - 1];
+    setDate(`${todayLocal}T${firstAvailable}`);
+  }, [dateOnly, todayLocal, timeOptions]);
 
   // Fechar sugestões ao clicar fora
   useEffect(() => {
@@ -275,55 +436,98 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Data *</label>
-              <input
-                type="date"
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={date.split('T')[0] || ''}
-                onChange={e => {
-                  const time = date.split('T')[1] || '09:00';
-                  setDate(`${e.target.value}T${time}`);
-                }}
-                required
-              />
+              <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+                <div className="flex items-center justify-between px-2 py-1.5 bg-stone-50 border-b border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setViewMonth((v) =>
+                        v.month === 0 ? { year: v.year - 1, month: 11 } : { year: v.year, month: v.month - 1 }
+                      )
+                    }
+                    className="p-1 rounded hover:bg-stone-200 text-stone-600"
+                    aria-label="Mês anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <span className="text-sm font-semibold text-stone-800 capitalize">
+                    {new Date(calendarGrid.year, calendarGrid.month, 1).toLocaleDateString('pt-BR', {
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setViewMonth((v) =>
+                        v.month === 11 ? { year: v.year + 1, month: 0 } : { year: v.year, month: v.month + 1 }
+                      )
+                    }
+                    className="p-1 rounded hover:bg-stone-200 text-stone-600"
+                    aria-label="Próximo mês"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="p-2">
+                  <div className="grid grid-cols-7 gap-0.5 text-center text-xs text-stone-500 font-medium mb-1">
+                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((w) => (
+                      <div key={w}>{w}</div>
+                    ))}
+                  </div>
+                  {calendarGrid.rows.map((row, ri) => (
+                    <div key={ri} className="grid grid-cols-7 gap-0.5">
+                      {row.map((cell, ci) => {
+                        if (cell.day === null) return <div key={ci} className="aspect-square" />;
+                        const past = isDayPast(calendarGrid.year, calendarGrid.month, cell.day);
+                        const selected =
+                          dateOnly ===
+                          `${calendarGrid.year}-${String(calendarGrid.month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`;
+                        return (
+                          <button
+                            key={ci}
+                            type="button"
+                            disabled={past}
+                            onClick={() => !past && selectDay(calendarGrid.year, calendarGrid.month, cell.day!)}
+                            className={`aspect-square rounded text-sm transition-colors
+                              ${past ? 'text-stone-300 cursor-not-allowed bg-transparent' : 'text-stone-800 hover:bg-amber-100'}
+                              ${selected && !past ? 'bg-amber-500 text-white font-semibold hover:bg-amber-600' : ''}`}
+                          >
+                            {cell.day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <input type="hidden" name="date" value={date.split('T')[0] || ''} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Horário *</label>
               <select
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={date.split('T')[1] || '09:00'}
+                value={date.split('T')[1]?.slice(0, 5) || '09:00'}
                 onChange={e => {
-                  const dateOnly = date.split('T')[0] || new Date().toISOString().split('T')[0];
-                  setDate(`${dateOnly}T${e.target.value}`);
+                  const d = date.split('T')[0] || todayLocal;
+                  setDate(`${d}T${e.target.value}`);
                 }}
                 required
               >
-                <option value="08:00">08:00</option>
-                <option value="08:30">08:30</option>
-                <option value="09:00">09:00</option>
-                <option value="09:30">09:30</option>
-                <option value="10:00">10:00</option>
-                <option value="10:30">10:30</option>
-                <option value="11:00">11:00</option>
-                <option value="11:30">11:30</option>
-                <option value="12:00">12:00</option>
-                <option value="12:30">12:30</option>
-                <option value="13:00">13:00</option>
-                <option value="13:30">13:30</option>
-                <option value="14:00">14:00</option>
-                <option value="14:30">14:30</option>
-                <option value="15:00">15:00</option>
-                <option value="15:30">15:30</option>
-                <option value="16:00">16:00</option>
-                <option value="16:30">16:30</option>
-                <option value="17:00">17:00</option>
-                <option value="17:30">17:30</option>
-                <option value="18:00">18:00</option>
-                <option value="18:30">18:30</option>
-                <option value="19:00">19:00</option>
-                <option value="19:30">19:30</option>
-                <option value="20:00">20:00</option>
+                {visibleTimeOptions.map((t) => {
+                  const blocked = professional ? isTimeBlocked(t) : false;
+                  return (
+                    <option key={t} value={t} disabled={blocked}>
+                      {t}{blocked ? ' (ocupado)' : ''}
+                    </option>
+                  );
+                })}
               </select>
+              {professional && busyAppointments.length > 0 && (
+                <p className="text-xs text-stone-500 mt-1">
+                  Horários já comprometidos do profissional aparecem desabilitados (ocupado).
+                </p>
+              )}
             </div>
           </div>
 

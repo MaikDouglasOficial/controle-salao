@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, stock, sku, photo } = body;
+    const { name, description, price, stock, sku, photo, commissionType, commissionValue } = body;
 
     if (!name || price === undefined || stock === undefined) {
       return NextResponse.json(
@@ -43,6 +43,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
+    const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
 
     const product = await prisma.product.create({
       data: {
@@ -52,6 +55,8 @@ export async function POST(request: NextRequest) {
         stock: parseInt(stock),
         sku: sku || null,
         photo: photo || null,
+        commissionType: commType,
+        commissionValue: commValue,
       },
     });
 
@@ -80,7 +85,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, description, price, stock, sku, photo } = body;
+    const { id, name, description, price, stock, sku, photo, commissionType, commissionValue } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -88,6 +93,9 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
+    const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
 
     const product = await prisma.product.update({
       where: { id },
@@ -98,6 +106,8 @@ export async function PUT(request: NextRequest) {
         stock: parseInt(stock),
         sku: sku || null,
         photo: photo || null,
+        commissionType: commType,
+        commissionValue: commValue,
       },
     });
 

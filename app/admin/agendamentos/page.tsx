@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import { fetchAuth, unwrapListResponse } from '@/lib/api';
 import AgendamentoModal from "@/components/AgendamentoModal";
@@ -30,6 +30,7 @@ interface Appointment {
 
 export default function AgendamentosPage() {
   const toast = useToast();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -396,11 +397,9 @@ export default function AgendamentosPage() {
         return;
       }
       const err = await res.json().catch(() => ({}));
-      if (res.status === 409 && err.error) {
-        toast.error(err.error);
-        return;
-      }
-      toast.error('Erro ao salvar');
+      const msg = err?.error || (res.status === 409 ? 'Conflito de horário ou profissional.' : 'Erro ao salvar');
+      toast.error(msg);
+      return;
     } catch (e) { toast.error('Erro ao salvar'); }
   }
 
@@ -900,20 +899,79 @@ export default function AgendamentosPage() {
             footer={
               <div className="flex flex-row gap-3 justify-end">
                 {apt.status === 'agendado' && (
-                  <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
+                  <>
+                    {apt.customer.phone && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        icon={MessageSquare}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const data = new Date(apt.date);
+                          const dataStr = data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+                          const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                          const prof = apt.professional ? ` Profissional: ${apt.professional}.` : '';
+                          const message = `Olá, ${apt.customer.name}! ✨\n\nLembrando seu agendamento: *${apt.service.name}* no dia ${dataStr} às ${horaStr}.${prof}\n\nAguardamos você!`;
+                          const phone = apt.customer.phone.replace(/\D/g, '');
+                          const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, '_blank');
+                        }}
+                      >
+                        Lembrar cliente
+                      </Button>
+                    )}
+                    <Button type="button" variant="warning" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
+                  </>
                 )}
                 {apt.status === 'confirmado' && (
-                  <Button type="button" variant="blue-dark" onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
+                  <>
+                    {apt.customer.phone && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        icon={MessageSquare}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const data = new Date(apt.date);
+                          const dataStr = data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+                          const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                          const prof = apt.professional ? ` Profissional: ${apt.professional}.` : '';
+                          const message = `Olá, ${apt.customer.name}! ✨\n\nLembrando seu agendamento: *${apt.service.name}* no dia ${dataStr} às ${horaStr}.${prof}\n\nAguardamos você!`;
+                          const phone = apt.customer.phone.replace(/\D/g, '');
+                          const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, '_blank');
+                        }}
+                      >
+                        Lembrar cliente
+                      </Button>
+                    )}
+                    <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
+                  </>
                 )}
                 {apt.status === 'concluido' && (
-                  <Button type="button" variant="primary" onClick={() => {
-                    localStorage.setItem('pdv_appointment_data', JSON.stringify({
-                      appointmentId: apt.id, customerId: apt.customerId, customerName: apt.customer.name,
-                      serviceId: apt.serviceId, serviceName: apt.service.name, servicePrice: apt.service.price,
-                      professional: apt.professional || ''
-                    }));
-                    window.location.href = '/admin/pdv';
-                  }}>Faturar no PDV</Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      localStorage.setItem('pdv_appointment_data', JSON.stringify({
+                        appointmentId: apt.id,
+                        customerId: apt.customerId,
+                        customerName: apt.customer.name,
+                        serviceId: apt.serviceId,
+                        serviceName: apt.service.name,
+                        servicePrice: apt.service.price,
+                        professional: apt.professional || ''
+                      }));
+                      setSelectedAppointment(null);
+                      router.push('/admin/pdv');
+                    }}
+                  >
+                    Faturar no PDV
+                  </Button>
                 )}
               </div>
             }

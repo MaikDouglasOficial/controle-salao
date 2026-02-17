@@ -137,15 +137,49 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Criar os itens da venda
+      // Criar os itens da venda (com cálculo de comissão snapshot)
       for (const item of items) {
+        let commissionAmount = 0;
+        const quantity = Number(item.quantity) || 1;
+        const price = Number(item.price) || 0;
+        const itemTotal = price * quantity;
+
+        if (item.serviceId) {
+          const service = await tx.service.findUnique({
+            where: { id: item.serviceId },
+            select: { commissionType: true, commissionValue: true },
+          });
+          if (service && (service.commissionValue ?? 0) > 0) {
+            const cv = Number(service.commissionValue);
+            if (service.commissionType === 'FIXED') {
+              commissionAmount = Math.round(cv * quantity * 100) / 100;
+            } else {
+              commissionAmount = Math.round((itemTotal * cv) / 100 * 100) / 100;
+            }
+          }
+        } else if (item.productId) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { commissionType: true, commissionValue: true },
+          });
+          if (product && (product.commissionValue ?? 0) > 0) {
+            const cv = Number(product.commissionValue);
+            if (product.commissionType === 'FIXED') {
+              commissionAmount = Math.round(cv * quantity * 100) / 100;
+            } else {
+              commissionAmount = Math.round((itemTotal * cv) / 100 * 100) / 100;
+            }
+          }
+        }
+
         await tx.saleItem.create({
           data: {
             saleId: newSale.id,
             productId: item.productId || null,
             serviceId: item.serviceId || null,
-            quantity: item.quantity,
-            price: item.price,
+            quantity,
+            price,
+            commissionAmount,
           },
         });
 

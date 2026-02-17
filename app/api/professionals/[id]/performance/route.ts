@@ -48,6 +48,9 @@ export async function GET(
             service: {
               select: { id: true, name: true },
             },
+            product: {
+              select: { id: true, name: true },
+            },
           },
         },
       },
@@ -58,21 +61,26 @@ export async function GET(
 
     const percentage = professional.commissionPercentage || 0;
     const services = sales.flatMap((sale) =>
-      sale.items
-        .filter((item) => item.serviceId)
-        .map((item) => {
-          const base = item.price * item.quantity;
-          const commission = (base * percentage) / 100;
-          return {
-            saleId: sale.id,
-            date: sale.date,
-            customerName: sale.customer?.name || 'Cliente não informado',
-            serviceName: item.service?.name || 'Serviço',
-            quantity: item.quantity,
-            price: item.price,
-            commission,
-          };
-        })
+      sale.items.map((item) => {
+        const base = item.price * item.quantity;
+        const commission =
+          (item.commissionAmount ?? 0) > 0
+            ? item.commissionAmount!
+            : item.serviceId
+              ? (base * percentage) / 100
+              : 0;
+        const itemName =
+          item.service?.name || item.product?.name || (item.serviceId ? 'Serviço' : 'Produto');
+        return {
+          saleId: sale.id,
+          date: sale.date,
+          customerName: sale.customer?.name || 'Cliente não informado',
+          serviceName: itemName,
+          quantity: item.quantity,
+          price: item.price,
+          commission,
+        };
+      })
     );
 
     const now = new Date();

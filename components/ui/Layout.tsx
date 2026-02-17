@@ -10,12 +10,12 @@ interface PageHeaderProps {
 export function PageHeader({ title, subtitle, children, className = '' }: PageHeaderProps) {
   return (
     <div className={`page-header ${className}`}>
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4">
+        <div className="text-center">
           <h1 className="page-title">{title}</h1>
           {subtitle && <p className="page-subtitle">{subtitle}</p>}
         </div>
-        {children}
+        {children ? <div className="flex justify-end">{children}</div> : null}
       </div>
     </div>
   );

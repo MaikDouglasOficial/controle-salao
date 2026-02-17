@@ -21,6 +21,8 @@ interface Product {
   stock: number;
   sku: string | null;
   photo: string | null;
+  commissionType?: string | null;
+  commissionValue?: number | null;
 }
 
 export default function ProdutosPage() {
@@ -324,7 +326,9 @@ export default function ProdutosPage() {
                   price: produtoAtualizado.preco,
                   stock: produtoAtualizado.estoque,
                   description: produtoAtualizado.descricao,
-                  photo: produtoAtualizado.photo || null
+                  photo: produtoAtualizado.photo || null,
+                  commissionType: produtoAtualizado.commissionType ?? 'PERCENT',
+                  commissionValue: produtoAtualizado.commissionValue ?? 0
                 })
               });
               if (response.ok) {
@@ -359,7 +363,9 @@ export default function ProdutosPage() {
                   price: novoProduto.preco,
                   stock: novoProduto.estoque,
                   description: novoProduto.descricao,
-                  photo: novoProduto.photo || null
+                  photo: novoProduto.photo || null,
+                  commissionType: novoProduto.commissionType ?? 'PERCENT',
+                  commissionValue: novoProduto.commissionValue ?? 0
                 })
               });
               if (response.ok) {

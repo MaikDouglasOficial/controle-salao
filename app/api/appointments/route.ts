@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
+    const professional = searchParams.get('professional');
     const startDateStr = searchParams.get('startDate');
     const endDateStr = searchParams.get('endDate');
     const pageStr = searchParams.get('page');
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
 
     const where: Record<string, unknown> = {};
     if (customerId) where.customerId = parseInt(customerId, 10);
+    if (professional != null && professional !== '') where.professional = professional;
 
     if (startDateStr || endDateStr) {
       const start = startDateStr ? new Date(startDateStr) : undefined;

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, duration, price } = body;
+    const { name, description, duration, price, commissionType, commissionValue } = body;
 
     if (!name || !duration || price === undefined) {
       return NextResponse.json(
@@ -44,12 +44,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
+    const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
+
     const service = await prisma.service.create({
       data: {
         name,
         description: description || null,
         duration: parseInt(duration),
         price: parseFloat(price),
+        commissionType: commType,
+        commissionValue: commValue,
       },
     });
 
@@ -71,7 +76,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, description, duration, price } = body;
+    const { id, name, description, duration, price, commissionType, commissionValue } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -80,6 +85,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
+    const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
+
     const service = await prisma.service.update({
       where: { id },
       data: {
@@ -87,6 +95,8 @@ export async function PUT(request: NextRequest) {
         description: description || null,
         duration: parseInt(duration),
         price: parseFloat(price),
+        commissionType: commType,
+        commissionValue: commValue,
       },
     });
 

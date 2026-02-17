@@ -7,15 +7,26 @@ import { useToast } from '@/hooks/useToast';
 import { fetchAuth } from '@/lib/api';
 import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
+const COMMISSION_TYPES = [
+  { value: 'PERCENT', label: 'Porcentagem (%)' },
+  { value: 'FIXED', label: 'Valor fixo (R$)' },
+] as const;
+
 interface ProdutoEditarModalProps {
   produto?: {
     nome?: string;
+    name?: string;
     sku?: string;
     preco?: number;
+    price?: number;
     estoque?: number;
+    stock?: number;
     descricao?: string;
+    description?: string;
     photo?: string;
     id?: number;
+    commissionType?: string | null;
+    commissionValue?: number | null;
   };
   onSave: (produto: any) => void;
   onClose: () => void;
@@ -23,15 +34,22 @@ interface ProdutoEditarModalProps {
 
 export default function ProdutoEditarModal({ produto, onSave, onClose }: ProdutoEditarModalProps) {
   const { error } = useToast();
-  const [nome, setNome] = useState<string>(produto?.nome || '');
+  const nomeInicial = produto?.nome ?? produto?.name ?? '';
+  const precoInicial = produto?.preco ?? produto?.price ?? 0;
+  const estoqueInicial = produto?.estoque ?? produto?.stock ?? 0;
+  const descricaoInicial = produto?.descricao ?? produto?.description ?? '';
+  const [nome, setNome] = useState<string>(nomeInicial);
   const [sku, setSku] = useState<string>(produto?.sku || '');
-  const [preco, setPreco] = useState<number>(produto?.preco ?? 0);
+  const [preco, setPreco] = useState<number>(precoInicial);
   const [precoDisplay, setPrecoDisplay] = useState<string | null>(null);
-  const [estoque, setEstoque] = useState<string>(produto?.estoque?.toString() || '');
-  const [descricao, setDescricao] = useState<string>(produto?.descricao || '');
+  const [estoque, setEstoque] = useState<string>(estoqueInicial.toString());
+  const [descricao, setDescricao] = useState<string>(descricaoInicial);
   const [photo, setPhoto] = useState<string>(produto?.photo || '');
   const [photoPreview, setPhotoPreview] = useState<string | null>(produto?.photo || null);
   const [uploading, setUploading] = useState(false);
+  const [commissionType, setCommissionType] = useState<string>(produto?.commissionType || 'PERCENT');
+  const [commissionValue, setCommissionValue] = useState<string>((produto?.commissionValue ?? 0).toString());
+  const [commissionDisplay, setCommissionDisplay] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,14 +102,19 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSave({ 
-      ...produto, 
-      nome, 
-      sku, 
-      preco, 
-      estoque: parseInt(estoque) || 0, 
-      descricao, 
-      photo 
+    const commVal = commissionType === 'FIXED'
+      ? parseCurrencyInput(commissionDisplay !== null ? commissionDisplay : commissionValue)
+      : Math.max(0, Math.min(100, parseFloat(commissionValue) || 0));
+    onSave({
+      ...produto,
+      nome,
+      sku,
+      preco,
+      estoque: parseInt(estoque) || 0,
+      descricao,
+      photo,
+      commissionType,
+      commissionValue: commVal,
     });
   }
 
@@ -216,6 +239,58 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
               required
               placeholder="0,00"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1.5">Comissão</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-stone-500 mb-1">Tipo</label>
+                <select
+                  className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  value={commissionType}
+                  onChange={e => setCommissionType(e.target.value)}
+                >
+                  {COMMISSION_TYPES.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-stone-500 mb-1">{commissionType === 'FIXED' ? 'Valor (R$)' : 'Valor (%)'}</label>
+                {commissionType === 'FIXED' ? (
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    value={commissionDisplay !== null ? commissionDisplay : (parseFloat(commissionValue) ? formatCurrencyInput(parseFloat(commissionValue)) : '')}
+                    onFocus={() => setCommissionDisplay(parseFloat(commissionValue) ? formatCurrencyInput(parseFloat(commissionValue)) : '')}
+                    onChange={e => {
+                      const raw = e.target.value.replace(/[^\d,]/g, '');
+                      setCommissionDisplay(raw);
+                      setCommissionValue(parseCurrencyInput(raw).toString());
+                    }}
+                    onBlur={e => {
+                      const v = parseCurrencyInput(e.target.value);
+                      setCommissionValue(v.toString());
+                      setCommissionDisplay(null);
+                    }}
+                    placeholder="0,00"
+                  />
+                ) : (
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.5}
+                    className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    value={commissionValue}
+                    onChange={e => setCommissionValue(e.target.value.replace(/[^0-9.,]/g, ''))}
+                    placeholder="0"
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
           <div>

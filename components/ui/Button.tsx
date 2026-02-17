@@ -2,7 +2,8 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'edit' | 'orange' | 'blue-dark' | 'dark';
+  /** primary = CTA principal (Salvar, Adicionar). success = conclusão positiva (Finalizar, Confirmar). danger = destrutivo (Excluir, Cancelar). */
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'edit' | 'warning';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   icon?: LucideIcon;
   loading?: boolean;
@@ -11,8 +12,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Componente Button profissional e moderno.
- * Segue design system consistente com espaçamentos, tipografia e cores padronizadas.
+ * Botões padronizados para sistema profissional.
+ * Cores por ação: primary (azul) = CTA principal | success (verde) = concluir/confirmar | danger (vermelho) = excluir/cancelar | secondary = cancelar/voltar.
  */
 export function Button({
   variant = 'primary',
@@ -25,21 +26,17 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  // Base: transições suaves, outline, cursor, display
   const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none rounded-lg shadow-sm hover:shadow-md active:scale-[0.98]';
-  
-  // Variantes — identidade salão (âmbar/dourado como primário)
-  const variantClasses = {
-    primary: 'bg-gradient-to-b from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 focus:ring-amber-400 border border-amber-600/80 shadow-sm hover:shadow-md',
-    secondary: 'bg-white text-stone-700 border-2 border-stone-200 hover:bg-stone-50 hover:border-stone-300 focus:ring-stone-300',
-    success: 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 focus:ring-green-500 border border-green-700',
-    danger: 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-red-500 border border-red-700',
-    outline: 'bg-transparent text-amber-700 border-2 border-amber-500 hover:bg-amber-50 hover:border-amber-600 focus:ring-amber-400',
+
+  const variantClasses: Record<string, string> = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 border border-blue-600',
+    secondary: 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 hover:border-stone-400 focus:ring-stone-300',
+    success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 border border-emerald-600',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border border-red-600',
+    outline: 'bg-transparent text-blue-700 border border-blue-600 hover:bg-blue-50 focus:ring-blue-500',
     ghost: 'bg-transparent text-stone-700 hover:bg-stone-100 focus:ring-stone-300 border border-transparent',
-    edit: 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:text-amber-900 focus:ring-amber-300',
-    orange: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500 border border-amber-600',
-    'blue-dark': 'bg-gradient-to-r from-stone-800 to-stone-900 text-white hover:from-stone-900 hover:to-stone-950 focus:ring-stone-600 border border-stone-800',
-    dark: 'bg-gradient-to-r from-stone-900 to-stone-800 text-white hover:from-stone-950 hover:to-stone-900 focus:ring-stone-700 border border-stone-900',
+    edit: 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 focus:ring-blue-300',
+    warning: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-400 border border-amber-500',
   };
   
   // Tamanhos com espaçamentos e tipografia consistentes (responsivos)
