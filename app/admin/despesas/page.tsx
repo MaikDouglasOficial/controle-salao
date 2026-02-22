@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X, Package, Search } from 'lucide-react';
+import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X, Package, Search, Plus, RefreshCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
@@ -39,6 +39,7 @@ export default function DespesasPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -227,21 +228,41 @@ export default function DespesasPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header">
+      <div className="page-header text-center mb-8 relative">
+        <button
+          type="button"
+          onClick={async () => { setRefreshing(true); await fetchExpenses(); setRefreshing(false); }}
+          disabled={refreshing}
+          className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+          aria-label="Atualizar lista"
+        >
+          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+        </button>
         <h1 className="page-title">Despesas</h1>
         <p className="page-subtitle">Controle de gastos</p>
+        <div className="flex justify-center mt-3 sm:hidden">
+          <button
+            type="button"
+            onClick={async () => { setRefreshing(true); await fetchExpenses(); setRefreshing(false); }}
+            disabled={refreshing}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+            aria-label="Atualizar lista"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+        <div className="mt-3 sm:mt-5 flex justify-center">
+          <Button
+            variant="secondary"
+            size="md"
+            icon={Plus}
+            onClick={() => setShowCreateModal(true)}
+            className="min-w-[200px] uppercase tracking-wide font-semibold"
+          >
+            Adicionar despesa
+          </Button>
+        </div>
       </div>
-      {/* Botão flutuante de nova despesa */}
-      <button
-        onClick={() => setShowCreateModal(true)}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 text-amber-400 rounded-full shadow-xl hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-90 transition-all z-50"
-        aria-label="Nova Despesa"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
-
       {/* Resumo em cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">

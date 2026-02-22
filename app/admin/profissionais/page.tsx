@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3 } from 'lucide-react';
+import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3, Plus, RefreshCw } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import PhotoViewerModal from '@/components/PhotoViewerModal';
 import { Button } from '@/components/ui/Button';
@@ -40,6 +40,7 @@ export default function ProfessionalsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
   const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchProfessionals();
@@ -123,20 +124,41 @@ export default function ProfessionalsPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header">
+      <div className="page-header text-center mb-8 relative">
+        <button
+          type="button"
+          onClick={async () => { setRefreshing(true); await fetchProfessionals(); setRefreshing(false); }}
+          disabled={refreshing}
+          className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+          aria-label="Atualizar lista"
+        >
+          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+        </button>
         <h1 className="page-title">Profissionais</h1>
         <p className="page-subtitle">Equipe do salão</p>
+        <div className="flex justify-center mt-3 sm:hidden">
+          <button
+            type="button"
+            onClick={async () => { setRefreshing(true); await fetchProfessionals(); setRefreshing(false); }}
+            disabled={refreshing}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+            aria-label="Atualizar lista"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+        <div className="mt-3 sm:mt-5 flex justify-center">
+          <Button
+            variant="secondary"
+            size="md"
+            icon={Plus}
+            onClick={() => { setEditingProfessional(null); setShowModal(true); }}
+            className="min-w-[200px] uppercase tracking-wide font-semibold"
+          >
+            Adicionar profissional
+          </Button>
+        </div>
       </div>
-
-      <button
-        onClick={() => { setEditingProfessional(null); setShowModal(true); }}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 text-amber-400 rounded-full shadow-xl hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-90 transition-all z-50"
-        aria-label="Novo Profissional"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
 
       {/* Resumo em cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -189,49 +211,49 @@ export default function ProfessionalsPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome, especialidade ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={scrollToTopOnFocus}
-              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-            />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome, especialidade ou telefone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={scrollToTopOnFocus}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterActive('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterActive === 'all'
+                    ? 'bg-stone-700 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                onClick={() => setFilterActive('active')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterActive === 'active'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Ativos
+              </button>
+              <button
+                onClick={() => setFilterActive('inactive')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterActive === 'inactive'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Inativos
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterActive('all')}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filterActive === 'all'
-                  ? 'bg-stone-700 text-white'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              onClick={() => setFilterActive('active')}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filterActive === 'active'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              Ativos
-            </button>
-            <button
-              onClick={() => setFilterActive('inactive')}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filterActive === 'inactive'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              Inativos
-            </button>
-          </div>
-        </div>
         </div>
       </div>
 
