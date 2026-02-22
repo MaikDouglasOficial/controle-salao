@@ -477,7 +477,7 @@ export default function AgendarPage() {
                           onClick={() => !past && setSelectedDate(dateStr)}
                           className={`aspect-square rounded text-sm flex items-center justify-center ${
                             past ? 'text-stone-300 cursor-not-allowed' : 'hover:bg-amber-100 text-stone-800'
-                          } ${selected ? '!bg-amber-600 text-white font-bold text-base shadow-md ring-2 ring-amber-500' : ''}`}
+                          } ${selected ? '!bg-stone-800 !text-amber-400 font-bold text-base shadow-md ring-2 ring-amber-600/50 border border-amber-600/50' : ''}`}
                         >
                           {cell.day}
                         </button>

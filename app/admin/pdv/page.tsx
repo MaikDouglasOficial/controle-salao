@@ -678,13 +678,13 @@ export default function PDVPage() {
           {/* Carrinho - Ocupa 1 de 3 colunas */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-gray-200 sticky top-4 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5 text-amber-600" />
+              <div className="px-4 py-3 bg-stone-900 border-b border-stone-700/50 flex items-center justify-between rounded-t-xl">
+                <h2 className="text-base font-semibold text-stone-100 flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-amber-400" />
                   Carrinho ({cart.length})
                 </h2>
                 {cart.length > 0 && (
-                  <button onClick={clearCart} className="text-sm text-stone-500 hover:text-red-600 font-medium">
+                  <button onClick={clearCart} className="text-sm text-stone-400 hover:text-red-400 font-medium">
                     Limpar
                   </button>
                 )}
@@ -804,8 +804,8 @@ export default function PDVPage() {
                               placeholder="0,00"
                               className="flex-1 px-2 py-1.5 bg-white border border-stone-200 rounded text-stone-900 text-sm text-right focus:ring-2 focus:ring-amber-500/30"
                             />
-                            <button type="button" onClick={() => setDiscountType('percent')} className={`px-2.5 py-1.5 text-xs font-semibold rounded ${discountType === 'percent' ? 'bg-amber-500 text-white' : 'bg-white border border-stone-200 text-stone-600'}`}>%</button>
-                            <button type="button" onClick={() => setDiscountType('value')} className={`px-2.5 py-1.5 text-xs font-semibold rounded ${discountType === 'value' ? 'bg-amber-500 text-white' : 'bg-white border border-stone-200 text-stone-600'}`}>R$</button>
+                            <button type="button" onClick={() => setDiscountType('percent')} className={`px-2.5 py-1.5 text-xs font-semibold rounded ${discountType === 'percent' ? 'bg-stone-800 text-amber-400 border border-amber-600/50' : 'bg-white border border-stone-200 text-stone-600'}`}>%</button>
+                            <button type="button" onClick={() => setDiscountType('value')} className={`px-2.5 py-1.5 text-xs font-semibold rounded ${discountType === 'value' ? 'bg-stone-800 text-amber-400 border border-amber-600/50' : 'bg-white border border-stone-200 text-stone-600'}`}>R$</button>
                           </div>
                           {discountAmount > 0 && <p className="text-right text-xs text-red-600 font-medium mt-1">- {formatCurrency(discountAmount)}</p>}
                         </div>
@@ -816,7 +816,7 @@ export default function PDVPage() {
                       </div>
                       <button
                         onClick={() => setShowCheckoutModal(true)}
-                        className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold text-sm transition-colors"
+                        className="w-full py-3 bg-stone-800 hover:bg-stone-700 text-amber-400 rounded-lg font-semibold text-sm border border-amber-600/50 shadow-[0_0_0_1px_rgba(245,158,11,0.25)] hover:shadow-[0_0_12px_rgba(245,158,11,0.2)] transition-colors"
                       >
                         Finalizar venda
                       </button>
@@ -1171,7 +1171,7 @@ export default function PDVPage() {
                         setValorTempDisplay(null);
                         setParcelasTemp(1);
                       }}
-                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-2.5 bg-stone-800 hover:bg-stone-700 text-amber-400 rounded-lg font-medium flex items-center justify-center gap-2 border border-amber-600/50 shadow-[0_0_0_1px_rgba(245,158,11,0.25)] hover:shadow-[0_0_12px_rgba(245,158,11,0.2)] transition-colors"
                     >
                       <Plus className="h-5 w-5" /> Lançar pagamento
                     </button>

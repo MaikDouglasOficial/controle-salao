@@ -215,7 +215,7 @@ export default function RelatoriosPage() {
           {hasExport && (
             <button
               onClick={exportCSV}
-              className="flex items-center justify-center gap-2 w-full py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-stone-800 text-amber-400 rounded-lg hover:bg-stone-700 border border-amber-600/50 shadow-[0_0_0_1px_rgba(245,158,11,0.25)] hover:shadow-[0_0_12px_rgba(245,158,11,0.2)] transition-colors font-medium"
             >
               <FileSpreadsheet className="h-5 w-5" />
               Baixar CSV

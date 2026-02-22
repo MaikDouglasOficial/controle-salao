@@ -130,7 +130,7 @@ export default function ProfessionalsPage() {
 
       <button
         onClick={() => { setEditingProfessional(null); setShowModal(true); }}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 text-amber-400 rounded-full shadow-xl hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-90 transition-all z-50"
         aria-label="Novo Profissional"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -295,17 +295,6 @@ export default function ProfessionalsPage() {
                     />
                   </div>
                 </div>
-
-                <div className="space-y-1.5 text-sm">
-                  <p className="text-gray-600">
-                    <span className="text-gray-400">Telefone</span>
-                    <span className="ml-2 text-gray-900">{professional.phone || '–'}</span>
-                  </p>
-                  <p className="text-gray-600 break-all">
-                    <span className="text-gray-400">Email</span>
-                    <span className="ml-2 text-gray-900">{professional.email || '–'}</span>
-                  </p>
-                </div>
               </div>
             ))
           )}
@@ -316,9 +305,7 @@ export default function ProfessionalsPage() {
             <thead className="bg-stone-50">
               <tr>
                 <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidade</th>
-                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Função</th>
                 <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
@@ -326,7 +313,7 @@ export default function ProfessionalsPage() {
             <tbody className="bg-white divide-y divide-gray-100">
               {filteredProfessionals.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={4} className="px-5 py-10 text-center text-sm text-gray-500">
                     Nenhum profissional encontrado
                   </td>
                 </tr>
@@ -358,12 +345,6 @@ export default function ProfessionalsPage() {
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">
                       {professional.specialty || '–'}
-                    </td>
-                    <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">
-                      {professional.phone || '–'}
-                    </td>
-                    <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">
-                      {professional.email || '–'}
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       {professional.active ? (

@@ -260,7 +260,7 @@ export default function ClientesPage() {
           setForm({ nome: '', email: '', telefone: '', aniversario: '', observacoes: '' });
           setShowModal(true);
         }}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 text-amber-400 rounded-full shadow-xl hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-90 transition-all z-50"
         aria-label="Novo Cliente"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -315,7 +315,7 @@ export default function ClientesPage() {
                 type="button"
                 onClick={() => setFilterClient('birthday')}
                 className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterClient === 'birthday' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  filterClient === 'birthday' ? 'bg-stone-800 text-amber-400 border border-amber-600/50' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                 }`}
               >
                 Aniv. mês
@@ -370,9 +370,7 @@ export default function ClientesPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <span className="font-semibold text-stone-900">{customer.name}</span>
-                        {customer.notes && (
-                          <p className="text-sm text-stone-500 mt-0.5 line-clamp-1">{customer.notes}</p>
-                        )}
+                        <p className="text-sm text-stone-600 mt-0.5">{formatPhone(customer.phone)}</p>
                       </div>
                     </Link>
                     <div className="flex-shrink-0 pt-0.5">
@@ -386,21 +384,6 @@ export default function ClientesPage() {
                       />
                     </div>
                   </div>
-
-                  <div className="space-y-1.5 text-sm">
-                    <p className="text-stone-600">
-                      <span className="text-stone-400">Telefone</span>
-                      <span className="ml-2 text-stone-900">{formatPhone(customer.phone)}</span>
-                    </p>
-                    <p className="text-stone-600 break-all">
-                      <span className="text-stone-400">Email</span>
-                      <span className="ml-2 text-stone-900">{customer.email || '–'}</span>
-                    </p>
-                    <p className="text-stone-600">
-                      <span className="text-stone-400">Aniversário</span>
-                      <span className="ml-2 text-stone-900">{customer.birthday ? formatDate(customer.birthday) : '–'}</span>
-                    </p>
-                  </div>
                 </div>
               ))}
             </div>
@@ -411,8 +394,6 @@ export default function ClientesPage() {
                   <tr>
                     <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Nome</th>
                     <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Telefone</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Email</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Aniversário</th>
                     <th className="px-5 py-3.5 text-center text-xs font-medium text-stone-500 uppercase tracking-wider">Ações</th>
                   </tr>
                 </thead>
@@ -438,13 +419,10 @@ export default function ClientesPage() {
                           </div>
                           <div>
                             <div className="font-medium text-stone-900">{customer.name}</div>
-                            {customer.notes && <div className="text-xs text-stone-500 mt-0.5">{customer.notes}</div>}
                           </div>
                         </Link>
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{formatPhone(customer.phone)}</td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{customer.email || '–'}</td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-sm text-stone-600">{customer.birthday ? formatDate(customer.birthday) : '–'}</td>
                       <td className="px-5 py-3.5 whitespace-nowrap text-center">
                         <div className="flex justify-center">
                           <ActionsMenu

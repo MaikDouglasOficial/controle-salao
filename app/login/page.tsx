@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Eye, EyeOff, FlaskConical, Lock, Loader2, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Loader2, Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,8 +17,6 @@ export default function LoginPage() {
   const [forbiddenMessage, setForbiddenMessage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [setupLoading, setSetupLoading] = useState(false);
-  const [setupMessage, setSetupMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -29,23 +27,23 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSetupMessage('');
     setLoading(true);
+
+    // Normaliza e-mail: minúsculo, sem acento em "salao" (admin@salao.com)
+    let emailNorm = email.trim().toLowerCase();
+    if (emailNorm.includes('salão') || emailNorm.includes('salao')) {
+      emailNorm = emailNorm.replace(/salão/g, 'salao');
+    }
 
     try {
       const result = await signIn('admin', {
-        email,
+        email: emailNorm,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        const isDefaultEmail = email === 'admin@salao.com';
-        setError(
-          isDefaultEmail
-            ? 'Usuário admin ainda não existe. Clique em "Entrar com conta de demonstração" para criar e depois faça login.'
-            : 'Email ou senha inválidos.'
-        );
+        setError('Email ou senha inválidos.');
         return;
       }
 
@@ -62,30 +60,6 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     signIn('google-admin', { callbackUrl: '/admin/dashboard' });
-  };
-
-  const handleSetupAdmin = async () => {
-    setError('');
-    setSetupMessage('');
-    setSetupLoading(true);
-
-    try {
-      const response = await fetch('/api/setup', { method: 'POST' });
-      const data = await response.json();
-
-      if (!response.ok) {
-        setSetupMessage(data?.details || data?.error || 'Erro ao criar usuário admin');
-        return;
-      }
-
-      setSetupMessage(data?.message || 'Usuário admin criado com sucesso!');
-      setEmail('admin@salao.com');
-      setPassword('admin123');
-    } catch (err) {
-      setSetupMessage('Erro ao conectar. Verifique se o banco de dados está rodando e o arquivo .env está configurado.');
-    } finally {
-      setSetupLoading(false);
-    }
   };
 
   const hasGoogle = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true';
@@ -147,7 +121,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-colors"
-                  placeholder="seu@email.com"
+                  placeholder="admin@salao.com"
                 />
               </div>
             </div>
@@ -218,21 +192,6 @@ export default function LoginPage() {
               </svg>
               {googleLoading ? 'Redirecionando...' : 'Entrar com Google'}
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSetupAdmin}
-            disabled={setupLoading}
-            className="mt-2.5 w-full py-2.5 px-4 rounded-lg text-[13px] font-medium text-slate-500 bg-transparent border border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              <FlaskConical className="h-4 w-4 shrink-0" />
-              {setupLoading ? 'Criando usuário...' : 'Conta de demonstração'}
-            </span>
-          </button>
-          {setupMessage && (
-            <p className="mt-2 text-[12px] text-center text-slate-500">{setupMessage}</p>
           )}
 
           <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col items-center gap-2">

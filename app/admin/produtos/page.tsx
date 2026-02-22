@@ -113,7 +113,7 @@ export default function ProdutosPage() {
       </div>
       <button
         onClick={() => setShowNewModal(true)}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-all z-50"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 text-amber-400 rounded-full shadow-xl hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-90 transition-all z-50"
         aria-label="Novo Produto"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -185,7 +185,7 @@ export default function ProdutosPage() {
             <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">Nenhum produto encontrado</div>
           ) : (
             filteredProducts.map((product) => (
-              <div key={product.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
+              <div key={product.id} className="p-4 pr-2 pt-4 pb-4">
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     <div
@@ -201,8 +201,16 @@ export default function ProdutosPage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-gray-900">{product.name}</span>
-                      {product.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{product.description}</p>}
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="font-semibold text-gray-900 truncate">{product.name}</span>
+                        <span className="text-amber-600 font-semibold flex-shrink-0 text-sm">{formatCurrency(product.price)}</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2 mt-1">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-50 text-green-700 border border-green-200' : product.stock > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                          {product.stock} unid.
+                        </span>
+                        <span className="text-xs text-gray-500">Cód: {product.sku || '–'}</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex-shrink-0 pt-0.5">
@@ -214,25 +222,6 @@ export default function ProdutosPage() {
                       ]}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-1.5 text-sm">
-                  <p className="text-gray-600">
-                    <span className="text-gray-400">Código</span>
-                    <span className="ml-2 text-gray-900 font-medium">{product.sku || '–'}</span>
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="text-gray-400">Preço</span>
-                    <span className="ml-2 font-medium text-gray-900">{formatCurrency(product.price)}</span>
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="text-gray-400">Estoque</span>
-                    <span className="ml-2">
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-50 text-green-700 border border-green-200' : product.stock > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                        {product.stock} unid.
-                      </span>
-                    </span>
-                  </p>
                 </div>
               </div>
             ))

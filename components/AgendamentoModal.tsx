@@ -500,7 +500,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
                             onClick={() => !past && selectDay(calendarGrid.year, calendarGrid.month, cell.day!)}
                             className={`aspect-square rounded text-sm transition-colors
                               ${past ? 'text-stone-300 cursor-not-allowed bg-transparent' : 'text-stone-800 hover:bg-amber-100'}
-                              ${selected && !past ? 'bg-amber-500 text-white font-semibold hover:bg-amber-600' : ''}`}
+                              ${selected && !past ? 'bg-stone-800 text-amber-400 font-semibold hover:bg-stone-700 border border-amber-600/50' : ''}`}
                           >
                             {cell.day}
                           </button>

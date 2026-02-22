@@ -33,14 +33,14 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none rounded-lg shadow-sm hover:shadow-md active:scale-[0.98]';
 
   const variantClasses: Record<string, string> = {
-    primary: 'bg-amber-600 text-white hover:bg-amber-700 focus:ring-amber-500 border border-amber-600',
+    primary: 'bg-stone-800 text-amber-400 hover:bg-stone-700 border border-amber-600/50 focus:ring-amber-500/50 shadow-[0_0_0_1px_rgba(245,158,11,0.25)] hover:shadow-[0_0_12px_rgba(245,158,11,0.2)]',
     secondary: 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 hover:border-stone-400 focus:ring-stone-300',
     success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 border border-emerald-600',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border border-red-600',
-    outline: 'bg-transparent text-amber-700 border border-amber-600 hover:bg-amber-50 focus:ring-amber-500',
+    outline: 'bg-transparent text-amber-400 border border-amber-600/60 hover:bg-stone-800/50 focus:ring-amber-500/50',
     ghost: 'bg-transparent text-stone-700 hover:bg-stone-100 focus:ring-stone-300 border border-transparent',
-    edit: 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 focus:ring-amber-300',
-    warning: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-400 border border-amber-500',
+    edit: 'bg-stone-800/80 text-amber-400 border border-amber-600/40 hover:bg-stone-700 focus:ring-amber-500/40',
+    warning: 'bg-stone-800 text-amber-400 hover:bg-stone-700 border border-amber-600/50 focus:ring-amber-500/50 shadow-[0_0_0_1px_rgba(245,158,11,0.25)]',
   };
   
   // Tamanhos com espaçamentos e tipografia consistentes (responsivos)

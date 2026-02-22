@@ -736,9 +736,9 @@ export default function AgendamentosPage() {
                           !isCurrentMonth
                             ? 'bg-stone-50/80 hover:bg-stone-100/80'
                             : isSelected
-                              ? 'bg-amber-100 ring-1 ring-amber-300 ring-inset hover:bg-amber-100'
+                              ? 'bg-stone-800/10 ring-1 ring-amber-600/40 ring-inset hover:bg-stone-800/15'
                               : isToday
-                                ? 'bg-amber-50 hover:bg-amber-100/50'
+                                ? 'bg-amber-50 hover:bg-stone-800/5'
                                 : isWeekend
                                   ? 'bg-stone-50/50 hover:bg-amber-50/50'
                                   : 'bg-white hover:bg-amber-50/50'
@@ -749,9 +749,9 @@ export default function AgendamentosPage() {
                             !isCurrentMonth
                               ? 'text-stone-400'
                               : isToday
-                                ? 'bg-amber-500 text-white'
+                                ? 'bg-stone-800 text-amber-400'
                                 : isSelected
-                                  ? 'text-amber-800'
+                                  ? 'text-amber-700'
                                   : 'text-stone-700'
                           }`}
                         >
@@ -849,7 +849,7 @@ export default function AgendamentosPage() {
         )}
       </main>
 
-      <button onClick={() => { setEditingAppointment(null); setShowFormModal(true); }} className="fixed bottom-6 right-6 w-12 h-12 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center active:scale-95 transition-all z-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2">
+      <button onClick={() => { setEditingAppointment(null); setShowFormModal(true); }} className="fixed bottom-6 right-6 w-12 h-12 bg-stone-800 hover:bg-stone-700 text-amber-400 rounded-full shadow-lg hover:shadow-[0_0_16px_rgba(245,158,11,0.25)] border border-amber-600/50 flex items-center justify-center active:scale-95 transition-all z-50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2">
         <Plus className="h-7 w-7" />
       </button>
 
@@ -929,7 +929,7 @@ export default function AgendamentosPage() {
                         Lembrar cliente
                       </Button>
                     )}
-                    <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
+                    <Button type="button" variant="primary" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
                   </>
                 )}
                 {apt.status === 'confirmado' && (
@@ -955,7 +955,7 @@ export default function AgendamentosPage() {
                         Lembrar cliente
                       </Button>
                     )}
-                    <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
+                    <Button type="button" variant="primary" onClick={() => handleStatusUpdate(apt.id, 'concluido')}>Finalizar serviço</Button>
                   </>
                 )}
                 {apt.status === 'concluido' && (

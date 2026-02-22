@@ -76,7 +76,7 @@ export function ClientSidebar() {
             <button
               type="button"
               onClick={() => setAccountOpen(!accountOpen)}
-              className="h-9 w-9 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0 hover:bg-amber-500/30 transition-colors"
+              className="h-9 w-9 rounded-full bg-stone-800 border border-amber-600/50 flex items-center justify-center flex-shrink-0 hover:bg-stone-700 transition-colors"
               aria-expanded={accountOpen}
               aria-haspopup="true"
             >
@@ -160,7 +160,7 @@ export function ClientSidebar() {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium',
                     isActive
-                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                      ? 'bg-stone-800 text-amber-400 border border-amber-600/50'
                       : 'text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-transparent'
                   )}
                 >
@@ -175,7 +175,7 @@ export function ClientSidebar() {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium mt-1',
                 pathname === '/agendar'
-                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                  ? 'bg-stone-800 text-amber-400 border border-amber-600/50'
                   : 'text-emerald-400 hover:bg-stone-800 hover:text-emerald-300 border border-transparent'
               )}
             >
@@ -193,7 +193,7 @@ export function ClientSidebar() {
               aria-expanded={accountOpen}
               aria-haspopup="true"
             >
-              <div className="h-10 w-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-stone-800 border border-amber-600/50 flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-semibold text-amber-400">{getInitials(displayName)}</span>
               </div>
               <div className="min-w-0 flex-1">
