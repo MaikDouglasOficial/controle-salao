@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
       }
     } else {
       const account = await prisma.customerAccount.findUnique({ where: { email } });
-      if (!account) {
+      const customerByEmail = await prisma.customer.findUnique({ where: { email } });
+      if (!account && !customerByEmail) {
         return NextResponse.json({ message: 'Se o e-mail existir, você receberá um link para redefinir a senha.' });
       }
     }

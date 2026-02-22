@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import * as bcrypt from 'bcryptjs';
-
 function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, '');
 }
@@ -29,8 +28,9 @@ function isValidCpf(cpfNorm: string): boolean {
 
 /**
  * POST - Cadastro de conta do cliente.
- * Body: { email, password, phone, name, cpf }
- * CPF é obrigatório e identifica a pessoa de forma única; evita cadastros repetidos.
+ * Body: { email, password, cpf } obrigatórios.
+ * Se o cliente já existir (ex.: cadastrado pelo admin), só cria a conta de acesso (não sobrescreve dados).
+ * Body opcional para novo cadastro: { phone, name }.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +54,35 @@ export async function POST(request: NextRequest) {
     if (!isValidCpf(cpfNorm)) {
       return NextResponse.json({ error: 'CPF inválido' }, { status: 400 });
     }
+
+    const MESSAGE_ALREADY = 'Este e-mail ou CPF já está cadastrado. Faça login ou use a opção "Esqueci minha senha".';
+
+    // E-mail já existe? (conta ou cliente com esse e-mail)
+    const existingAccount = await prisma.customerAccount.findUnique({ where: { email } });
+    if (existingAccount) {
+      return NextResponse.json({ error: MESSAGE_ALREADY }, { status: 400 });
+    }
+    const existingByEmail = await prisma.customer.findUnique({
+      where: { email },
+    });
+    if (existingByEmail) {
+      return NextResponse.json({ error: MESSAGE_ALREADY }, { status: 400 });
+    }
+
+    // CPF já existe?
+    let customerByCpf = await prisma.customer.findFirst({
+      where: { cpf: cpfNorm },
+    });
+    if (!customerByCpf) {
+      const allWithCpf = await prisma.customer.findMany({ where: { cpf: { not: null } }, select: { id: true, cpf: true } });
+      const found = allWithCpf.find((c) => c.cpf && normalizeCpf(c.cpf) === cpfNorm);
+      if (found) customerByCpf = await prisma.customer.findUnique({ where: { id: found.id } }) ?? null;
+    }
+    if (customerByCpf) {
+      return NextResponse.json({ error: MESSAGE_ALREADY }, { status: 400 });
+    }
+
+    // E-mail e CPF são novos → exige nome e telefone e cria cliente + conta
     const phoneNorm = normalizePhone(phone);
     if (phoneNorm.length < 8) {
       return NextResponse.json({ error: 'Telefone inválido' }, { status: 400 });
@@ -62,22 +91,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 });
     }
 
-    // Evitar cadastro duplicado: e-mail já usado em outra conta
-    const existingByEmail = await prisma.customerAccount.findUnique({
-      where: { email },
-    });
-    if (existingByEmail) {
-      return NextResponse.json({ error: 'Este e-mail já está em uso. Faça login ou use outro e-mail.' }, { status: 400 });
-    }
-
-    // 1) Buscar cliente pelo CPF (identificador único da pessoa)
     let customer = await prisma.customer.findFirst({
-      where: { cpf: cpfNorm },
+      where: { phone: phoneNorm },
       include: { account: true },
-    });
-    if (!customer && cpfNorm) {
-      const allWithCpf = await prisma.customer.findMany({ where: { cpf: { not: null } }, select: { id: true, cpf: true } });
-      const found = allWithCpf.find((c) => c.cpf && normalizeCpf(c.cpf) === cpfNorm);
+    }) ?? null;
+    if (!customer) {
+      const all = await prisma.customer.findMany({ select: { id: true, phone: true } });
+      const found = all.find((c) => normalizePhone(c.phone) === phoneNorm);
       if (found) {
         customer = await prisma.customer.findUnique({
           where: { id: found.id },
@@ -85,41 +105,15 @@ export async function POST(request: NextRequest) {
         }) ?? null;
       }
     }
-
-    // CPF já tem conta → uma pessoa = uma conta
     if (customer?.account) {
       return NextResponse.json({
-        error: 'Este CPF já possui uma conta. Faça login ou use "Esqueci minha senha" na tela de login.',
+        error: 'Este telefone já está vinculado a uma conta. Faça login ou use "Esqueci minha senha".',
       }, { status: 400 });
     }
-
-    // 2) Se não achou por CPF, tentar por telefone (cliente criado no agendamento sem CPF)
-    if (!customer) {
-      customer = await prisma.customer.findFirst({
-        where: { phone: phoneNorm },
-        include: { account: true },
-      }) ?? null;
-      if (!customer) {
-        const all = await prisma.customer.findMany({ select: { id: true, phone: true } });
-        const found = all.find((c) => normalizePhone(c.phone) === phoneNorm);
-        if (found) {
-          customer = await prisma.customer.findUnique({
-            where: { id: found.id },
-            include: { account: true },
-          }) ?? null;
-        }
-      }
-      if (customer?.account) {
-        return NextResponse.json({
-          error: 'Este telefone já está vinculado a uma conta. Faça login ou use "Esqueci minha senha".',
-        }, { status: 400 });
-      }
-      // Telefone já existe com outro CPF → não sobrescrever
-      if (customer.cpf && normalizeCpf(customer.cpf) !== cpfNorm) {
-        return NextResponse.json({
-          error: 'Este telefone já está cadastrado com outro CPF. Se já tem conta, faça login com seu e-mail.',
-        }, { status: 400 });
-      }
+    if (customer?.cpf && normalizeCpf(customer.cpf) !== cpfNorm) {
+      return NextResponse.json({
+        error: 'Este telefone já está cadastrado com outro CPF. Se já tem conta, faça login com seu e-mail.',
+      }, { status: 400 });
     }
 
     if (!customer) {
@@ -158,7 +152,7 @@ export async function POST(request: NextRequest) {
     const prismaError = error as { code?: string };
     if (prismaError?.code === 'P2002') {
       return NextResponse.json(
-        { error: 'Este CPF, e-mail ou telefone já está vinculado a uma conta. Faça login ou use "Esqueci minha senha".' },
+        { error: 'Este e-mail ou CPF já está cadastrado. Faça login ou use a opção "Esqueci minha senha".' },
         { status: 400 }
       );
     }

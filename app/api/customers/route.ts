@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/customers - Criar novo cliente
+// POST /api/customers - Criar novo cliente (ou retornar existente se e-mail/CPF já cadastrados)
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireAdminSession();
@@ -54,13 +54,59 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, phone, email, cpf, birthday, notes, photo } = parsed.data;
+    const emailNorm = email?.trim().toLowerCase() || null;
+    const cpfNorm = cpf?.replace(/\D/g, '').slice(0, 11) || null;
+
+    // Este e-mail ou este CPF já existem? → não criar, retornar cliente existente
+    if (emailNorm) {
+      const byEmail = await prisma.customer.findUnique({
+        where: { email: emailNorm },
+        include: { account: { select: { id: true } } },
+      });
+      if (byEmail) {
+        return NextResponse.json(
+          { error: 'Cliente já encontrado!', existing: true, customer: byEmail },
+          { status: 409 }
+        );
+      }
+    }
+    if (cpfNorm && cpfNorm.length === 11) {
+      const byCpf = await prisma.customer.findFirst({
+        where: { cpf: cpfNorm },
+        include: { account: { select: { id: true } } },
+      });
+      if (!byCpf) {
+        const allWithCpf = await prisma.customer.findMany({
+          where: { cpf: { not: null } },
+          select: { id: true, cpf: true },
+        });
+        const found = allWithCpf.find((c) => c.cpf && c.cpf.replace(/\D/g, '').slice(0, 11) === cpfNorm);
+        if (found) {
+          const full = await prisma.customer.findUnique({
+            where: { id: found.id },
+            include: { account: { select: { id: true } } },
+          });
+          if (full) {
+            return NextResponse.json(
+              { error: 'Cliente já encontrado!', existing: true, customer: full },
+              { status: 409 }
+            );
+          }
+        }
+      } else {
+        return NextResponse.json(
+          { error: 'Cliente já encontrado!', existing: true, customer: byCpf },
+          { status: 409 }
+        );
+      }
+    }
 
     const customer = await prisma.customer.create({
       data: {
         name,
         phone,
-        email: email ?? null,
-        cpf: cpf ?? null,
+        email: emailNorm ?? null,
+        cpf: cpfNorm ?? null,
         birthday,
         notes: notes ?? null,
         photo: photo ?? null,
@@ -71,7 +117,8 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const err = error as { code?: string; meta?: { target?: string[] } };
     if (err.code === 'P2002') {
-      const field = err.meta?.target?.includes('phone') ? 'Telefone' : 'CPF';
+      const target = err.meta?.target as string[] | undefined;
+      const field = target?.includes('email') ? 'E-mail' : target?.includes('phone') ? 'Telefone' : 'CPF';
       return NextResponse.json(
         { error: `${field} já cadastrado` },
         { status: 400 }

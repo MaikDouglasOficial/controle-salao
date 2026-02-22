@@ -31,10 +31,30 @@ export async function POST(request: NextRequest) {
         data: { password: hash },
       });
     } else {
-      await prisma.customerAccount.update({
+      const account = await prisma.customerAccount.findUnique({
         where: { email: record.email },
-        data: { passwordHash: hash },
       });
+      if (account) {
+        await prisma.customerAccount.update({
+          where: { email: record.email },
+          data: { passwordHash: hash },
+        });
+      } else {
+        const customer = await prisma.customer.findUnique({
+          where: { email: record.email },
+        });
+        if (customer) {
+          await prisma.customerAccount.create({
+            data: {
+              customerId: customer.id,
+              email: record.email,
+              passwordHash: hash,
+            },
+          });
+        } else {
+          return NextResponse.json({ error: 'E-mail não encontrado. Solicite uma nova recuperação de senha.' }, { status: 400 });
+        }
+      }
     }
 
     await prisma.passwordResetToken.delete({ where: { id: record.id } });

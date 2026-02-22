@@ -25,7 +25,7 @@ model Customer {
   id            Int              @id @default(autoincrement())
   name          String
   phone         String           @unique
-  email         String?
+  email         String?          @unique
   cpf           String?          @unique
   birthday      DateTime?
   notes         String?
@@ -36,6 +36,7 @@ model Customer {
   sales         Sale[]
   gallery       CustomerGallery[]
   account       CustomerAccount?
+  verificationSessions CustomerVerificationSession[]
 }
 
 // Conta de acesso do cliente (login com email + senha)
@@ -47,6 +48,16 @@ model CustomerAccount {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+// Código de verificação para criar senha (cliente já cadastrado pelo admin)
+model CustomerVerificationSession {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  code       String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 // Token para recuperação de senha (admin ou cliente)
@@ -82,6 +93,7 @@ model Professional {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  services  Service[] // serviços que este profissional realiza
 }
 
 // Modelo de Produto
@@ -113,6 +125,7 @@ model Service {
   updatedAt        DateTime      @updatedAt
   appointments     Appointment[]
   saleItems        SaleItem[]
+  professionals    Professional[] // profissionais que realizam este serviço
 }
 
 // Modelo de Agendamento

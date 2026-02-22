@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { CalendarDays, Pencil, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { CalendarDays, Pencil, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ModalBase } from '@/components/ui/ModalBase';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
@@ -142,6 +143,7 @@ export default function ClienteAgendamentosPage() {
     return opts;
   }, []);
 
+  /** Bloqueia se o período do novo agendamento (início até início+duração) sobrepõe qualquer horário ocupado. */
   const isTimeBlocked = (timeStr: string): boolean => {
     if (busySlots.length === 0) return false;
     const slotStart = new Date(editDateOnly + 'T' + timeStr + ':00').getTime();
@@ -294,7 +296,7 @@ export default function ClienteAgendamentosPage() {
   };
 
   const renderList = (list: AppointmentItem[], title: string, showActions: boolean) => (
-    <div className="mb-8">
+    <div className="card card-body mb-6">
       <h3 className="card-title mb-4 flex items-center gap-2">
         <CalendarDays className="h-5 w-5 text-[var(--brand-primary)]" />
         {title}
@@ -304,11 +306,11 @@ export default function ClienteAgendamentosPage() {
           {title.includes('Próxim') ? 'Nenhum agendamento futuro.' : 'Nenhum agendamento passado.'}
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-0">
           {list.map((a) => {
             const d = new Date(a.date);
             return (
-              <li key={a.id} className="card p-4">
+              <li key={a.id} className="py-3 border-b border-stone-100 last:border-0">
                 <div className="flex items-start gap-3 sm:gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-stone-900">{a.service.name}</p>
@@ -414,6 +416,14 @@ export default function ClienteAgendamentosPage() {
       {renderList(upcoming, 'Próximos agendamentos', true)}
       {renderList(past, 'Histórico', false)}
 
+      <div className="flex flex-row items-center justify-end gap-3 flex-nowrap">
+        <Link href="/agendar">
+          <Button type="button" variant="primary" icon={Calendar}>
+            Novo agendamento
+          </Button>
+        </Link>
+      </div>
+
       <ModalBase
         isOpen={actionModal !== null}
         onClose={closeModal}
@@ -427,12 +437,12 @@ export default function ClienteAgendamentosPage() {
             </Button>
             <Button
               type="button"
-              variant={actionModal === 'cancel' ? 'danger' : 'primary'}
+              variant={actionModal === 'cancel' ? 'danger' : actionModal === 'confirm' ? 'success' : 'primary'}
               onClick={handleSubmit}
               disabled={saving || justification.trim().length < 3}
               loading={saving}
             >
-              {actionModal === 'edit' ? 'Salvar Alterações' : actionModal === 'confirm' ? 'Confirmar' : 'Cancelar agendamento'}
+              {actionModal === 'edit' ? 'Salvar alterações' : actionModal === 'confirm' ? 'Confirmar' : 'Cancelar agendamento'}
             </Button>
           </div>
         }

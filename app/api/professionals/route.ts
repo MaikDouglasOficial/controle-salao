@@ -10,8 +10,11 @@ export async function GET() {
 
     const professionals = await prisma.professional.findMany({
       orderBy: { name: 'asc' },
+      include: { services: { select: { id: true } } },
     });
-    return NextResponse.json(professionals);
+    return NextResponse.json(
+      professionals.map((p) => ({ ...p, serviceIds: p.services.map((s) => s.id) }))
+    );
   } catch (error) {
     console.error('Erro ao buscar profissionais:', error);
     return NextResponse.json(
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { name, phone, email, specialty, active, photo, commissionPercentage } = body;
+    const { name, phone, email, specialty, active, photo, commissionPercentage, serviceIds } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -36,6 +39,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const serviceIdsArr = Array.isArray(serviceIds) ? serviceIds.filter((id: unknown) => Number.isInteger(Number(id)) && Number(id) > 0).map(Number) : [];
 
     const professional = await prisma.professional.create({
       data: {
@@ -46,6 +51,7 @@ export async function POST(request: Request) {
         commissionPercentage: commissionPercentage ?? 0,
         active: active ?? true,
         photo: photo || null,
+        services: serviceIdsArr.length > 0 ? { connect: serviceIdsArr.map((id: number) => ({ id })) } : undefined,
       },
     });
 
@@ -74,7 +80,7 @@ export async function PUT(request: Request) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { id, name, phone, email, specialty, active, photo, commissionPercentage } = body;
+    const { id, name, phone, email, specialty, active, photo, commissionPercentage, serviceIds } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -82,6 +88,8 @@ export async function PUT(request: Request) {
         { status: 400 }
       );
     }
+
+    const serviceIdsArr = Array.isArray(serviceIds) ? serviceIds.filter((id: unknown) => Number.isInteger(Number(id)) && Number(id) > 0).map(Number) : [];
 
     const professional = await prisma.professional.update({
       where: { id },
@@ -93,6 +101,7 @@ export async function PUT(request: Request) {
         commissionPercentage: commissionPercentage ?? 0,
         active,
         photo: photo || null,
+        services: { set: serviceIdsArr.map((id: number) => ({ id })) },
       },
     });
 

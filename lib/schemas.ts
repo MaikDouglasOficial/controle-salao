@@ -15,14 +15,17 @@ export const appointmentPostSchema = z.object({
   notes: optionalString.optional(),
 });
 
-/** Agendamento público (cliente): telefone + nome opcional; servidor exige nome só se cliente novo. */
+/** Agendamento público (cliente): telefone + nome opcional; serviceId ou serviceIds[] (vários serviços em sequência). */
 export const bookingPostSchema = z.object({
   phone: z.string().min(1, 'Telefone é obrigatório'),
   name: z.string().optional(),
-  serviceId: z.coerce.number().int().positive('Serviço é obrigatório'),
+  serviceId: z.coerce.number().int().positive().optional(),
+  serviceIds: z.array(z.coerce.number().int().positive()).optional(),
   date: z.string().min(1, 'Data e horário são obrigatórios'),
   professional: optionalString.optional(),
   notes: optionalString.optional(),
+}).refine((d) => (d.serviceIds && d.serviceIds.length > 0) || (d.serviceId != null && d.serviceId > 0), {
+  message: 'Informe ao menos um serviço (serviceId ou serviceIds).',
 });
 
 export const appointmentPutSchema = z.object({

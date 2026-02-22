@@ -38,9 +38,11 @@ async function main() {
   });
   console.log('✅ Usuário admin criado:', admin.email);
 
-  // Criar clientes
-  const cliente1 = await prisma.customer.create({
-    data: {
+  // Criar clientes (upsert = pode rodar o seed várias vezes)
+  const cliente1 = await prisma.customer.upsert({
+    where: { phone: '+5511987654321' },
+    update: {},
+    create: {
       name: 'Maria Silva',
       phone: '+5511987654321',
       email: 'maria@email.com',
@@ -49,8 +51,10 @@ async function main() {
     },
   });
 
-  const cliente2 = await prisma.customer.create({
-    data: {
+  const cliente2 = await prisma.customer.upsert({
+    where: { phone: '+5511976543210' },
+    update: {},
+    create: {
       name: 'Ana Santos',
       phone: '+5511976543210',
       email: 'ana@email.com',
@@ -59,8 +63,10 @@ async function main() {
     },
   });
 
-  const cliente3 = await prisma.customer.create({
-    data: {
+  const cliente3 = await prisma.customer.upsert({
+    where: { phone: '+5511965432109' },
+    update: {},
+    create: {
       name: 'Juliana Oliveira',
       phone: '+5511965432109',
       email: 'juliana@email.com',
@@ -69,9 +75,11 @@ async function main() {
   });
   console.log('✅ Clientes criados');
 
-  // Criar profissionais
-  const profissional1 = await prisma.professional.create({
-    data: {
+  // Criar profissionais (upsert = pode rodar o seed várias vezes)
+  await prisma.professional.upsert({
+    where: { name: 'Carla Mendes' },
+    update: {},
+    create: {
       name: 'Carla Mendes',
       phone: '+5511999887766',
       email: 'carla@salao.com',
@@ -80,8 +88,10 @@ async function main() {
     },
   });
 
-  const profissional2 = await prisma.professional.create({
-    data: {
+  await prisma.professional.upsert({
+    where: { name: 'Roberto Silva' },
+    update: {},
+    create: {
       name: 'Roberto Silva',
       phone: '+5511988776655',
       email: 'roberto@salao.com',
@@ -90,8 +100,10 @@ async function main() {
     },
   });
 
-  const profissional3 = await prisma.professional.create({
-    data: {
+  await prisma.professional.upsert({
+    where: { name: 'Fernanda Costa' },
+    update: {},
+    create: {
       name: 'Fernanda Costa',
       phone: '+5511977665544',
       email: 'fernanda@salao.com',
@@ -100,8 +112,10 @@ async function main() {
     },
   });
 
-  const profissional4 = await prisma.professional.create({
-    data: {
+  await prisma.professional.upsert({
+    where: { name: 'Paula Rodrigues' },
+    update: {},
+    create: {
       name: 'Paula Rodrigues',
       phone: '+5511966554433',
       email: 'paula@salao.com',
@@ -110,8 +124,10 @@ async function main() {
     },
   });
 
-  const profissional5 = await prisma.professional.create({
-    data: {
+  await prisma.professional.upsert({
+    where: { name: 'Marcos Almeida' },
+    update: {},
+    create: {
       name: 'Marcos Almeida',
       phone: '+5511955443322',
       email: 'marcos@salao.com',
@@ -121,9 +137,11 @@ async function main() {
   });
   console.log('✅ Profissionais criados');
 
-  // Criar produtos
-  const produto1 = await prisma.product.create({
-    data: {
+  // Criar produtos (upsert = pode rodar o seed várias vezes)
+  const produto1 = await prisma.product.upsert({
+    where: { sku: 'SHP-001' },
+    update: {},
+    create: {
       name: 'Shampoo Hidratante',
       description: 'Shampoo profissional para hidratação profunda',
       price: 45.90,
@@ -132,8 +150,10 @@ async function main() {
     },
   });
 
-  const produto2 = await prisma.product.create({
-    data: {
+  const produto2 = await prisma.product.upsert({
+    where: { sku: 'CND-001' },
+    update: {},
+    create: {
       name: 'Condicionador Reparador',
       description: 'Condicionador para cabelos danificados',
       price: 52.90,
@@ -142,8 +162,10 @@ async function main() {
     },
   });
 
-  const produto3 = await prisma.product.create({
-    data: {
+  const produto3 = await prisma.product.upsert({
+    where: { sku: 'MSC-001' },
+    update: {},
+    create: {
       name: 'Máscara Capilar',
       description: 'Máscara de tratamento intensivo',
       price: 89.90,
@@ -152,8 +174,10 @@ async function main() {
     },
   });
 
-  const produto4 = await prisma.product.create({
-    data: {
+  const produto4 = await prisma.product.upsert({
+    where: { sku: 'ESM-001' },
+    update: {},
+    create: {
       name: 'Esmalte Premium',
       description: 'Esmalte de longa duração',
       price: 15.90,
@@ -163,158 +187,176 @@ async function main() {
   });
   console.log('✅ Produtos criados');
 
-  // Criar serviços
-  const servico1 = await prisma.service.create({
-    data: {
-      name: 'Corte Feminino',
-      description: 'Corte de cabelo feminino com lavagem',
-      duration: 60,
-      price: 80.00,
-    },
-  });
+  // Criar serviços (buscar ou criar para poder rodar o seed várias vezes)
+  const servico1 = await prisma.service.findFirst({ where: { name: 'Corte Feminino' } })
+    ?? await prisma.service.create({
+        data: {
+          name: 'Corte Feminino',
+          description: 'Corte de cabelo feminino com lavagem',
+          duration: 60,
+          price: 80.00,
+        },
+      });
 
-  const servico2 = await prisma.service.create({
-    data: {
-      name: 'Coloração',
-      description: 'Coloração completa com produtos profissionais',
-      duration: 120,
-      price: 180.00,
-    },
-  });
+  const servico2 = await prisma.service.findFirst({ where: { name: 'Coloração' } })
+    ?? await prisma.service.create({
+        data: {
+          name: 'Coloração',
+          description: 'Coloração completa com produtos profissionais',
+          duration: 120,
+          price: 180.00,
+        },
+      });
 
-  const servico3 = await prisma.service.create({
-    data: {
-      name: 'Manicure',
-      description: 'Manicure completa com esmaltação',
-      duration: 45,
-      price: 35.00,
-    },
-  });
+  const servico3 = await prisma.service.findFirst({ where: { name: 'Manicure' } })
+    ?? await prisma.service.create({
+        data: {
+          name: 'Manicure',
+          description: 'Manicure completa com esmaltação',
+          duration: 45,
+          price: 35.00,
+        },
+      });
 
-  const servico4 = await prisma.service.create({
-    data: {
-      name: 'Hidratação',
-      description: 'Tratamento de hidratação capilar',
-      duration: 90,
-      price: 120.00,
-    },
-  });
+  const servico4 = await prisma.service.findFirst({ where: { name: 'Hidratação' } })
+    ?? await prisma.service.create({
+        data: {
+          name: 'Hidratação',
+          description: 'Tratamento de hidratação capilar',
+          duration: 90,
+          price: 120.00,
+        },
+      });
 
-  const servico5 = await prisma.service.create({
-    data: {
-      name: 'Escova Progressiva',
-      description: 'Alisamento com escova progressiva',
-      duration: 180,
-      price: 250.00,
-    },
-  });
+  await prisma.service.findFirst({ where: { name: 'Escova Progressiva' } })
+    ?? await prisma.service.create({
+        data: {
+          name: 'Escova Progressiva',
+          description: 'Alisamento com escova progressiva',
+          duration: 180,
+          price: 250.00,
+        },
+      });
   console.log('✅ Serviços criados');
 
-  // Criar agendamentos
-  const hoje = new Date();
-  const amanha = new Date(hoje);
-  amanha.setDate(amanha.getDate() + 1);
-  amanha.setHours(14, 0, 0, 0);
+  // Criar agendamentos, venda e despesas só se ainda não existirem (evita duplicar ao rodar o seed de novo)
+  const countAppointments = await prisma.appointment.count();
+  if (countAppointments === 0) {
+    const hoje = new Date();
+    const amanha = new Date(hoje);
+    amanha.setDate(amanha.getDate() + 1);
+    amanha.setHours(14, 0, 0, 0);
 
-  const agendamento1 = await prisma.appointment.create({
-    data: {
-      customerId: cliente1.id,
-      serviceId: servico1.id,
-      date: amanha,
-      status: 'confirmado',
-      professional: 'Carla',
-      notes: 'Cliente pediu para deixar o cabelo mais curto',
-    },
-  });
+    await prisma.appointment.create({
+      data: {
+        customerId: cliente1.id,
+        serviceId: servico1.id,
+        date: amanha,
+        status: 'confirmado',
+        professional: 'Carla',
+        notes: 'Cliente pediu para deixar o cabelo mais curto',
+      },
+    });
 
-  const depoisAmanha = new Date(hoje);
-  depoisAmanha.setDate(depoisAmanha.getDate() + 2);
-  depoisAmanha.setHours(10, 30, 0, 0);
+    const depoisAmanha = new Date(hoje);
+    depoisAmanha.setDate(depoisAmanha.getDate() + 2);
+    depoisAmanha.setHours(10, 30, 0, 0);
 
-  const agendamento2 = await prisma.appointment.create({
-    data: {
-      customerId: cliente2.id,
-      serviceId: servico2.id,
-      date: depoisAmanha,
-      status: 'agendado',
-      professional: 'Fernanda',
-    },
-  });
-  console.log('✅ Agendamentos criados');
+    await prisma.appointment.create({
+      data: {
+        customerId: cliente2.id,
+        serviceId: servico2.id,
+        date: depoisAmanha,
+        status: 'agendado',
+        professional: 'Fernanda',
+      },
+    });
+    console.log('✅ Agendamentos criados');
+  } else {
+    console.log('✅ Agendamentos já existem (pulado)');
+  }
 
-  // Criar uma venda
-  const venda = await prisma.sale.create({
-    data: {
-      customerId: cliente3.id,
-      total: 215.90,
-      paymentMethod: 'CARTAO_CREDITO',
-      date: new Date(),
-      notes: 'Cliente aproveitou promoção',
-    },
-  });
+  const countSales = await prisma.sale.count();
+  if (countSales === 0) {
+    const venda = await prisma.sale.create({
+      data: {
+        customerId: cliente3.id,
+        total: 215.90,
+        paymentMethod: 'CARTAO_CREDITO',
+        date: new Date(),
+        notes: 'Cliente aproveitou promoção',
+      },
+    });
 
-  await prisma.saleItem.create({
-    data: {
-      saleId: venda.id,
-      serviceId: servico4.id,
-      quantity: 1,
-      price: 120.00,
-    },
-  });
+    await prisma.saleItem.create({
+      data: {
+        saleId: venda.id,
+        serviceId: servico4.id,
+        quantity: 1,
+        price: 120.00,
+      },
+    });
 
-  await prisma.saleItem.create({
-    data: {
-      saleId: venda.id,
-      productId: produto1.id,
-      quantity: 2,
-      price: 45.90,
-    },
-  });
+    await prisma.saleItem.create({
+      data: {
+        saleId: venda.id,
+        productId: produto1.id,
+        quantity: 2,
+        price: 45.90,
+      },
+    });
 
-  await prisma.saleItem.create({
-    data: {
-      saleId: venda.id,
-      productId: produto4.id,
-      quantity: 1,
-      price: 15.90,
-    },
-  });
-  console.log('✅ Venda criada');
+    await prisma.saleItem.create({
+      data: {
+        saleId: venda.id,
+        productId: produto4.id,
+        quantity: 1,
+        price: 15.90,
+      },
+    });
+    console.log('✅ Venda criada');
+  } else {
+    console.log('✅ Vendas já existem (pulado)');
+  }
 
-  // Criar despesas
-  await prisma.expense.create({
-    data: {
-      name: 'Aluguel do Salão',
-      category: 'Infraestrutura',
-      value: 2500.00,
-      type: 'FIXA',
-      date: new Date(),
-      notes: 'Aluguel mensal',
-    },
-  });
+  const countExpenses = await prisma.expense.count();
+  if (countExpenses === 0) {
+    await prisma.expense.create({
+      data: {
+        name: 'Aluguel do Salão',
+        category: 'Infraestrutura',
+        value: 2500.00,
+        type: 'FIXA',
+        date: new Date(),
+        notes: 'Aluguel mensal',
+      },
+    });
 
-  await prisma.expense.create({
-    data: {
-      name: 'Conta de Luz',
-      category: 'Utilidades',
-      value: 450.00,
-      type: 'FIXA',
-      date: new Date(),
-      notes: 'Energia elétrica',
-    },
-  });
+    await prisma.expense.create({
+      data: {
+        name: 'Conta de Luz',
+        category: 'Utilidades',
+        value: 450.00,
+        type: 'FIXA',
+        date: new Date(),
+        notes: 'Energia elétrica',
+      },
+    });
 
-  await prisma.expense.create({
-    data: {
-      name: 'Compra de Produtos',
-      category: 'Estoque',
-      value: 1200.00,
-      type: 'VARIAVEL',
-      date: new Date(),
-      notes: 'Reposição de estoque mensal',
-    },
-  });
-  console.log('✅ Despesas criadas');
+    await prisma.expense.create({
+      data: {
+        name: 'Compra de Produtos',
+        category: 'Estoque',
+        value: 1200.00,
+        type: 'VARIAVEL',
+        date: new Date(),
+        notes: 'Reposição de estoque mensal',
+      },
+    });
+    console.log('✅ Despesas criadas');
+  } else {
+    console.log('✅ Despesas já existem (pulado)');
+  }
 
   console.log('🎉 Seed concluído com sucesso!');
 }

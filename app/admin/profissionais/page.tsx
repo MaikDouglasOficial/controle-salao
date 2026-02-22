@@ -23,6 +23,7 @@ interface Professional {
   active: boolean;
   photo: string | null;
   createdAt: string;
+  serviceIds?: number[];
 }
 
 export default function ProfessionalsPage() {
@@ -60,7 +61,7 @@ export default function ProfessionalsPage() {
       console.error('Erro ao buscar profissionais:', error);
       setProfessionals([]);
       if (!apiError) {
-        setApiError('Não foi possível carregar os profissionais. Verifique se executou: npx prisma migrate dev --name add_professional_model');
+        setApiError('Não foi possível carregar os profissionais. Execute no terminal (na pasta do projeto) os comandos abaixo.');
       }
     } finally {
       setLoading(false);
@@ -166,7 +167,11 @@ export default function ProfessionalsPage() {
               <div className="mt-2 text-sm text-amber-700">
                 <p>{apiError}</p>
                 <p className="mt-2">
-                  <strong>Comandos necessários:</strong>
+                  <strong>Opção 1 – um comando:</strong>
+                </p>
+                <pre className="mt-1 bg-amber-100 p-2 rounded text-xs overflow-x-auto">npm run prisma:setup</pre>
+                <p className="mt-2">
+                  <strong>Opção 2 – comandos separados:</strong>
                 </p>
                 <pre className="mt-1 bg-amber-100 p-2 rounded text-xs overflow-x-auto">
                   npx prisma migrate dev --name add_professional_model{'\n'}

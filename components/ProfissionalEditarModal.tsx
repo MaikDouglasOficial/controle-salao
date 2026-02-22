@@ -1,6 +1,6 @@
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
@@ -15,6 +15,7 @@ interface ProfissionalEditarModalProps {
     specialty?: string;
     active?: boolean;
     photo?: string;
+    serviceIds?: number[];
   };
   onSave: (profissional: any) => void;
   onClose: () => void;
@@ -30,7 +31,20 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
   const [photo, setPhoto] = useState<string>(profissional?.photo || '');
   const [photoPreview, setPhotoPreview] = useState<string | null>(profissional?.photo || null);
   const [uploading, setUploading] = useState(false);
+  const [services, setServices] = useState<{ id: number; name: string }[]>([]);
+  const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>(profissional?.serviceIds ?? []);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setSelectedServiceIds(profissional?.serviceIds ?? []);
+  }, [profissional?.serviceIds]);
+
+  useEffect(() => {
+    fetchAuth('/api/services')
+      .then((r) => r.json())
+      .then((list) => setServices(Array.isArray(list) ? list : []))
+      .catch(() => setServices([]));
+  }, []);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,6 +94,12 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
     }
   };
 
+  const toggleService = (id: number) => {
+    setSelectedServiceIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     onSave({
@@ -90,6 +110,7 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       email,
       active,
       photo,
+      serviceIds: selectedServiceIds,
     });
   }
 
@@ -207,6 +228,24 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
               <label htmlFor="active" className="ml-2 text-sm text-gray-700">
                 Profissional ativo (pode receber agendamentos)
               </label>
+            </div>
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Serviços que realiza</label>
+            <p className="text-xs text-gray-500 mb-2">Marque os procedimentos que este profissional realiza. O cliente só poderá escolhê-lo ao agendar se ele realizar todos os serviços selecionados.</p>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+              {services.map((s) => (
+                <label key={s.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 cursor-pointer hover:border-primary-400">
+                  <input
+                    type="checkbox"
+                    checked={selectedServiceIds.includes(s.id)}
+                    onChange={() => toggleService(s.id)}
+                    className="w-4 h-4 text-primary-600 rounded"
+                  />
+                  <span className="text-sm">{s.name}</span>
+                </label>
+              ))}
+              {services.length === 0 && <span className="text-sm text-gray-500">Nenhum serviço cadastrado.</span>}
             </div>
           </div>
         </div>

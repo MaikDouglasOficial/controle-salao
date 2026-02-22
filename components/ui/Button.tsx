@@ -2,7 +2,7 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** primary = CTA principal (Salvar, Adicionar). success = conclusão positiva (Finalizar, Confirmar). danger = destrutivo (Excluir, Cancelar). */
+  /** primary = dourado (Salvar, Continuar, Adicionar). secondary = Cancelar/Voltar. success = Confirmar/Finalizar. danger = Cancelar agendamento/Excluir. warning = atenção. */
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'edit' | 'warning';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   icon?: LucideIcon;
@@ -12,8 +12,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Botões padronizados para sistema profissional.
- * Cores por ação: primary (azul) = CTA principal | success (verde) = concluir/confirmar | danger (vermelho) = excluir/cancelar | secondary = cancelar/voltar.
+ * Botões padronizados — cores por tipo de ação:
+ * primary = dourado/âmbar (marca): Salvar, Continuar, Adicionar, Novo agendamento
+ * secondary = neutro: Cancelar, Voltar, Fechar
+ * success = verde: Confirmar agendamento, Finalizar serviço, Agendar (concluir)
+ * danger = vermelho: Cancelar agendamento, Confirmar cancelamento, Excluir
+ * warning = âmbar atenção: uso pontual para avisos
  */
 export function Button({
   variant = 'primary',
@@ -29,13 +33,13 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none rounded-lg shadow-sm hover:shadow-md active:scale-[0.98]';
 
   const variantClasses: Record<string, string> = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 border border-blue-600',
+    primary: 'bg-amber-600 text-white hover:bg-amber-700 focus:ring-amber-500 border border-amber-600',
     secondary: 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 hover:border-stone-400 focus:ring-stone-300',
     success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 border border-emerald-600',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border border-red-600',
-    outline: 'bg-transparent text-blue-700 border border-blue-600 hover:bg-blue-50 focus:ring-blue-500',
+    outline: 'bg-transparent text-amber-700 border border-amber-600 hover:bg-amber-50 focus:ring-amber-500',
     ghost: 'bg-transparent text-stone-700 hover:bg-stone-100 focus:ring-stone-300 border border-transparent',
-    edit: 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 focus:ring-blue-300',
+    edit: 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 focus:ring-amber-300',
     warning: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-400 border border-amber-500',
   };
   

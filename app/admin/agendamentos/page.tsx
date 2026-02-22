@@ -58,6 +58,7 @@ export default function AgendamentosPage() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
+  const fetchIdRef = useRef(0);
 
   const dateStrip = useMemo(() => {
     const year = selectedDate.getFullYear();
@@ -161,6 +162,7 @@ export default function AgendamentosPage() {
   };
 
   async function fetchData() {
+    const myId = ++fetchIdRef.current;
     setLoading(true);
     try {
       const year = selectedDate.getFullYear();
@@ -185,16 +187,20 @@ export default function AgendamentosPage() {
       const customersList = unwrapListResponse(c);
       const appointmentsList = unwrapListResponse(aJson);
 
+      if (myId !== fetchIdRef.current) return;
+
       setCustomers(customersList);
       setServices(s);
       setProfessionals(Array.isArray(p) ? p.filter((prof: { active?: boolean }) => prof.active).map((prof: { name: string }) => prof.name) : []);
       setAppointments(appointmentsList);
     } catch (e) {
       console.error(e);
-      toast.error('Erro ao carregar agendamentos. Tente novamente.');
-      setAppointments([]);
+      if (myId === fetchIdRef.current) {
+        toast.error('Erro ao carregar agendamentos. Tente novamente.');
+        setAppointments([]);
+      }
     } finally {
-      setLoading(false);
+      if (myId === fetchIdRef.current) setLoading(false);
     }
   }
 
@@ -923,7 +929,7 @@ export default function AgendamentosPage() {
                         Lembrar cliente
                       </Button>
                     )}
-                    <Button type="button" variant="warning" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
+                    <Button type="button" variant="success" onClick={() => handleStatusUpdate(apt.id, 'confirmado')}>Confirmar agendamento</Button>
                   </>
                 )}
                 {apt.status === 'confirmado' && (

@@ -148,6 +148,7 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
     return opts;
   }, []);
 
+  /** Bloqueia se o período do agendamento (início até início+duração) sobrepõe qualquer horário já ocupado. */
   const isTimeBlocked = (timeStr: string): boolean => {
     if (busyAppointments.length === 0) return false;
     const slotStart = new Date(dateOnly + 'T' + timeStr + ':00').getTime();
@@ -415,9 +416,16 @@ export default function AgendamentoModal({ agendamento, customers, services, pro
               >
                 <option value="">Selecione o serviço</option>
                 {services.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({(s.duration ?? 30)} min)
+                  </option>
                 ))}
               </select>
+              {selectedService && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Duração: <span className="font-medium text-gray-700">{durationMinutes} min</span>
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Profissional</label>

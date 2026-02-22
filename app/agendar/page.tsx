@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
-const STEPS = ['Seus dados', 'Serviço', 'Data', 'Horário', 'Confirmar'];
-const STEPS_LOGGED = ['Serviço', 'Data', 'Horário', 'Confirmar'];
+const STEPS = ['Seus dados', 'Serviço', 'Profissional', 'Data', 'Horário', 'Confirmar'];
+const STEPS_LOGGED = ['Serviço', 'Profissional', 'Data', 'Horário', 'Confirmar'];
 
 interface Service {
   id: number;
@@ -28,14 +28,14 @@ export default function AgendarPage() {
   const [name, setName] = useState('');
   const [customerName, setCustomerName] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  const [professionals, setProfessionals] = useState<string[]>([]);
+  const [professionals, setProfessionals] = useState<{ name: string; serviceIds: number[] }[]>([]);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState<{ service: string; date: string; time: string; professional?: string } | null>(null);
+  const [success, setSuccess] = useState<{ services: string[]; date: string; time: string; professional?: string } | null>(null);
 
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [viewMonth, setViewMonth] = useState(() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -121,7 +121,14 @@ export default function AgendarPage() {
     return opts;
   }, []);
 
-  const durationMinutes = selectedService?.duration ?? 30;
+  const durationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0);
+  const totalPrice = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const toggleService = (s: Service) => {
+    setSelectedServices((prev) =>
+      prev.some((x) => x.id === s.id) ? prev.filter((x) => x.id !== s.id) : [...prev, s]
+    );
+  };
+  /** Bloqueia se o período do novo agendamento (início até início+duração) sobrepõe qualquer horário ocupado. */
   const isTimeBlocked = (timeStr: string): boolean => {
     if (busySlots.length === 0) return false;
     const slotStart = new Date(selectedDate + 'T' + timeStr + ':00').getTime();
@@ -138,6 +145,20 @@ export default function AgendarPage() {
     const now = new Date();
     return h * 60 + m <= now.getHours() * 60 + now.getMinutes();
   };
+  const selectedServiceIds = useMemo(() => selectedServices.map((s) => s.id), [selectedServices]);
+  const professionalsForServices = useMemo(() => {
+    if (selectedServiceIds.length === 0) return professionals;
+    return professionals.filter((p) =>
+      selectedServiceIds.every((id) => p.serviceIds.includes(id))
+    );
+  }, [professionals, selectedServiceIds]);
+
+  useEffect(() => {
+    if (!selectedProfessional) return;
+    const canDo = professionalsForServices.some((p) => p.name === selectedProfessional);
+    if (!canDo) setSelectedProfessional('');
+  }, [selectedProfessional, professionalsForServices]);
+
   const visibleTimeOptions = useMemo(() => {
     if (selectedDate !== todayLocal) return timeOptions;
     const now = new Date();
@@ -176,16 +197,17 @@ export default function AgendarPage() {
     setError('');
     setSubmitting(true);
     const dateIso = selectedDate && selectedTime ? `${selectedDate}T${selectedTime}:00` : '';
-    if (!dateIso || !selectedService) {
+    if (!dateIso || selectedServices.length === 0) {
       setError('Preencha todos os campos.');
       setSubmitting(false);
       return;
     }
+    const serviceIds = selectedServices.map((s) => s.id);
     try {
       const url = isLoggedIn ? '/api/cliente/agendamentos' : '/api/booking';
       const body = isLoggedIn
         ? {
-            serviceId: selectedService.id,
+            serviceIds,
             date: dateIso,
             professional: selectedProfessional || undefined,
             notes: notes.trim() || undefined,
@@ -193,7 +215,7 @@ export default function AgendarPage() {
         : {
             phone: phone.replace(/\D/g, ''),
             name: name.trim() || undefined,
-            serviceId: selectedService.id,
+            serviceIds,
             date: dateIso,
             professional: selectedProfessional || undefined,
             notes: notes.trim() || undefined,
@@ -212,7 +234,7 @@ export default function AgendarPage() {
       }
       const d = new Date(dateIso);
       setSuccess({
-        service: selectedService.name,
+        services: selectedServices.map((s) => s.name),
         date: d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }),
         time: d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
         professional: selectedProfessional || undefined,
@@ -229,18 +251,18 @@ export default function AgendarPage() {
 
   if (success) {
     return (
-      <div className="min-h-[100svh] bg-[var(--bg-main)] py-12 px-4">
-        <div className="page-container max-w-md mx-auto mt-6">
+      <div className={isLoggedIn ? '' : 'min-h-[100svh] bg-[var(--bg-main)]'}>
+        <div className="page-container space-y-6 mt-6">
           <div className="page-header">
             <h1 className="page-title">Agendamento confirmado!</h1>
             <p className="page-subtitle">Seu horário foi reservado com sucesso</p>
           </div>
-          <div className="card p-8 text-center">
+          <div className="card card-body text-center max-w-xl mx-auto">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mb-6">
               <CheckCircle className="w-10 h-10" />
             </div>
             <p className="text-[var(--text-muted)] mb-6">
-              <strong className="text-[var(--text-main)]">{success.service}</strong><br />
+              <strong className="text-[var(--text-main)]">{success.services.join(' + ')}</strong><br />
               {success.date} às {success.time}
               {success.professional && <><br />Com {success.professional}</>}
             </p>
@@ -262,14 +284,17 @@ export default function AgendarPage() {
   }
 
   return (
-    <div className={isLoggedIn ? '' : 'min-h-[100svh] bg-[var(--bg-main)] pt-6 pb-8 px-4'}>
-      <div className={`page-container max-w-lg mx-auto ${isLoggedIn ? 'space-y-6 mt-6' : ''}`}>
+    <div className={isLoggedIn ? '' : 'min-h-[100svh] bg-[var(--bg-main)]'}>
+      <div className="page-container space-y-6 mt-6">
         <div className="page-header">
-          <h1 className="page-title">Agendar horário</h1>
-          <p className="page-subtitle">Escolha o serviço, data e horário nos passos abaixo</p>
+          <h1 className="page-title flex items-center justify-center gap-2">
+            <CalendarDays className="h-7 w-7 text-[var(--brand-primary)]" />
+            Agendar horário
+          </h1>
+          <p className="page-subtitle">Escolha o serviço, o profissional, a data e o horário nos passos abaixo</p>
         </div>
-        <div className="card p-6 sm:p-8">
-        <div className="flex justify-between mb-8 gap-1">
+        <div className="card card-body">
+        <div className="flex justify-between mb-6 gap-1">
           {(isLoggedIn ? STEPS_LOGGED : STEPS).map((label, i) => {
             const stepIndex = isLoggedIn ? i + 2 : i + 1;
             const isActive = step === stepIndex;
@@ -288,7 +313,7 @@ export default function AgendarPage() {
           })}
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); if (step === 1 && !isLoggedIn) checkPhone(); else if (step === 5) handleSubmit(e); else setStep(step + 1); }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (step === 1 && !isLoggedIn) checkPhone(); else if (step === 6) handleSubmit(e); else setStep(step + 1); }}>
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{error}</div>
           )}
@@ -322,7 +347,7 @@ export default function AgendarPage() {
             </div>
           )}
 
-          {(step === 2 || (isLoggedIn && step === 1)) && (
+          {step === 2 && (
             <div className="space-y-4">
               {isLoggedIn && session?.user?.name && (
                 <p className="text-sm text-stone-600">Olá, <strong>{session.user.name}</strong>!</p>
@@ -330,37 +355,74 @@ export default function AgendarPage() {
               {!isLoggedIn && customerName && (
                 <p className="text-sm text-stone-600">Olá, <strong>{customerName}</strong>!</p>
               )}
-              <label className="block text-sm font-medium text-stone-700 mb-2">Escolha o serviço *</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2">Escolha um ou mais serviços *</label>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {services.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSelectedService(s)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-colors ${
-                      selectedService?.id === s.id
-                        ? 'border-[var(--brand-primary)] bg-[var(--brand-soft)] text-[var(--text-main)]'
-                        : 'border-stone-200 bg-white hover:border-stone-300'
-                    }`}
-                  >
-                    <span className="font-semibold">{s.name}</span>
-                    <span className="text-stone-500 text-sm block mt-0.5">
-                      {s.duration} min · {formatCurrency(s.price)}
-                    </span>
-                  </button>
-                ))}
+                {services.map((s) => {
+                  const isSelected = selectedServices.some((x) => x.id === s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleService(s)}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-colors flex items-center gap-3 ${
+                        isSelected
+                          ? 'border-[var(--brand-primary)] bg-[var(--brand-soft)] text-[var(--text-main)]'
+                          : 'border-stone-200 bg-white hover:border-stone-300'
+                      }`}
+                    >
+                      <span className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${isSelected ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]' : 'border-stone-400'}`}>
+                        {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                      </span>
+                      <span>
+                        <span className="font-semibold">{s.name}</span>
+                        <span className="text-stone-500 text-sm block mt-0.5">
+                          {s.duration} min · {formatCurrency(s.price)}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
+              {selectedServices.length > 0 && (
+                <p className="text-sm text-stone-600">
+                  Total: {selectedServices.reduce((a, s) => a + s.duration, 0)} min · {formatCurrency(totalPrice)}
+                </p>
+              )}
               {services.length === 0 && (
                 <p className="text-stone-500 text-sm">Nenhum serviço disponível no momento.</p>
               )}
               <div className="flex flex-row gap-3 justify-end">
                 {!isLoggedIn && <Button type="button" variant="secondary" onClick={() => setStep(1)}>Voltar</Button>}
-                <Button type="submit" variant="primary" disabled={!selectedService}>Continuar</Button>
+                <Button type="submit" variant="primary" disabled={selectedServices.length === 0}>Continuar</Button>
               </div>
             </div>
           )}
 
           {step === 3 && (
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-stone-700 mb-2">Selecione um profissional</label>
+              <p className="text-sm text-stone-600 mb-2">Escolha o profissional que irá atender você. Os horários disponíveis serão exibidos na próxima etapa.</p>
+              <select
+                className="form-input"
+                value={selectedProfessional}
+                onChange={(e) => setSelectedProfessional(e.target.value)}
+              >
+                <option value="">Qualquer disponível</option>
+                {professionalsForServices.map((p) => (
+                  <option key={p.name} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+              {selectedServiceIds.length > 0 && professionalsForServices.length === 0 && (
+                <p className="text-amber-600 text-sm mt-1">Nenhum profissional realiza todos os serviços escolhidos. Escolha outros serviços.</p>
+              )}
+              <div className="flex flex-row gap-3 justify-end">
+                <Button type="button" variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
+                <Button type="submit" variant="primary">Continuar</Button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
             <div className="space-y-4">
               <label className="block text-sm font-medium text-stone-700 mb-2">Escolha a data *</label>
               <div className="border border-stone-300 rounded-xl overflow-hidden bg-white">
@@ -413,9 +475,9 @@ export default function AgendarPage() {
                           type="button"
                           disabled={past}
                           onClick={() => !past && setSelectedDate(dateStr)}
-                          className={`aspect-square rounded text-sm ${
-                            past ? 'text-stone-300 cursor-not-allowed' : 'hover:bg-[var(--brand-soft)]'
-                          } ${selected ? 'bg-[var(--brand-primary)] text-white font-semibold' : ''}`}
+                          className={`aspect-square rounded text-sm flex items-center justify-center ${
+                            past ? 'text-stone-300 cursor-not-allowed' : 'hover:bg-amber-100 text-stone-800'
+                          } ${selected ? '!bg-amber-600 text-white font-bold text-base shadow-md ring-2 ring-amber-500' : ''}`}
                         >
                           {cell.day}
                         </button>
@@ -426,27 +488,17 @@ export default function AgendarPage() {
                 </div>
               </div>
               <div className="flex flex-row gap-3 justify-end">
-                <Button type="button" variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
+                <Button type="button" variant="secondary" onClick={() => setStep(3)}>Voltar</Button>
                 <Button type="submit" variant="primary" disabled={!selectedDate}>Continuar</Button>
               </div>
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Profissional (opcional)</label>
-                <select
-                  className="form-input"
-                  value={selectedProfessional}
-                  onChange={(e) => setSelectedProfessional(e.target.value)}
-                >
-                  <option value="">Qualquer disponível</option>
-                  {professionals.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
+              {selectedProfessional && (
+                <p className="text-sm text-stone-600">Profissional: <strong>{selectedProfessional}</strong></p>
+              )}
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">Horário *</label>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
@@ -484,16 +536,16 @@ export default function AgendarPage() {
                 />
               </div>
               <div className="flex flex-row gap-3 justify-end">
-                <Button type="button" variant="secondary" onClick={() => setStep(3)}>Voltar</Button>
+                <Button type="button" variant="secondary" onClick={() => setStep(4)}>Voltar</Button>
                 <Button type="submit" variant="primary" disabled={!selectedTime}>Continuar</Button>
               </div>
             </div>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <div className="space-y-4">
               <div className="rounded-xl border border-stone-200 bg-white p-4 space-y-2">
-                <p><span className="text-stone-500">Serviço:</span> <strong>{selectedService?.name}</strong> · {formatCurrency(selectedService?.price ?? 0)}</p>
+                <p><span className="text-stone-500">Serviço(s):</span> <strong>{selectedServices.map((s) => s.name).join(' + ')}</strong> · {durationMinutes} min · {formatCurrency(totalPrice)}</p>
                 <p><span className="text-stone-500">Data:</span> {selectedDate && selectedTime && (() => {
                   const d = new Date(selectedDate + 'T' + selectedTime + ':00');
                   return d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -501,9 +553,9 @@ export default function AgendarPage() {
                 {selectedProfessional && <p><span className="text-stone-500">Profissional:</span> {selectedProfessional}</p>}
               </div>
               <div className="flex flex-row gap-3 justify-end">
-                <Button type="button" variant="secondary" onClick={() => setStep(4)}>Voltar</Button>
+                <Button type="button" variant="secondary" onClick={() => setStep(5)}>Voltar</Button>
                 <Button type="submit" variant="success" loading={submitting} disabled={submitting}>
-                  Confirmar agendamento
+                  Agendar
                 </Button>
               </div>
             </div>

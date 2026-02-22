@@ -4,9 +4,9 @@ import { prisma } from '@/lib/prisma';
 /**
  * GET - Horários ocupados em um dia (público).
  * Query: date (YYYY-MM-DD), professional (opcional).
- * Se professional for informado: retorna ocupação daquele profissional.
- * Se não: retorna ocupação de todos os agendamentos do dia (para "Qualquer disponível").
- * Retorna array de { start: ISO, end: ISO } considerando a duração de cada serviço.
+ * Retorna array de { start: ISO, end: ISO } com o período completo de cada agendamento (início + duração).
+ * O cliente deve considerar um novo horário bloqueado se seu período [início, início+duração]
+ * sobrepuser qualquer um desses intervalos (início < outroFim && fim > outroInício).
  */
 export async function GET(request: NextRequest) {
   try {

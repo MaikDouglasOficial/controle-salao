@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [expiredMessage, setExpiredMessage] = useState(false);
+  const [forbiddenMessage, setForbiddenMessage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
@@ -21,9 +22,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get('expired') === '1') {
-      setExpiredMessage(true);
-    }
+    if (searchParams.get('expired') === '1') setExpiredMessage(true);
+    if (searchParams.get('forbidden') === '1') setForbiddenMessage(true);
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,6 +119,11 @@ export default function LoginPage() {
             {expiredMessage && (
               <div className="rounded-lg bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800 border border-amber-200">
                 Sessão expirada. Faça login novamente.
+              </div>
+            )}
+            {forbiddenMessage && (
+              <div className="rounded-lg bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800 border border-amber-200">
+                Esta área é restrita a administradores. Faça login com sua conta de admin.
               </div>
             )}
             {error && (

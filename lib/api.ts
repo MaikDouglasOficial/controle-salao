@@ -1,5 +1,6 @@
 /**
- * Fetch que trata 401: redireciona para /login e exibe mensagem de sessão expirada.
+ * Fetch que trata 401 e 403: redireciona para /login.
+ * 401 = não autenticado; 403 = autenticado mas sem permissão (ex.: cliente na área admin).
  * Use em todas as chamadas às APIs protegidas do admin.
  */
 export async function fetchAuth(
@@ -14,6 +15,14 @@ export async function fetchAuth(
       window.location.href = url.pathname + url.search;
     }
     throw new Error('Não autorizado');
+  }
+  if (res.status === 403) {
+    const url = new URL('/login', typeof window !== 'undefined' ? window.location.origin : '');
+    url.searchParams.set('forbidden', '1');
+    if (typeof window !== 'undefined') {
+      window.location.href = url.pathname + url.search;
+    }
+    throw new Error('Acesso restrito');
   }
   return res;
 }

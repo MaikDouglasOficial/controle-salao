@@ -40,6 +40,7 @@ export default function ClientesPage() {
   const [form, setForm] = useState<any | null>(null);
   const [uploading, setUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [existingConflictMessage, setExistingConflictMessage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -163,7 +164,26 @@ export default function ClientesPage() {
         setEditingCustomer(null);
         setForm(null);
         setPhotoPreview(null);
+        setExistingConflictMessage(false);
         toast.success(editingCustomer ? 'Cliente atualizado com sucesso!' : 'Cliente criado com sucesso!');
+      } else if (response.status === 409) {
+        const data = await response.json();
+        toast.warning('Cliente já encontrado!');
+        setExistingConflictMessage(true);
+        if (data.customer) {
+          setEditingCustomer(data.customer);
+          setForm({
+            nome: data.customer.name,
+            email: data.customer.email || '',
+            telefone: data.customer.phone,
+            cpf: data.customer.cpf || '',
+            aniversario: data.customer.birthday || '',
+            observacoes: data.customer.notes || '',
+            photo: data.customer.photo || '',
+          });
+          setPhotoPreview(data.customer.photo);
+          setShowModal(true);
+        }
       } else {
         const error = await response.json();
         toast.error(error.error || 'Erro ao salvar cliente');
@@ -453,9 +473,10 @@ export default function ClientesPage() {
             setShowModal(false);
             setEditingCustomer(null);
             setForm(null);
+            setExistingConflictMessage(false);
           }}
-          title={editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}
-          subtitle={editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente'}
+          title={existingConflictMessage ? 'Cliente já encontrado!' : (editingCustomer ? 'Editar Cliente' : 'Novo Cliente')}
+          subtitle={existingConflictMessage ? 'Este e-mail ou CPF já está cadastrado. Abaixo estão os dados do cliente.' : (editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente')}
           size="md"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -463,6 +484,7 @@ export default function ClientesPage() {
                 setShowModal(false);
                 setEditingCustomer(null);
                 setForm(null);
+                setExistingConflictMessage(false);
               }}>
                 Cancelar
               </Button>
@@ -473,6 +495,11 @@ export default function ClientesPage() {
           }
         >
           <form id="cliente-form" onSubmit={handleSaveCustomer} className="space-y-4">
+            {existingConflictMessage && (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                Não foi criado um novo cadastro. Os dados abaixo são do cliente já existente. Você pode editá-los e salvar ou fechar.
+              </div>
+            )}
             {/* Upload de Foto */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-stone-700 mb-2">Foto do Cliente</label>
