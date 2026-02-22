@@ -1,6 +1,10 @@
 import { ModalBase } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
+import { Camera, X } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
+import { fetchAuth } from '@/lib/api';
 import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 
 const COMMISSION_TYPES = [
@@ -15,6 +19,8 @@ interface ServiceModalProps {
     description?: string;
     duration?: number;
     price?: number;
+    sku?: string | null;
+    photo?: string | null;
     commissionType?: string | null;
     commissionValue?: number | null;
   };
@@ -23,14 +29,57 @@ interface ServiceModalProps {
 }
 
 export default function ServiceModal({ service, onSave, onClose }: ServiceModalProps) {
+  const { error } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState<string>(service?.name || '');
   const [description, setDescription] = useState<string>(service?.description || '');
   const [duration, setDuration] = useState<string>(service?.duration?.toString() || '');
   const [price, setPrice] = useState<number>(service?.price ?? 0);
   const [priceDisplay, setPriceDisplay] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string>(service?.photo ?? '');
+  const [photoPreview, setPhotoPreview] = useState<string | null>(service?.photo ?? null);
+  const [uploading, setUploading] = useState(false);
   const [commissionType, setCommissionType] = useState<string>(service?.commissionType || 'PERCENT');
   const [commissionValue, setCommissionValue] = useState<string>((service?.commissionValue ?? 0).toString());
   const [commissionDisplay, setCommissionDisplay] = useState<string | null>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      error('Arquivo muito grande. Máximo 5MB');
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      error('Por favor, selecione uma imagem');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetchAuth('/api/upload', { method: 'POST', body: formData });
+      if (response.ok) {
+        const { url } = await response.json();
+        setPhoto(url);
+        setPhotoPreview(url);
+      } else {
+        const err = await response.json();
+        error(err.error || 'Erro ao fazer upload');
+      }
+    } catch (err) {
+      console.error(err);
+      error('Erro ao fazer upload da foto');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhoto('');
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,9 +89,11 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
     onSave({
       ...service,
       name,
+      sku: service ? service.sku : undefined,
       description,
       duration: parseInt(duration) || 0,
       price,
+      photo: photo || null,
       commissionType,
       commissionValue: commVal,
     });
@@ -63,7 +114,60 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       }
     >
       <form id="service-form" onSubmit={handleSubmit} className="space-y-4">
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Serviço</label>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              {photoPreview ? (
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                  <Image src={photoPreview} alt="Foto do serviço" fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-bl-lg rounded-tr-lg hover:bg-red-600"
+                    aria-label="Remover foto"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                  <Camera className="h-8 w-8 text-gray-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="service-photo-upload"
+              />
+              <label
+                htmlFor="service-photo-upload"
+                className={`inline-block cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  uploading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {uploading ? 'Enviando...' : photoPreview ? 'Alterar foto' : 'Adicionar Foto'}
+              </label>
+              <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Código</label>
+            {service?.sku ? (
+              <div className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700">
+                {service.sku}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">Será gerado automaticamente ao salvar.</p>
+            )}
+          </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome do Serviço *</label>
             <input

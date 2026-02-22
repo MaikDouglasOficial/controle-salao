@@ -39,7 +39,6 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
   const estoqueInicial = produto?.estoque ?? produto?.stock ?? 0;
   const descricaoInicial = produto?.descricao ?? produto?.description ?? '';
   const [nome, setNome] = useState<string>(nomeInicial);
-  const [sku, setSku] = useState<string>(produto?.sku || '');
   const [preco, setPreco] = useState<number>(precoInicial);
   const [precoDisplay, setPrecoDisplay] = useState<string | null>(null);
   const [estoque, setEstoque] = useState<string>(estoqueInicial.toString());
@@ -108,7 +107,7 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
     onSave({
       ...produto,
       nome,
-      sku,
+      sku: produto?.id ? produto.sku : undefined,
       preco,
       estoque: parseInt(estoque) || 0,
       descricao,
@@ -191,13 +190,14 @@ export default function ProdutoEditarModal({ produto, onSave, onClose }: Produto
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">SKU</label>
-              <input
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={sku}
-                onChange={e => setSku(e.target.value)}
-                placeholder="Ex: 12345"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Código</label>
+              {produto?.id && produto?.sku ? (
+                <div className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700">
+                  {produto.sku}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Será gerado automaticamente ao salvar.</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Estoque *</label>

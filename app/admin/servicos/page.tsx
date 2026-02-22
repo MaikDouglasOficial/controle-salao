@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Scissors, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import ServiceModal from '@/components/ServiceModal';
+import { PhotoViewerModal } from '@/components/PhotoViewerModal';
 import { Button } from '@/components/ui/Button';
 import { ActionsMenu } from '@/components/ui/ActionsMenu';
 import { LoadingSpinner } from '@/components/ui/Layout';
@@ -18,6 +20,8 @@ interface Service {
   description: string | null;
   duration: number;
   price: number;
+  sku: string | null;
+  photo: string | null;
   commissionType?: string | null;
   commissionValue?: number | null;
 }
@@ -32,6 +36,7 @@ export default function ServicosPage() {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchServices();
@@ -110,7 +115,8 @@ export default function ServicosPage() {
   const filteredServices = services.filter((service) => {
     const matchesSearch =
       service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (service.sku && service.sku.toLowerCase().includes(searchTerm.toLowerCase()));
     if (!matchesSearch) return false;
     if (filterDuration === 'short') return service.duration <= 60;
     if (filterDuration === 'long') return service.duration > 60;
@@ -169,7 +175,7 @@ export default function ServicosPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por nome ou descrição..."
+                placeholder="Buscar por nome, descrição ou código..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={scrollToTopOnFocus}
@@ -224,8 +230,17 @@ export default function ServicosPage() {
               <div key={service.id} className="p-4 pr-2 pt-4 pb-5 space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
-                    <div className="h-12 w-12 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Scissors className="h-6 w-6 text-stone-600" />
+                    <div
+                      className="relative w-12 h-12 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                      onClick={service.photo ? () => setPhotoViewUrl(service.photo) : undefined}
+                    >
+                      {service.photo ? (
+                        <Image src={service.photo} alt={service.name} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Scissors className="h-6 w-6 text-stone-600" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="font-semibold text-gray-900">{service.name}</span>
@@ -244,6 +259,10 @@ export default function ServicosPage() {
                 </div>
 
                 <div className="space-y-1.5 text-sm">
+                  <p className="text-gray-600">
+                    <span className="text-gray-400">Código</span>
+                    <span className="ml-2 text-gray-900 font-medium">{service.sku || '–'}</span>
+                  </p>
                   <p className="text-gray-600">
                     <span className="text-gray-400">Duração</span>
                     <span className="ml-2">
@@ -266,6 +285,7 @@ export default function ServicosPage() {
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-stone-50">
                 <tr>
+                  <th className="sticky left-0 z-[1] bg-stone-50 px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
                   <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
                   <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duração</th>
                   <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
@@ -275,15 +295,25 @@ export default function ServicosPage() {
               <tbody className="bg-white divide-y divide-gray-100">
                 {filteredServices.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-5 py-10 text-center text-sm text-gray-500">Nenhum serviço encontrado</td>
+                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-500">Nenhum serviço encontrado</td>
                   </tr>
                 ) : (
                   filteredServices.map((service) => (
-                  <tr key={service.id} className="hover:bg-stone-50/50 transition-colors">
+                  <tr key={service.id} className="group hover:bg-stone-50/50 transition-colors">
+                    <td className="sticky left-0 z-[1] bg-white group-hover:bg-stone-50/50 px-5 py-3.5 whitespace-nowrap text-sm text-gray-600 font-medium">{service.sku || '–'}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Scissors className="h-5 w-5 text-stone-600" />
+                        <div
+                          className="relative w-10 h-10 rounded-full overflow-hidden bg-stone-100 flex-shrink-0 cursor-pointer"
+                          onClick={service.photo ? () => setPhotoViewUrl(service.photo) : undefined}
+                        >
+                          {service.photo ? (
+                            <Image src={service.photo} alt={service.name} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Scissors className="h-5 w-5 text-stone-600" />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="font-medium text-gray-900">{service.name}</div>
@@ -334,6 +364,8 @@ export default function ServicosPage() {
                   description: dadosAtualizados.description,
                   duration: dadosAtualizados.duration,
                   price: dadosAtualizados.price,
+                  sku: dadosAtualizados.sku ?? editingService.sku,
+                  photo: dadosAtualizados.photo ?? editingService.photo,
                   commissionType: dadosAtualizados.commissionType ?? 'PERCENT',
                   commissionValue: dadosAtualizados.commissionValue ?? 0
                 })
@@ -371,6 +403,8 @@ export default function ServicosPage() {
                   description: novoServico.description,
                   duration: novoServico.duration,
                   price: novoServico.price,
+                  sku: novoServico.sku || undefined,
+                  photo: novoServico.photo || undefined,
                   commissionType: novoServico.commissionType ?? 'PERCENT',
                   commissionValue: novoServico.commissionValue ?? 0
                 })
@@ -388,6 +422,10 @@ export default function ServicosPage() {
           }}
           onClose={() => setShowNewModal(false)}
         />
+      )}
+
+      {photoViewUrl && (
+        <PhotoViewerModal imageUrl={photoViewUrl} onClose={() => setPhotoViewUrl(null)} />
       )}
     </div>
   );

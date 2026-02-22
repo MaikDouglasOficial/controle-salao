@@ -139,7 +139,7 @@ export default function ProdutosPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por nome ou SKU..."
+                placeholder="Buscar por nome ou código..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={scrollToTopOnFocus}
@@ -218,8 +218,8 @@ export default function ProdutosPage() {
 
                 <div className="space-y-1.5 text-sm">
                   <p className="text-gray-600">
-                    <span className="text-gray-400">SKU</span>
-                    <span className="ml-2 text-gray-900">{product.sku || '–'}</span>
+                    <span className="text-gray-400">Código</span>
+                    <span className="ml-2 text-gray-900 font-medium">{product.sku || '–'}</span>
                   </p>
                   <p className="text-gray-600">
                     <span className="text-gray-400">Preço</span>
@@ -243,8 +243,8 @@ export default function ProdutosPage() {
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-stone-50">
               <tr>
+                <th className="sticky left-0 z-[1] bg-stone-50 px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
                 <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
-                <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
                 <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
                 <th className="px-5 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
                 <th className="px-5 py-3.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -257,7 +257,8 @@ export default function ProdutosPage() {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-stone-50/50 transition-colors">
+                  <tr key={product.id} className="group hover:bg-stone-50/50 transition-colors">
+                    <td className="sticky left-0 z-[1] bg-white group-hover:bg-stone-50/50 px-5 py-3.5 whitespace-nowrap text-sm text-gray-600 font-medium">{product.sku || '–'}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div
@@ -278,7 +279,6 @@ export default function ProdutosPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 whitespace-nowrap text-sm text-gray-600">{product.sku || '–'}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(product.price)}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-50 text-green-700 border border-green-200' : product.stock > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>

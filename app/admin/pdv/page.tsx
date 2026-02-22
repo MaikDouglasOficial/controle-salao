@@ -17,12 +17,14 @@ interface Product {
   price: number;
   stock: number;
   photo?: string;
+  sku?: string | null;
 }
 
 interface Service {
   id: number;
   name: string;
   price: number;
+  sku?: string | null;
 }
 
 interface CartItem {
@@ -31,6 +33,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  sku?: string | null;
 }
 
 interface Professional {
@@ -46,6 +49,7 @@ export default function PDVPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'product' | 'service'>('all');
   const [loading, setLoading] = useState(true);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showCustomerNotFoundModal, setShowCustomerNotFoundModal] = useState(false);
@@ -86,7 +90,7 @@ export default function PDVPage() {
   const [discountType, setDiscountType] = useState<'percent' | 'value'>('percent');
   const [discountValue, setDiscountValue] = useState(0);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
-  const [itemToAdd, setItemToAdd] = useState<{type: 'product' | 'service', id: number, name: string, price: number, stock?: number} | null>(null);
+  const [itemToAdd, setItemToAdd] = useState<{type: 'product' | 'service', id: number, name: string, price: number, stock?: number, sku?: string | null} | null>(null);
   const [tempQuantity, setTempQuantity] = useState(1);
   const [tempPrice, setTempPrice] = useState(0);
   const [editingPrices, setEditingPrices] = useState<{[key: string]: string}>({});
@@ -95,7 +99,9 @@ export default function PDVPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchData();
+    const ac = new AbortController();
+    fetchData(ac.signal);
+    return () => ac.abort();
   }, []);
 
   useEffect(() => {
@@ -157,33 +163,38 @@ export default function PDVPage() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (signal?: AbortSignal) => {
     try {
+      const init = signal ? { signal } : undefined;
       const [productsRes, servicesRes, customersRes, professionalsRes] = await Promise.all([
-        fetchAuth('/api/products'),
-        fetchAuth('/api/services'),
-        fetchAuth('/api/customers'),
-        fetchAuth('/api/professionals'),
+        fetchAuth('/api/products', init),
+        fetchAuth('/api/services', init),
+        fetchAuth('/api/customers', init),
+        fetchAuth('/api/professionals', init),
       ]);
-      
+
+      if (signal?.aborted) return;
+
       const productsData = await productsRes.json();
       const servicesData = await servicesRes.json();
       const customersData = await customersRes.json();
       const professionalsData = await professionalsRes.json();
-      
-      setProducts(productsData);
-      setServices(servicesData);
-      setCustomers(customersData);
-      // Filtrar apenas profissionais ativos
-      setProfessionals(professionalsData.filter((p: Professional) => p.active));
+
+      if (signal?.aborted) return;
+
+      setProducts(Array.isArray(productsData) ? productsData : []);
+      setServices(Array.isArray(servicesData) ? servicesData : []);
+      setCustomers(Array.isArray(customersData) ? customersData : []);
+      setProfessionals((Array.isArray(professionalsData) ? professionalsData : []).filter((p: Professional) => p.active));
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Erro ao buscar dados:', error);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
-  const openAddItemModal = (item: { type: 'product' | 'service'; id: number; name: string; price: number; stock?: number }) => {
+  const openAddItemModal = (item: { type: 'product' | 'service'; id: number; name: string; price: number; stock?: number; sku?: string | null }) => {
     setItemToAdd(item);
     setTempPrice(item.price);
     setTempQuantity(1);
@@ -204,7 +215,7 @@ export default function PDVPage() {
         )
       );
     } else {
-      setCart([...cart, { type: itemToAdd.type, id: itemToAdd.id, name: itemToAdd.name, price: tempPrice, quantity: tempQuantity }]);
+      setCart([...cart, { type: itemToAdd.type, id: itemToAdd.id, name: itemToAdd.name, price: tempPrice, quantity: tempQuantity, sku: itemToAdd.sku ?? null }]);
     }
 
     setShowAddItemModal(false);
@@ -517,6 +528,29 @@ export default function PDVPage() {
     }
   };
 
+  // Lista unificada: produtos + serviços, ordenada por nome; filtro só na pesquisa (hooks antes de qualquer return)
+  const combinedItems = useMemo(() => {
+    const fromProducts = products.map((p) => ({ type: 'product' as const, id: p.id, name: p.name, price: p.price, stock: p.stock, photo: p.photo, sku: p.sku ?? null }));
+    const fromServices = services.map((s) => ({ type: 'service' as const, id: s.id, name: s.name, price: s.price, sku: s.sku ?? null }));
+    const combined = [...fromProducts, ...fromServices];
+    combined.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    return combined;
+  }, [products, services]);
+
+  const filteredItems = useMemo(() => {
+    let list = combinedItems;
+    if (typeFilter !== 'all') {
+      list = list.filter((item) => item.type === typeFilter);
+    }
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return list;
+    return list.filter((item) => {
+      const matchName = item.name.toLowerCase().includes(term);
+      const matchSku = item.sku && item.sku.toLowerCase().includes(term);
+      return matchName || matchSku;
+    });
+  }, [combinedItems, searchTerm, typeFilter]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -525,14 +559,6 @@ export default function PDVPage() {
     );
   }
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const filteredServices = services.filter((s) =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="page-container space-y-6 animate-fade-in mt-6">
       <div className="page-header">
@@ -540,125 +566,119 @@ export default function PDVPage() {
         <p className="page-subtitle">Ponto de venda</p>
       </div>
 
-      {/* Busca */}
-      <div className="bg-white rounded-xl border border-stone-200 p-3 shadow-sm">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
-          <input
-            type="text"
-            placeholder="Pesquisar produtos e serviços..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm border-0 rounded-lg bg-stone-50/50 focus:ring-2 focus:ring-amber-500/30 focus:bg-white"
-          />
+      {/* Busca e filtro — mesmo estilo das páginas Produtos e Serviços */}
+      <div className="sticky top-0 z-10 bg-[var(--bg-main)] pt-1 pb-2 -mx-1 px-1">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome ou código..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTypeFilter('all')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${typeFilter === 'all' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setTypeFilter('product')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${typeFilter === 'product' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+              >
+                Produtos
+              </button>
+              <button
+                type="button"
+                onClick={() => setTypeFilter('service')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${typeFilter === 'service' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+              >
+                Serviços
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Área de Produtos e Serviços - Ocupa 2 de 3 colunas */}
-        <div className="lg:col-span-2 space-y-6">
-
-            {/* Produtos e Serviços em Linha */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Produtos */}
-              <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
-                  <Package className="h-5 w-5 text-amber-600" />
-                  Produtos
-                </h2>
-                <span className="text-xs text-stone-500">{filteredProducts.length} itens</span>
-              </div>
-              
-              {filteredProducts.length === 0 ? (
-                <div className="text-center py-10">
-                  <Package className="h-12 w-12 text-stone-300 mx-auto mb-2" />
-                  <p className="text-sm text-stone-500">Nenhum produto encontrado</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-2 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
-                  {filteredProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => openAddItemModal({ type: 'product', id: product.id, name: product.name, price: product.price, stock: product.stock })}
-                      className="group flex items-center gap-3 rounded-lg p-3 border border-stone-200 hover:border-amber-400 hover:bg-amber-50/50 text-left transition-colors"
-                    >
-                      <div className="relative w-11 h-11 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
-                        {product.photo ? (
-                          <Image src={product.photo} alt={product.name} fill className="object-cover" />
-                        ) : (
-                          <Package className="w-5 h-5 text-stone-400 m-auto" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-stone-900 text-sm truncate">{product.name}</p>
-                        <div className="flex items-center justify-between mt-0.5 gap-2">
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${
-                            product.stock > 10 ? 'bg-emerald-50 text-emerald-700' : product.stock > 0 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'
-                          }`}>
-                            {product.stock} un.
-                          </span>
-                          <span className="text-sm font-semibold text-amber-600">{formatCurrency(product.price)}</span>
-                        </div>
-                      </div>
-                      <Plus className="h-4 w-4 text-stone-400 group-hover:text-amber-600 flex-shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              )}
+        {/* Área única: Produtos e Serviços unificados */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <Package className="h-5 w-5 text-amber-600" />
+                Produtos e Serviços
+              </h2>
+              <span className="text-xs text-gray-500">
+                {searchTerm.trim() || typeFilter !== 'all'
+                  ? `${filteredItems.length} de ${typeFilter === 'all' ? combinedItems.length : combinedItems.filter((i) => i.type === typeFilter).length}`
+                  : `${combinedItems.length} itens`}
+              </span>
             </div>
 
-            {/* Serviços */}
-            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
-                  <span className="h-5 w-5 rounded bg-amber-100 flex items-center justify-center">
-                    <svg className="h-3.5 w-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
-                  Serviços
-                </h2>
-                <span className="text-xs text-stone-500">{filteredServices.length} itens</span>
+            {filteredItems.length === 0 ? (
+              <div className="min-h-[200px] flex items-center justify-center px-5 py-10 text-center text-sm text-gray-500">
+                {searchTerm.trim() || typeFilter !== 'all' ? 'Nenhum item encontrado para esta pesquisa ou filtro.' : 'Nenhum produto ou serviço cadastrado.'}
               </div>
-              
-              {filteredServices.length === 0 ? (
-                <div className="text-center py-10">
-                  <svg className="h-12 w-12 text-stone-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-sm text-stone-500">Nenhum serviço encontrado</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-2 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
-                  {filteredServices.map((service) => (
-                    <button
-                      key={service.id}
-                      onClick={() => openAddItemModal({ type: 'service', id: service.id, name: service.name, price: service.price })}
-                      className="group flex items-center gap-3 rounded-lg p-3 border border-stone-200 hover:border-amber-400 hover:bg-amber-50/50 text-left transition-colors"
-                    >
-                      <div className="h-11 w-11 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+            ) : (
+              <div className="grid grid-cols-1 gap-2 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
+                {filteredItems.map((item) => (
+                  <button
+                    key={item.type === 'product' ? `p-${item.id}` : `s-${item.id}`}
+                    onClick={() =>
+                      item.type === 'product'
+                        ? openAddItemModal({ type: 'product', id: item.id, name: item.name, price: item.price, stock: item.stock, sku: item.sku })
+                        : openAddItemModal({ type: 'service', id: item.id, name: item.name, price: item.price, sku: item.sku })
+                    }
+                    className="group flex items-center gap-3 rounded-lg p-3 border border-gray-200 hover:border-amber-400 hover:bg-amber-50/50 text-left transition-colors"
+                  >
+                    <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center bg-stone-100">
+                      {item.type === 'product' && item.photo ? (
+                        <Image src={item.photo} alt={item.name} fill className="object-cover" />
+                      ) : item.type === 'product' ? (
+                        <Package className="h-5 w-5 text-gray-400" />
+                      ) : (
                         <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
+                      {item.sku && <p className="text-xs text-gray-500 mt-0.5">Cód. {item.sku}</p>}
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        {item.type === 'product' && (
+                          <span
+                            className={`text-xs px-1.5 py-0.5 rounded ${
+                              item.stock > 10 ? 'bg-emerald-50 text-emerald-700' : item.stock > 0 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'
+                            }`}
+                          >
+                            {item.stock} un.
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-500">{item.type === 'product' ? 'Produto' : 'Serviço'}</span>
+                        <span className="text-sm font-semibold text-amber-600">{formatCurrency(item.price)}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-stone-900 text-sm truncate">{service.name}</p>
-                        <p className="text-sm font-semibold text-amber-600 mt-0.5">{formatCurrency(service.price)}</p>
-                      </div>
-                      <Plus className="h-4 w-4 text-stone-400 group-hover:text-amber-600 flex-shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            </div>
+                    </div>
+                    <Plus className="h-4 w-4 text-gray-400 group-hover:text-amber-600 flex-shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
 
           {/* Carrinho - Ocupa 1 de 3 colunas */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-stone-200 shadow-sm sticky top-4 overflow-hidden">
-              <div className="px-4 py-3 border-b border-stone-200 flex items-center justify-between">
+            <div className="bg-white rounded-xl border border-gray-200 sticky top-4 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-amber-600" />
                   Carrinho ({cart.length})
@@ -694,6 +714,7 @@ export default function PDVPage() {
                             <tr key={`${item.type}-${item.id}-${index}`} className="hover:bg-stone-50/50">
                               <td className="px-2 py-2">
                                 <p className="text-stone-900 font-medium line-clamp-2">{item.name}</p>
+                                {item.sku && <p className="text-stone-500 text-[10px]">Cód. {item.sku}</p>}
                                 <p className="text-stone-400 text-[10px]">{item.type === 'product' ? 'Produto' : 'Serviço'}</p>
                               </td>
                               <td className="px-1 py-2">

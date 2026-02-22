@@ -119,6 +119,8 @@ model Service {
   description      String?
   duration         Int           // duração em minutos
   price            Float
+  sku              String?       @unique // código único (gerado automaticamente se não informado)
+  photo            String?       // URL ou caminho da foto
   commissionType   String?       @default("PERCENT") // 'PERCENT' ou 'FIXED'
   commissionValue  Float         @default(0)
   createdAt        DateTime      @default(now())

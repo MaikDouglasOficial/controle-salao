@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdminSession } from '@/lib/auth-api';
+import { getNextSku } from '@/lib/next-sku';
 
 // GET /api/services
 export async function GET() {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { name, description, duration, price, commissionType, commissionValue } = body;
+    const { name, description, duration, price, commissionType, commissionValue, sku: skuBody, photo } = body;
 
     if (!name || !duration || price === undefined) {
       return NextResponse.json(
@@ -42,19 +43,49 @@ export async function POST(request: NextRequest) {
     const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
     const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
 
+    const skuVal = skuBody && String(skuBody).trim() ? String(skuBody).trim() : null;
+    if (skuVal) {
+      const [existingProduct, existingService] = await Promise.all([
+        prisma.product.findFirst({ where: { sku: skuVal } }),
+        prisma.service.findFirst({ where: { sku: skuVal } }),
+      ]);
+      if (existingProduct || existingService) {
+        return NextResponse.json(
+          { error: 'Este código já está em uso. Use outro código ou deixe em branco para gerar automaticamente.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const service = await prisma.service.create({
       data: {
         name,
         description: description || null,
         duration: parseInt(duration),
         price: parseFloat(price),
+        sku: skuVal,
+        photo: photo && String(photo).trim() ? String(photo).trim() : null,
         commissionType: commType,
         commissionValue: commValue,
       },
     });
 
+    if (!service.sku) {
+      const newSku = await getNextSku();
+      const withSku = await prisma.service.update({
+        where: { id: service.id },
+        data: { sku: newSku },
+      });
+      return NextResponse.json(withSku, { status: 201 });
+    }
     return NextResponse.json(service, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Este código já está em uso. Use outro código ou deixe em branco para gerar automaticamente.' },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { error: 'Erro ao criar serviço' },
       { status: 500 }
@@ -69,7 +100,7 @@ export async function PUT(request: NextRequest) {
     if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const { id, name, description, duration, price, commissionType, commissionValue } = body;
+    const { id, name, description, duration, price, commissionType, commissionValue, sku, photo } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -81,6 +112,20 @@ export async function PUT(request: NextRequest) {
     const commType = commissionType === 'FIXED' ? 'FIXED' : 'PERCENT';
     const commValue = Number(commissionValue) >= 0 ? Number(commissionValue) : 0;
 
+    const skuVal = sku !== undefined ? (sku && String(sku).trim() ? String(sku).trim() : null) : undefined;
+    if (skuVal !== undefined) {
+      const [anyProduct, otherService] = await Promise.all([
+        prisma.product.findFirst({ where: { sku: skuVal } }),
+        prisma.service.findFirst({ where: { sku: skuVal, id: { not: Number(id) } } }),
+      ]);
+      if (anyProduct || otherService) {
+        return NextResponse.json(
+          { error: 'Este código já está em uso. Escolha outro código.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const service = await prisma.service.update({
       where: { id },
       data: {
@@ -90,11 +135,19 @@ export async function PUT(request: NextRequest) {
         price: parseFloat(price),
         commissionType: commType,
         commissionValue: commValue,
+        ...(skuVal !== undefined ? { sku: skuVal } : {}),
+        ...(photo !== undefined ? { photo: photo && String(photo).trim() ? String(photo).trim() : null } : {}),
       },
     });
 
     return NextResponse.json(service);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Este código já está em uso. Escolha outro código.' },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { error: 'Erro ao atualizar serviço' },
       { status: 500 }
