@@ -57,7 +57,6 @@ export default function DespesaModal({ despesa, onSave, onClose }: DespesaModalP
       isOpen={true}
       onClose={onClose}
       title={despesa ? 'Editar Despesa' : 'Nova Despesa'}
-      subtitle={despesa ? 'Atualize os dados da despesa abaixo' : 'Preencha os dados para cadastrar uma nova despesa'}
       size="lg"
       footer={
         <div className="flex flex-row gap-3 justify-end">

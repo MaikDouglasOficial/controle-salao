@@ -25,7 +25,6 @@ export default function ClienteEditarModal({ cliente, onSave, onClose }: Cliente
       isOpen={true}
       onClose={onClose}
       title={cliente ? 'Editar Cliente' : 'Novo Cliente'}
-      subtitle={cliente ? 'Atualize os dados do cliente abaixo' : 'Preencha os dados para cadastrar um novo cliente'}
       size="xl"
       footer={
         <div className="flex flex-row gap-3 justify-end">

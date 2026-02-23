@@ -392,12 +392,6 @@ export default function ClienteAgendamentosPage() {
       : actionModal === 'confirm'
         ? 'Confirmar agendamento'
         : 'Cancelar agendamento';
-  const modalSubtitle =
-    actionModal === 'edit'
-      ? 'Atualize os dados do agendamento abaixo'
-      : actionModal === 'confirm'
-        ? 'Informe uma justificativa para confirmar'
-        : 'Informe o motivo do cancelamento';
 
   if (loading) {
     return (
@@ -428,7 +422,6 @@ export default function ClienteAgendamentosPage() {
         isOpen={actionModal !== null}
         onClose={closeModal}
         title={modalTitle}
-        subtitle={modalSubtitle}
         size={actionModal === 'edit' ? 'xl' : 'md'}
         footer={
           <div className="flex flex-row gap-3 justify-end">

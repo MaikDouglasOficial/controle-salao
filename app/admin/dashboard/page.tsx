@@ -16,6 +16,7 @@ import {
   User,
   ShoppingBag,
   CreditCard,
+  RefreshCw,
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { fetchAuth } from '@/lib/api';
@@ -118,6 +119,7 @@ export default function DashboardPage() {
   const [vendasRecentes, setVendasRecentes] = useState<VendaRecente[]>([]);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -212,9 +214,29 @@ export default function DashboardPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-        <div className="page-header">
+        <div className="page-header text-center mb-8 relative">
+          <button
+            type="button"
+            onClick={async () => { try { setRefreshing(true); await Promise.all([fetchData(), new Promise(r => setTimeout(r, 1000))]); } finally { setRefreshing(false); } }}
+            disabled={refreshing}
+            className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+            aria-label="Atualizar"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Visão geral do seu salão</p>
+          <div className="flex justify-center mt-3 sm:hidden">
+            <button
+              type="button"
+              onClick={async () => { try { setRefreshing(true); await Promise.all([fetchData(), new Promise(r => setTimeout(r, 1000))]); } finally { setRefreshing(false); } }}
+              disabled={refreshing}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+              aria-label="Atualizar"
+            >
+              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {error && (

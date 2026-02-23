@@ -83,7 +83,6 @@ export function ProfileEditModal({ isOpen, onClose, onSaved }: ProfileEditModalP
       isOpen={isOpen}
       onClose={onClose}
       title="Editar informações"
-      subtitle="Altere seu nome, e-mail ou senha"
       size="md"
       footer={
         <div className="flex flex-row gap-3 justify-end">

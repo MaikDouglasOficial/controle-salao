@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3, Plus, RefreshCw } from 'lucide-react';
+import { Search, Pencil, Trash2, UserCheck, UserX, Users, BarChart3, Plus } from 'lucide-react';
 import ProfissionalEditarModal from '@/components/ProfissionalEditarModal';
 import PhotoViewerModal from '@/components/PhotoViewerModal';
 import { Button } from '@/components/ui/Button';
@@ -40,7 +40,6 @@ export default function ProfessionalsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
   const [photoViewUrl, setPhotoViewUrl] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchProfessionals();
@@ -124,29 +123,9 @@ export default function ProfessionalsPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header text-center mb-8 relative">
-        <button
-          type="button"
-          onClick={async () => { setRefreshing(true); await fetchProfessionals(); setRefreshing(false); }}
-          disabled={refreshing}
-          className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-          aria-label="Atualizar lista"
-        >
-          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+      <div className="page-header text-center mb-8">
         <h1 className="page-title">Profissionais</h1>
         <p className="page-subtitle">Equipe do salão</p>
-        <div className="flex justify-center mt-3 sm:hidden">
-          <button
-            type="button"
-            onClick={async () => { setRefreshing(true); await fetchProfessionals(); setRefreshing(false); }}
-            disabled={refreshing}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-            aria-label="Atualizar lista"
-          >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
         <div className="mt-3 sm:mt-5 flex justify-center">
           <Button
             variant="secondary"

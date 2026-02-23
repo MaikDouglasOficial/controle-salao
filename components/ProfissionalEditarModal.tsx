@@ -2,7 +2,7 @@ import { ModalBase as Modal } from '@/components/ui/ModalBase';
 import { Button } from '@/components/ui/Button';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Camera, X } from 'lucide-react';
+import { Camera, X, Check } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { fetchAuth } from '@/lib/api';
 
@@ -119,7 +119,6 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
       isOpen={true}
       onClose={onClose}
       title={profissional ? 'Editar Profissional' : 'Novo Profissional'}
-      subtitle={profissional ? 'Atualize os dados do profissional abaixo' : 'Preencha os dados para cadastrar um novo profissional'}
       size="lg"
       footer={
         <div className="flex flex-row gap-3 justify-end">
@@ -130,52 +129,55 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
     >
       <form id="professional-form" onSubmit={handleSubmit} className="space-y-4">
         {/* Upload de Foto */}
-        <div className="mb-6">
+        <div className="w-full mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">Foto do Profissional</label>
-          <div className="flex items-center space-x-4">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-              {photoPreview ? (
-                <>
-                  <Image
-                    src={photoPreview}
-                    alt="Preview"
-                    fill
-                    className="object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </>
-              ) : (
-                <Camera className="w-8 h-8 text-gray-400" />
-              )}
-            </div>
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="photo-upload"
-              />
-              <label htmlFor="photo-upload">
-                <Button
+          <div className="w-full rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50">
+            {photoPreview ? (
+              <div className="relative w-full aspect-video">
+                <Image
+                  src={photoPreview}
+                  alt="Foto do profissional"
+                  fill
+                  className="object-cover"
+                />
+                <button
                   type="button"
-                  variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
+                  onClick={handleRemovePhoto}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow"
+                  aria-label="Remover foto"
                 >
-                  {uploading ? 'Enviando...' : photoPreview ? 'Trocar Foto' : 'Adicionar Foto'}
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <label
+                htmlFor="photo-upload"
+                className={`flex flex-col items-center justify-center w-full aspect-video cursor-pointer transition-colors ${
+                  uploading ? 'bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100'
+                }`}
+              >
+                <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">{uploading ? 'Enviando...' : 'Clique para adicionar foto'}</span>
               </label>
-              <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
-            </div>
+            )}
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+            id="photo-upload"
+          />
+          {photoPreview && (
+            <label
+              htmlFor="photo-upload"
+              className="mt-2 flex w-full justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+            >
+              {uploading ? 'Enviando...' : 'Trocar foto'}
+            </label>
+          )}
+          <p className="text-xs text-gray-500 mt-1.5">PNG, JPG ou WEBP (máx. 5MB)</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -232,20 +234,36 @@ export default function ProfissionalEditarModal({ profissional, onSave, onClose 
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">Serviços que realiza</label>
-            <p className="text-xs text-gray-500 mb-2">Marque os procedimentos que este profissional realiza. O cliente só poderá escolhê-lo ao agendar se ele realizar todos os serviços selecionados.</p>
-            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-              {services.map((s) => (
-                <label key={s.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 cursor-pointer hover:border-primary-400">
-                  <input
-                    type="checkbox"
-                    checked={selectedServiceIds.includes(s.id)}
-                    onChange={() => toggleService(s.id)}
-                    className="w-4 h-4 text-primary-600 rounded"
-                  />
-                  <span className="text-sm">{s.name}</span>
-                </label>
-              ))}
-              {services.length === 0 && <span className="text-sm text-gray-500">Nenhum serviço cadastrado.</span>}
+            <p className="text-xs text-gray-500 mb-3">Marque os procedimentos que este profissional realiza. O cliente só poderá escolhê-lo ao agendar se ele realizar todos os serviços selecionados.</p>
+            <div className="max-h-48 overflow-y-auto rounded-xl p-3 bg-gradient-to-br from-gray-50 to-white border border-gray-200">
+              {services.length === 0 && <p className="text-sm text-gray-500 text-center py-4">Nenhum serviço cadastrado.</p>}
+              <ul className="flex flex-col gap-1">
+                {services.map((s) => {
+                  const selected = selectedServiceIds.includes(s.id);
+                  return (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        onClick={() => toggleService(s.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
+                          selected
+                            ? 'bg-stone-800 text-amber-400 border border-amber-500 shadow-sm'
+                            : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${
+                            selected ? 'bg-amber-400' : 'bg-gray-200'
+                          }`}
+                        >
+                          {selected && <Check className="w-2.5 h-2.5 text-black" strokeWidth={3} />}
+                        </span>
+                        <span>{s.name}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ import { LoadingSpinner } from '@/components/ui/Layout';
 import { 
   Trash2, Pencil, User, Plus, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, MessageSquare, Scissors, Info, AlertCircle, Lock,
-  CalendarDays, LayoutGrid, List, XCircle, CalendarClock
+  CalendarDays, LayoutGrid, List, XCircle, CalendarClock, RefreshCw
 } from "lucide-react";
 
 interface Appointment {
@@ -42,6 +42,7 @@ export default function AgendamentosPage() {
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [cancelReasonAppointment, setCancelReasonAppointment] = useState<Appointment | null>(null);
   const [cancelReasonText, setCancelReasonText] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   
   const [customers, setCustomers] = useState([]);
   const [services, setServices] = useState<{id: number; name: string; duration: number; price: number;}[]>([]);
@@ -65,7 +66,7 @@ export default function AgendamentosPage() {
     const month = selectedDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     return Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1));
-  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
+  }, [selectedDate.getTime()]);
 
   const monthGrid = useMemo(() => {
     const year = selectedDate.getFullYear();
@@ -98,7 +99,7 @@ export default function AgendamentosPage() {
       rows.push(row);
     }
     return rows;
-  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
+  }, [selectedDate.getTime()]);
 
   useEffect(() => {
     fetchData();
@@ -330,10 +331,9 @@ export default function AgendamentosPage() {
   }
 
   const changeMonth = (offset: number) => {
-    const newDate = new Date(selectedDate);
-    newDate.setMonth(newDate.getMonth() + offset);
-    newDate.setDate(1);
-    setSelectedDate(newDate);
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    setSelectedDate(new Date(year, month + offset, 1));
     isInitialLoad.current = true;
   };
 
@@ -409,7 +409,7 @@ export default function AgendamentosPage() {
     } catch (e) { toast.error('Erro ao salvar'); }
   }
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
         <LoadingSpinner size="lg" />
@@ -425,9 +425,29 @@ export default function AgendamentosPage() {
       <div className="flex flex-col h-full bg-white overflow-hidden">
 
       <div className="page-container flex-shrink-0 pt-4 pb-2 border-b border-stone-100 bg-white">
-        <div className="page-header">
+        <div className="page-header text-center relative">
+          <button
+            type="button"
+            onClick={async () => { try { setRefreshing(true); await Promise.all([fetchData(), new Promise(r => setTimeout(r, 1000))]); } finally { setRefreshing(false); } }}
+            disabled={refreshing}
+            className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+            aria-label="Atualizar"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
           <h1 className="page-title">Agendamentos</h1>
           <p className="page-subtitle">Calendário e agenda</p>
+          <div className="flex justify-center mt-3 sm:hidden">
+            <button
+              type="button"
+              onClick={async () => { try { setRefreshing(true); await Promise.all([fetchData(), new Promise(r => setTimeout(r, 1000))]); } finally { setRefreshing(false); } }}
+              disabled={refreshing}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
+              aria-label="Atualizar"
+            >
+              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -736,7 +756,7 @@ export default function AgendamentosPage() {
                           !isCurrentMonth
                             ? 'bg-stone-50/80 hover:bg-stone-100/80'
                             : isSelected
-                              ? 'bg-stone-800/10 ring-1 ring-amber-600/40 ring-inset hover:bg-stone-800/15'
+                              ? 'bg-amber-50 ring-1 ring-amber-500 ring-inset hover:bg-amber-100'
                               : isToday
                                 ? 'bg-amber-50 hover:bg-stone-800/5'
                                 : isWeekend
@@ -751,7 +771,7 @@ export default function AgendamentosPage() {
                               : isToday
                                 ? 'bg-stone-800 text-amber-400'
                                 : isSelected
-                                  ? 'text-amber-700'
+                                  ? 'bg-amber-500 text-white'
                                   : 'text-stone-700'
                           }`}
                         >
@@ -902,7 +922,6 @@ export default function AgendamentosPage() {
             isOpen={true}
             onClose={() => setSelectedAppointment(null)}
             title={apt.service.name}
-            subtitle={`${startHour} - ${endHour} • ${apt.status}`}
             size="md"
             footer={
               <div className="flex flex-row gap-3 justify-end">
@@ -1035,7 +1054,6 @@ export default function AgendamentosPage() {
           isOpen={true}
           onClose={() => { setCancelReasonAppointment(null); setCancelReasonText(''); }}
           title="Cancelar agendamento"
-          subtitle="O horário ficará disponível para novos agendamentos."
           size="sm"
           footer={
             <div className="flex flex-row gap-3 justify-end">

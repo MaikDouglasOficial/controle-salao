@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import { useScrollToTopOnFocus } from '@/hooks/useScrollToTopOnFocus';
 
-import { Search, Pencil, Trash2, Eye, Users, Camera, X, Plus, RefreshCw } from 'lucide-react';
+import { Search, Pencil, Trash2, Eye, Users, Camera, X, Plus } from 'lucide-react';
 import { formatPhone, formatDate } from '@/lib/utils';
 import { fetchAuth, unwrapListResponse } from '@/lib/api';
 import { ModalBase as Modal } from '@/components/ui/ModalBase';
@@ -41,7 +41,6 @@ export default function ClientesPage() {
   const [uploading, setUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingConflictMessage, setExistingConflictMessage] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -144,18 +143,33 @@ export default function ClientesPage() {
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form) return;
+    const nome = (form.nome || '').trim();
+    const cpf = (form.cpf || '').trim().replace(/\D/g, '');
+    const telefone = (form.telefone || '').trim().replace(/\D/g, '');
+    if (!nome) {
+      toast.error('Preencha o nome do cliente.');
+      return;
+    }
+    if (!cpf || cpf.length !== 11) {
+      toast.error('Preencha um CPF válido (11 dígitos).');
+      return;
+    }
+    if (!telefone || telefone.length < 10) {
+      toast.error('Preencha um telefone válido (mínimo 10 dígitos).');
+      return;
+    }
     try {
       const response = await fetchAuth('/api/customers', {
         method: editingCustomer ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editingCustomer?.id,
-          name: form.nome,
+          name: nome,
           email: form.email,
           phone: form.telefone,
           birthday: form.aniversario,
           notes: form.observacoes,
-          cpf: form.cpf,
+          cpf: form.cpf?.replace(/\D/g, '') || '',
           photo: form.photo || null,
         }),
       });
@@ -249,29 +263,9 @@ export default function ClientesPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header text-center mb-8 relative">
-        <button
-          type="button"
-          onClick={async () => { setRefreshing(true); await fetchCustomers(); setRefreshing(false); }}
-          disabled={refreshing}
-          className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-          aria-label="Atualizar lista"
-        >
-          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+      <div className="page-header text-center mb-8">
         <h1 className="page-title">Clientes</h1>
         <p className="page-subtitle">Cadastro e histórico de clientes</p>
-        <div className="flex justify-center mt-3 sm:hidden">
-          <button
-            type="button"
-            onClick={async () => { setRefreshing(true); await fetchCustomers(); setRefreshing(false); }}
-            disabled={refreshing}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-            aria-label="Atualizar lista"
-          >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
         <div className="mt-3 sm:mt-5 flex justify-center">
           <Button
             variant="secondary"
@@ -471,7 +465,6 @@ export default function ClientesPage() {
             setExistingConflictMessage(false);
           }}
           title={existingConflictMessage ? 'Cliente já encontrado!' : (editingCustomer ? 'Editar Cliente' : 'Novo Cliente')}
-          subtitle={existingConflictMessage ? 'Este e-mail ou CPF já está cadastrado. Abaixo estão os dados do cliente.' : (editingCustomer ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente')}
           size="md"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -496,47 +489,55 @@ export default function ClientesPage() {
               </div>
             )}
             {/* Upload de Foto */}
-            <div className="mb-4">
+            <div className="w-full mb-4">
               <label className="block text-sm font-medium text-stone-700 mb-2">Foto do Cliente</label>
-              <div className="flex items-center gap-4">
-                <div className="relative flex-shrink-0">
-                  {photoPreview ? (
-                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-stone-200">
-                      <Image
-                        src={photoPreview}
-                        alt="Foto do cliente"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-stone-100 border-2 border-stone-200 flex items-center justify-center">
-                      <Camera className="h-8 w-8 text-stone-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    id="photo-upload"
-                  />
+              <div className="w-full rounded-xl border-2 border-stone-200 overflow-hidden bg-stone-50">
+                {photoPreview ? (
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src={photoPreview}
+                      alt="Foto do cliente"
+                      fill
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemovePhoto}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow"
+                      aria-label="Remover foto"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
                   <label
                     htmlFor="photo-upload"
-                    className={`inline-block cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      uploading
-                        ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
-                        : 'bg-white border border-stone-300 text-stone-700 hover:bg-stone-50'
+                    className={`flex flex-col items-center justify-center w-full aspect-video cursor-pointer transition-colors ${
+                      uploading ? 'bg-stone-100 cursor-not-allowed' : 'hover:bg-stone-100'
                     }`}
                   >
-                    {uploading ? 'Enviando...' : 'Adicionar Foto'}
+                    <Camera className="h-10 w-10 text-stone-400 mb-2" />
+                    <span className="text-sm text-stone-500">{uploading ? 'Enviando...' : 'Clique para adicionar foto'}</span>
                   </label>
-                  <p className="text-xs text-stone-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
-                </div>
+                )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload"
+              />
+              {photoPreview && (
+                <label
+                  htmlFor="photo-upload"
+                  className="mt-2 flex w-full justify-center rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 cursor-pointer"
+                >
+                  {uploading ? 'Enviando...' : 'Alterar foto'}
+                </label>
+              )}
+              <p className="text-xs text-stone-500 mt-1.5">PNG, JPG ou WEBP (máx. 5MB)</p>
             </div>
 
             <div className="space-y-4">
@@ -553,22 +554,24 @@ export default function ClientesPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">CPF</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">CPF *</label>
                   <input
                     className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                     value={form?.cpf || ''}
                     onChange={e => setForm((f: any) => ({ ...f, cpf: e.target.value }))}
                     placeholder="000.000.000-00"
                     maxLength={14}
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Telefone</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Telefone *</label>
                   <input
                     className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                     value={form?.telefone || ''}
                     onChange={e => setForm((f: any) => ({ ...f, telefone: e.target.value }))}
                     placeholder="(00) 00000-0000"
+                    required
                   />
                 </div>
               </div>

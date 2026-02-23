@@ -44,7 +44,6 @@ export default function ClientePage() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title="Editar Perfil"
-        subtitle="Atualize seus dados pessoais"
         size="sm"
         footer={
           <div className="flex flex-row gap-3 justify-end">

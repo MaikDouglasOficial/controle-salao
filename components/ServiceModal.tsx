@@ -104,7 +104,6 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       isOpen={true}
       onClose={onClose}
       title={service ? 'Editar Serviço' : 'Novo Serviço'}
-      subtitle={service ? 'Atualize os dados do serviço abaixo' : 'Preencha os dados para cadastrar um novo serviço'}
       size="lg"
       footer={
         <div className="flex flex-row gap-3 justify-end">
@@ -114,48 +113,52 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       }
     >
       <form id="service-form" onSubmit={handleSubmit} className="space-y-4">
-        <div className="mb-4">
+        <div className="w-full mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Serviço</label>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-shrink-0">
-              {photoPreview ? (
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
-                  <Image src={photoPreview} alt="Foto do serviço" fill className="object-cover" />
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
-                    className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-bl-lg rounded-tr-lg hover:bg-red-600"
-                    aria-label="Remover foto"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-gray-400" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="service-photo-upload"
-              />
+          <div className="w-full rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50">
+            {photoPreview ? (
+              <div className="relative w-full aspect-video">
+                <Image src={photoPreview} alt="Foto do serviço" fill className="object-cover" />
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow"
+                  aria-label="Remover foto"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
               <label
                 htmlFor="service-photo-upload"
-                className={`inline-block cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  uploading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                className={`flex flex-col items-center justify-center w-full aspect-video cursor-pointer transition-colors ${
+                  uploading ? 'bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100'
                 }`}
               >
-                {uploading ? 'Enviando...' : photoPreview ? 'Alterar foto' : 'Adicionar Foto'}
+                <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">{uploading ? 'Enviando...' : 'Clique para adicionar foto'}</span>
               </label>
-              <p className="text-xs text-gray-500 mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
-            </div>
+            )}
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+            id="service-photo-upload"
+          />
+          {photoPreview && (
+            <label
+              htmlFor="service-photo-upload"
+              className={`mt-2 flex w-full justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors ${
+                uploading ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              {uploading ? 'Enviando...' : 'Alterar foto'}
+            </label>
+          )}
+          <p className="text-xs text-gray-500 mt-1.5">PNG, JPG ou WEBP (máx. 5MB)</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">

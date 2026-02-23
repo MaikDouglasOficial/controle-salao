@@ -837,7 +837,6 @@ export default function PDVPage() {
             setItemToAdd(null);
           }}
           title="Adicionar ao Carrinho"
-          subtitle={itemToAdd.name}
           size="md"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -943,7 +942,6 @@ export default function PDVPage() {
           isOpen={showCheckoutModal}
           onClose={() => setShowCheckoutModal(false)}
           title="Finalizar Venda"
-          subtitle="Selecione o cliente e configure os detalhes da venda"
           size="lg"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -1207,7 +1205,6 @@ export default function PDVPage() {
             setCustomerSearchTerm('');
           }}
           title="Cliente Não Encontrado"
-          subtitle="O cliente não foi localizado no sistema"
           size="md"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -1261,7 +1258,6 @@ export default function PDVPage() {
             setPhotoPreview(null);
           }}
           title="Cadastrar Novo Cliente"
-          subtitle="Preencha os dados para cadastrar um novo cliente"
           size="md"
           footer={
             <div className="flex flex-row gap-3 justify-end">
@@ -1284,10 +1280,11 @@ export default function PDVPage() {
         >
           <form id="new-customer-form" onSubmit={(e) => { e.preventDefault(); handleRegisterNewCustomer(); }} className="space-y-4">
             {/* Upload de Foto */}
-            <div className="flex flex-col items-center space-y-3 pb-4 border-b">
-              <div className="relative">
+            <div className="w-full pb-4 border-b border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Cliente</label>
+              <div className="w-full rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50">
                 {photoPreview ? (
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary-100">
+                  <div className="relative w-full aspect-video">
                     <Image
                       src={photoPreview}
                       alt="Foto do cliente"
@@ -1297,16 +1294,22 @@ export default function PDVPage() {
                     <button
                       type="button"
                       onClick={handleRemovePhoto}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow"
                       title="Remover foto"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-gray-400" />
-                  </div>
+                  <label
+                    htmlFor="photo-upload-pdv"
+                    className={`flex flex-col items-center justify-center w-full aspect-video cursor-pointer transition-colors ${
+                      uploading ? 'bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <Camera className="h-10 w-10 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-500">{uploading ? 'Enviando...' : 'Clique para adicionar foto'}</span>
+                  </label>
                 )}
               </div>
               <input
@@ -1317,17 +1320,15 @@ export default function PDVPage() {
                 className="hidden"
                 id="photo-upload-pdv"
               />
-              <label
-                htmlFor="photo-upload-pdv"
-                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploading
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-                }`}
-              >
-                {uploading ? 'Enviando...' : photoPreview ? 'Trocar Foto' : 'Adicionar Foto'}
-              </label>
-              <p className="text-xs text-gray-500">JPG, PNG ou WEBP (máx. 5MB)</p>
+              {photoPreview && (
+                <label
+                  htmlFor="photo-upload-pdv"
+                  className="mt-2 flex w-full justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  {uploading ? 'Enviando...' : 'Trocar foto'}
+                </label>
+              )}
+              <p className="text-xs text-gray-500 mt-1.5">JPG, PNG ou WEBP (máx. 5MB)</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1352,13 +1353,14 @@ export default function PDVPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
                 <input
                   className="w-full border rounded px-3 py-2"
                   value={newCustomerData.cpf}
                   onChange={(e) => setNewCustomerData({ ...newCustomerData, cpf: e.target.value })}
                   placeholder="000.000.000-00"
                   maxLength={14}
+                  required
                 />
               </div>
               <div>

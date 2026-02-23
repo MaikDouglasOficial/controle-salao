@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X, Package, Search, Plus, RefreshCw } from 'lucide-react';
+import { TrendingDown, Calendar, DollarSign, Pencil, Trash2, Filter, X, Package, Search, Plus } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import DespesaModal from '@/components/DespesaModal';
 import { Button } from '@/components/ui/Button';
@@ -39,7 +39,6 @@ export default function DespesasPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -228,29 +227,9 @@ export default function DespesasPage() {
 
   return (
     <div className="page-container space-y-6 mt-6">
-      <div className="page-header text-center mb-8 relative">
-        <button
-          type="button"
-          onClick={async () => { setRefreshing(true); await fetchExpenses(); setRefreshing(false); }}
-          disabled={refreshing}
-          className="hidden sm:flex absolute right-0 top-0 w-9 h-9 rounded-full items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-          aria-label="Atualizar lista"
-        >
-          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+      <div className="page-header text-center mb-8">
         <h1 className="page-title">Despesas</h1>
         <p className="page-subtitle">Controle de gastos</p>
-        <div className="flex justify-center mt-3 sm:hidden">
-          <button
-            type="button"
-            onClick={async () => { setRefreshing(true); await fetchExpenses(); setRefreshing(false); }}
-            disabled={refreshing}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-amber-500 hover:bg-stone-100 active:!text-stone-500 active:!bg-transparent focus:!text-stone-500 focus:!bg-transparent focus:outline-none transition-colors disabled:opacity-50"
-            aria-label="Atualizar lista"
-          >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
         <div className="mt-3 sm:mt-5 flex justify-center">
           <Button
             variant="secondary"
